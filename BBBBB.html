@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบนัดหมาย</title>
+    <title>ระบบนัดหามาย</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
@@ -220,8 +220,8 @@
                     body: JSON.stringify({ action: 'fetchData', userId: userId })
                 });
                 const data = await response.json();
-                data.sort((a, b) => new Date(b[5]) - new Date(a[5]));
-                const row = data.find(row => row[0] === userId);
+                data.sort((a, b) => new Date(b[6]) - new Date(a[6]));
+                const row = data.find(row => row[1] === userId);
                 if (row) {
                     displayData(row);
                 } else {
@@ -235,10 +235,10 @@
         }
 
         function displayData(row) {
-            document.getElementById('userlineid').value = row[0] || '';
-            document.getElementById('name').value = row[1] || '';
-            document.getElementById('phonenumber').value = row[2] || '';
-            document.getElementById('note').value = row[3] || '';
+            document.getElementById('userlineid').value = row[1] || '';
+            document.getElementById('name').value = row[2] || '';
+            document.getElementById('phonenumber').value = row[3] || '';
+            document.getElementById('note').value = row[4] || '';
         }
 
         function showLoading(isLoading) {

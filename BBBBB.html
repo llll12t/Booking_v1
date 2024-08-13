@@ -214,26 +214,38 @@
         }
 
         async function fetchData(userId) {
-            showLoading(true);
-            try {
-                const response = await fetch(WEB_APP_MEMBER_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'fetchData', userId: userId })
-                });
-                const data = await response.json();
-                data.sort((a, b) => new Date(b[6]) - new Date(a[6]));
-                const row = data.find(row => row[1] === userId);
-                if (row) {
-                    displayData(row);
-                } else {
-                    console.log('No data found for userId:', userId);
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                showLoading(false);
-            }
+    showLoading(true);
+    try {
+        const response = await fetch(WEB_APP_MEMBER_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'fetchData', userId: userId })
+        });
+
+        // ตรวจสอบว่า response เป็น JSON ที่ถูกต้องหรือไม่
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (error) {
+            throw new Error(`Response is not valid JSON: ${text}`);
         }
+
+        // ดำเนินการต่อหาก JSON ถูกต้อง
+        data.sort((a, b) => new Date(b[6]) - new Date(a[6]));
+        const row = data.find(row => row[1] === userId);
+        if (row) {
+            displayData(row);
+        } else {
+            console.log('No data found for userId:', userId);
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error.message); // แสดงข้อผิดพลาดที่ชัดเจนใน console
+        showPopup('Error', `เกิดข้อผิดพลาด: ${error.message}`, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
 
         function displayData(row) {
             document.getElementById('userlineid').value = row[1] || '';

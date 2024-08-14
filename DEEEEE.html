@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg p-6">
+    <h2 class="text-2xl font-bold mb-4">Search Member</h2>
+    <form id="fetchForm" class="space-y-4">
+      <div>
+        <label for="nameId" class="block text-xs font-medium text-gray-700">Name:</label>
+        <input type="text" id="nameId" name="nameId" list="namesList" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        <datalist id="namesList">
+          <!-- Dynamically filled by JavaScript -->
+        </datalist>
+      </div>
+      <div>
+        <label for="keynumberId" class="block text-xs font-medium text-gray-700">Key Number ID:</label>
+        <input type="text" id="keynumberId" name="keynumberId" list="keynumbersList" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        <datalist id="keynumbersList">
+          <!-- Dynamically filled by JavaScript -->
+        </datalist>
+      </div>
+      <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Fetch Data</button>
+    </form>
+
+    <h1 class="text-md font-bold mt-8 mb-4">Member Profile</h1>
+    <div id="result" class="hidden">
+      <div class="space-y-4">
+        <!-- Add Button to Insert Data into Table -->
+        <button id="addDataButton" class="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700">Add to Table</button>
+
+        <!-- Profile Picture -->
+        <div class="flex justify-center">
+          <img id="fileLinkInput" class="border border-gray-300 rounded-md max-w-xs w-32 h-32" alt="Profile Image">
+        </div>
+        <!-- Profile Information -->
+        <div>
+          <input type="text" id="userIdInput" class="mt-1 block w-full text-xs p-2 border bg-gray-300 rounded-md" readonly>
+        </div>
+        <div>
+          <label for="keyIdInput" class="block text-xs font-medium text-gray-700">Key ID:</label>
+          <input type="text" id="keyIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
+        </div>
+        <div>
+          <label for="nameIdInput" class="block text-xs font-medium text-gray-700">Name:</label>
+          <input type="text" id="nameIdInput" class="mt-1 text-xs block w-full p-2 border border-gray-300 rounded-md" readonly>
+        </div>
+        <div>
+          <label for="keynumberIdInput" class="block text-xs font-medium text-gray-700">Key Number ID:</label>
+          <input type="text" id="keynumberIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
+        </div>
+        <div>
+          <label for="keynumber2IdInput" class="block text-xs font-medium text-gray-700">Key Number 2 ID:</label>
+          <input type="text" id="keynumber2IdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
+        </div>
+        <div>
+          <label for="timestampInput" class="block text-xs font-medium text-gray-700">Timestamp:</label>
+          <input type="text" id="timestampInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
+        </div>
+
+      </div>
+    </div>
+    <div id="noResult" class="hidden text-gray-700 text-center mt-10">
+      No data found for the provided input.
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 bg-gray-100 p-8">
+    <!-- Filter Section -->
+    <div class="flex space-x-4 mb-4">
+      <div>
+        <label for="statusFilter" class="block text-xs font-medium text-gray-700">Filter by Status:</label>
+        <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+          <option value="">All</option>
+          <option value="รอการยืนยัน">รอการยืนยัน</option>
+          <option value="ยืนยันแล้ว">ยืนยันแล้ว</option>
+          <option value="ยกเลิก">ยกเลิก</option>
+          <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+        </select>
+      </div>
+      <div>
+        <label for="locationFilter" class="block text-xs font-medium text-gray-700">Filter by Location:</label>
+        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Enter location">
+      </div>
+      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Apply Filters</button>
+    </div>
+
+    <!-- Table Section -->
+    <div id="filteredData" class="overflow-x-auto">
+      <table class="min-w-full text-xs bg-white">
+        <thead>
+          <tr>
+            <th class="hidden">Line ID</th> <!-- Hide the column header -->
+            <th class="px-4 py-2 border">ชื่อ</th>
+            <th class="px-4 py-2 border">บริการ</th>
+            <th class="px-4 py-2 border">สถานที่</th>
+            <th class="px-4 py-2 border">เบอร์โทร</th>
+            <th class="px-4 py-2 border">หมายเหตุ</th>
+            <th class="px-4 py-2 border">วันที่</th>
+            <th class="px-4 py-2 border">เวลา</th>
+            <th class="px-4 py-2 border">สถานะ</th>
+            <th class="px-4 py-2 border">Actions</th> <!-- Actions column -->
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- ข้อมูลจะถูกแสดงที่นี่ -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal Popup -->
+  <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 w-1/3">
+      <h2 class="text-xl font-semibold mb-4">Add Data to Table</h2>
+      <form id="modalForm" class="space-y-4">
+        <div>
+          <label for="serviceInput" class="block text-xs font-medium text-gray-700">Service:</label>
+          <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label for="locationInput" class="block text-xs font-medium text-gray-700">Location:</label>
+          <input type="text" id="locationInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label for="dateInput" class="block text-xs font-medium text-gray-700">Date:</label>
+          <input type="date" id="dateInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label for="timeInput" class="block text-xs font-medium text-gray-700">Time:</label>
+          <input type="time" id="timeInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label for="statusInput" class="block text-xs font-medium text-gray-700">Status:</label>
+          <input type="text" id="statusInput" value="รอการยืนยัน" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
+        </div>
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
+    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEA28znSJjvo18S_l9ENdg50c05h8564BLp-c4H3xoEgw1KG8cl4c1y-BwbSl6KD8Tnw/exec';
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Fetch and populate the names list
+      fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
+        .then(response => response.json())
+        .then(data => {
+          const namesList = document.getElementById('namesList');
+          data.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            namesList.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching names:', error);
+        });
+
+      // Fetch and populate the key numbers list
+      fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllKeyNumbers`)
+        .then(response => response.json())
+        .then(data => {
+          const keynumbersList = document.getElementById('keynumbersList');
+          data.forEach(keynumber => {
+            const option = document.createElement('option');
+            option.value = keynumber;
+            keynumbersList.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching key numbers:', error);
+        });
+
+      // Fetch all user details and populate the table
+      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+        .then(response => response.json())
+        .then(details => {
+          const tableBody = document.getElementById('tableBody');
+          tableBody.innerHTML = ''; // Clear old data
+
+          // Loop through each detail to create table rows
+          details.forEach(detail => {
+            // Assign keyid to detail.id
+            detail.id = detail.idKey;
+
+            // Create a new table row
+            const row = document.createElement('tr');
+            
+            // Populate the row with data
+            row.innerHTML = `
+              <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
+              <td class="px-4 py-2 border">${detail.name}</td>
+              <td class="px-4 py-2 border">${detail.service}</td>
+              <td class="px-4 py-2 border">${detail.locationservice}</td>
+              <td class="px-4 py-2 border">${detail.phonenumber}</td>
+              <td class="px-4 py-2 border">${detail.note}</td>
+              <td class="px-4 py-2 border">${detail.date}</td>
+              <td class="px-4 py-2 border">${detail.time}</td>
+              <td class="px-4 py-2 border">${detail.status}</td>
+              <td class="px-4 py-2 border">
+                <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Confirm</button>
+                <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Cancel</button>
+                <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Complete</button>
+                <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Send Reminder</button>
+              </td>
+            `;
+
+            // Append the new row to the table body
+            tableBody.appendChild(row);
+          });
+
+          // Add event listeners for confirm, cancel, complete, and reminder buttons
+          document.querySelectorAll('.confirm-btn').forEach(button => {
+            button.addEventListener('click', function () {
+              const id = this.dataset.id;
+              confirmBooking(id);
+            });
+          });
+
+          document.querySelectorAll('.cancel-btn').forEach(button => {
+            button.addEventListener('click', function () {
+              const id = this.dataset.id;
+              cancelBooking(id);
+            });
+          });
+
+          document.querySelectorAll('.complete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+              const id = this.dataset.id;
+              completeBooking(id);
+            });
+          });
+
+          document.querySelectorAll('.reminder-btn').forEach(button => {
+            button.addEventListener('click', function () {
+              const id = this.dataset.id;
+              sendReminder(id);
+            });
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching user details:', error);
+        });
+    });
+
+    document.getElementById('fetchForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const nameId = document.getElementById('nameId').value;
+      const keynumberId = document.getElementById('keynumberId').value;
+
+      let fetchUrl = '';
+      if (nameId) {
+        fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByNameId&nameId=${encodeURIComponent(nameId)}`;
+      } else if (keynumberId) {
+        fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByKeyNumberId&keynumberId=${encodeURIComponent(keynumberId)}`;
+      }
+
+      if (fetchUrl) {
+        fetch(fetchUrl)
+          .then(response => response.json())
+          .then(data => {
+            if (data && Object.keys(data).length > 0) {
+              document.getElementById('userIdInput').value = data.userlineId || '';  // Set userid value
+              document.getElementById('keyIdInput').value = data.keyid || '';
+              document.getElementById('nameIdInput').value = data.nameId || '';
+              document.getElementById('keynumberIdInput').value = data.keynumberId || '';
+              document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
+              document.getElementById('fileLinkInput').src = data.fileLink || '';
+
+              // Format and set the timestamp
+              if (data.timestamp) {
+                const timestamp = new Date(data.timestamp);
+                const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
+                document.getElementById('timestampInput').value = formattedTimestamp;
+              } else {
+                document.getElementById('timestampInput').value = '';
+              }
+
+              // Filter and display table based on userlineid
+              filterTableByUserlineId(data.userlineId);
+
+              document.getElementById('result').classList.remove('hidden');
+              document.getElementById('noResult').classList.add('hidden');
+            } else {
+              document.getElementById('result').classList.add('hidden');
+              document.getElementById('noResult').classList.remove('hidden');
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('noResult').classList.remove('hidden');
+          });
+      } else {
+        document.getElementById('result').classList.add('hidden');
+        document.getElementById('noResult').classList.remove('hidden');
+      }
+    });
+
+    // Show the modal when "Add to Table" button is clicked
+    document.getElementById('addDataButton').addEventListener('click', function () {
+      document.getElementById('modal').classList.remove('hidden');
+    });
+
+    // Hide the modal when "Cancel" button is clicked
+    document.getElementById('cancelButton').addEventListener('click', function () {
+      document.getElementById('modal').classList.add('hidden');
+    });
+
+    // Handle form submission in the modal
+    document.getElementById('modalForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Get data from profile inputs
+      const userId = document.getElementById('userIdInput').value;
+      const nameId = document.getElementById('nameIdInput').value;
+      const keynumberId = document.getElementById('keynumberIdInput').value;
+      const keynumber2Id = document.getElementById('keynumber2IdInput').value;
+
+      // Get additional data from modal inputs
+      const service = document.getElementById('serviceInput').value;
+      const location = document.getElementById('locationInput').value;
+      const date = document.getElementById('dateInput').value;
+      const time = document.getElementById('timeInput').value;
+      const status = document.getElementById('statusInput').value;
+
+      // Insert new row into the table
+      const newRow = `
+        <tr>
+          <td class="hidden">${userId}</td> <!-- Hidden userlineid -->
+          <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
+          <td class="px-4 py-2 border">${service}</td> <!-- service -->
+          <td class="px-4 py-2 border">${location}</td> <!-- location -->
+          <td class="px-4 py-2 border">${keynumberId}</td> <!-- keynumberId -->
+          <td class="px-4 py-2 border">${keynumber2Id}</td> <!-- keynumber2Id -->
+          <td class="px-4 py-2 border">${date}</td> <!-- date -->
+          <td class="px-4 py-2 border">${time}</td> <!-- time -->
+          <td class="px-4 py-2 border">${status}</td> <!-- status -->
+          <td class="px-4 py-2 border">
+            <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
+            <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
+            <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
+            <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
+          </td>
+        </tr>
+      `;
+      document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
+
+      // Hide the modal after submission
+      document.getElementById('modal').classList.add('hidden');
+
+      // Save the data by calling the Google Script makeBooking function
+      const saveUrl = `${DETAILS_SCRIPT_URL}?action=makeBooking&userlineid=${encodeURIComponent(userId)}&name=${encodeURIComponent(nameId)}&service=${encodeURIComponent(service)}&locationservice=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&phonenumber=${encodeURIComponent(keynumberId)}&note=${encodeURIComponent(keynumber2Id)}`;
+      fetch(saveUrl, { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+          console.log('Booking saved successfully:', data);
+        })
+        .catch(error => {
+          console.error('Error saving booking:', error);
+        });
+    });
+
+    function filterTableByUserlineId(userid) {
+      const tableRows = document.querySelectorAll('#tableBody tr');
+      tableRows.forEach(row => {
+        const lineIdCell = row.querySelector('td:nth-child(1)');
+        if (lineIdCell && lineIdCell.textContent !== userid) {
+          row.classList.add('hidden');
+        } else {
+          row.classList.remove('hidden');
+        }
+      });
+    }
+
+    // Apply filters on the table based on status and location
+    document.getElementById('applyFiltersButton').addEventListener('click', function () {
+      const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+      const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+
+      const tableRows = document.querySelectorAll('#tableBody tr');
+      tableRows.forEach(row => {
+        const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
+        const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+
+        const matchesStatus = statusFilter === '' || statusCell === statusFilter;
+        const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
+
+        if (matchesStatus && matchesLocation) {
+          row.classList.remove('hidden');
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+    });
+
+    // Function to confirm booking
+    function confirmBooking(id) {
+      const confirmUrl = `${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`;
+      fetch(confirmUrl, { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+          console.log('Booking confirmed:', data);
+          alert('Booking confirmed successfully!');
+          document.querySelector(`.confirm-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยืนยันแล้ว';
+        })
+        .catch(error => {
+          console.error('Error confirming booking:', error);
+        });
+    }
+
+    // Function to cancel booking
+    function cancelBooking(id) {
+      const cancelUrl = `${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`;
+      fetch(cancelUrl, { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+          console.log('Booking canceled:', data);
+          alert('Booking canceled successfully!');
+          document.querySelector(`.cancel-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยกเลิก';
+        })
+        .catch(error => {
+          console.error('Error canceling booking:', error);
+        });
+    }
+
+    // Function to complete booking
+    function completeBooking(id) {
+      const completeUrl = `${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`;
+      fetch(completeUrl, { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+          console.log('Booking completed:', data);
+          alert('Booking marked as completed!');
+          document.querySelector(`.complete-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'เสร็จสิ้น';
+        })
+        .catch(error => {
+          console.error('Error completing booking:', error);
+        });
+    }
+
+    // Function to send reminder
+    function sendReminder(id) {
+      const reminderUrl = `${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`;
+      fetch(reminderUrl, { method: 'POST' })
+        .then(response => response.text())
+        .then(data => {
+          console.log('Reminder sent:', data);
+          alert('Reminder sent successfully!');
+        })
+        .catch(error => {
+          console.error('Error sending reminder:', error);
+        });
+    }
+  </script>
+
+</body>
+
+</html>

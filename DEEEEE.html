@@ -6,6 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .loader {
+      border-top-color: #3498db;
+      animation: spin 1s linear infinite;
+      border: 8px solid #f3f3f3;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex">
@@ -151,6 +168,11 @@
     </div>
   </div>
 
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="loader"></div>
+  </div>
+
   <script>
     const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
@@ -271,9 +293,11 @@
       }
 
       if (fetchUrl) {
+        showLoadingSpinner(true);
         fetch(fetchUrl)
           .then(response => response.json())
           .then(data => {
+            showLoadingSpinner(false);
             if (data && Object.keys(data).length > 0) {
               document.getElementById('userIdInput').value = data.userlineId || '';  // Set userid value
               document.getElementById('keyIdInput').value = data.keyid || '';
@@ -302,6 +326,7 @@
             }
           })
           .catch(error => {
+            showLoadingSpinner(false);
             console.error('Error fetching data:', error);
             document.getElementById('result').classList.add('hidden');
             document.getElementById('noResult').classList.remove('hidden');
@@ -376,6 +401,15 @@
         });
     });
 
+    function showLoadingSpinner(show) {
+      const spinner = document.getElementById('loadingSpinner');
+      if (show) {
+        spinner.classList.remove('hidden');
+      } else {
+        spinner.classList.add('hidden');
+      }
+    }
+
     function filterTableByUserlineId(userid) {
       const tableRows = document.querySelectorAll('#tableBody tr');
       tableRows.forEach(row => {
@@ -411,61 +445,117 @@
 
     // Function to confirm booking
     function confirmBooking(id) {
-      const confirmUrl = `${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`;
-      fetch(confirmUrl, { method: 'POST' })
-        .then(response => response.text())
-        .then(data => {
-          console.log('Booking confirmed:', data);
-          alert('Booking confirmed successfully!');
-          document.querySelector(`.confirm-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยืนยันแล้ว';
-        })
-        .catch(error => {
-          console.error('Error confirming booking:', error);
-        });
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to confirm this booking!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, confirm it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
+              document.querySelector(`.confirm-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยืนยันแล้ว';
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error confirming the booking.', 'error');
+              console.error('Error confirming booking:', error);
+            });
+        }
+      });
     }
 
     // Function to cancel booking
     function cancelBooking(id) {
-      const cancelUrl = `${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`;
-      fetch(cancelUrl, { method: 'POST' })
-        .then(response => response.text())
-        .then(data => {
-          console.log('Booking canceled:', data);
-          alert('Booking canceled successfully!');
-          document.querySelector(`.cancel-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยกเลิก';
-        })
-        .catch(error => {
-          console.error('Error canceling booking:', error);
-        });
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to cancel this booking!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
+              document.querySelector(`.cancel-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยกเลิก';
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error canceling the booking.', 'error');
+              console.error('Error canceling booking:', error);
+            });
+        }
+      });
     }
 
     // Function to complete booking
     function completeBooking(id) {
-      const completeUrl = `${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`;
-      fetch(completeUrl, { method: 'POST' })
-        .then(response => response.text())
-        .then(data => {
-          console.log('Booking completed:', data);
-          alert('Booking marked as completed!');
-          document.querySelector(`.complete-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'เสร็จสิ้น';
-        })
-        .catch(error => {
-          console.error('Error completing booking:', error);
-        });
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to mark this booking as completed!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, complete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
+              document.querySelector(`.complete-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'เสร็จสิ้น';
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error completing the booking.', 'error');
+              console.error('Error completing booking:', error);
+            });
+        }
+      });
     }
 
     // Function to send reminder
     function sendReminder(id) {
-      const reminderUrl = `${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`;
-      fetch(reminderUrl, { method: 'POST' })
-        .then(response => response.text())
-        .then(data => {
-          console.log('Reminder sent:', data);
-          alert('Reminder sent successfully!');
-        })
-        .catch(error => {
-          console.error('Error sending reminder:', error);
-        });
+      Swal.fire({
+        title: 'Send reminder?',
+        text: "A reminder will be sent to the user.",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, send it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error sending the reminder.', 'error');
+              console.error('Error sending reminder:', error);
+            });
+        }
+      });
     }
   </script>
 

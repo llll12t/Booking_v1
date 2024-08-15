@@ -141,8 +141,8 @@
                         </div>
                     </div>
                 </div>
-                <div id="buttons" class="bg-indigo-300 p-2 shadow-lg fixed bottom-0 left-0 right-0">
-                    <button type="button" onclick="nextStep()" class="w-full bg-gray-100 text-indigo-700 py-3 rounded-lg">ถัดไป</button>
+                <div id="buttons" class="p-2 shadow-lg fixed bottom-0 left-0 right-0">
+                    <button type="button" onclick="nextStep()" class="w-full bg-red-400 text-white py-3 mb-4 rounded-lg">ถัดไป</button>
                 </div>
 
             </div>
@@ -178,9 +178,8 @@
                 <div class="hidden text-center">
                     <input type="submit" value="Submit" class="px-6 py-4 bg-gray-100 text-black font-semibold rounded-md">
                 </div>
-                <div id="buttons" class="bg-indigo-300 p-2 shadow-lg fixed bottom-0 left-0 right-0">
-                    <button type="button" onclick="prevStep()" class="w-full bg-gray-100 text-indigo-700 py-3 rounded-lg">กลับหน้าหลัก</button>
-                </div>
+                    <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-indigo-700 py-3 rounded-lg">กลับหน้าหลัก</button>
+               
             </div>
         </form>
     </div>
@@ -190,7 +189,7 @@
         const LIFF_ID = '2005629952-LVg8Kpvz';
 
         window.onload = function () {
-            initializeLiff();
+              initializeLiff();
         };
 
         async function initializeLiff() {
@@ -350,7 +349,7 @@ function populateDays(month, year, currentDay) {
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dayElement = document.createElement('div');
-        dayElement.classList.add('bg-white', 'px-6', 'py-3', 'mx-2', 'bg-gray-100', 'border', 'border-gray-300', 'text-center', 'rounded-md', 'cursor-pointer');
+        dayElement.classList.add('bg-white', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-indigo-800', 'text-center', 'rounded-md', 'cursor-pointer');
         dayElement.textContent = `${daysOfWeek[date.getDay()]} ${day}`;
         if (day === currentDay) {
             dayElement.id = 'currentDay';
@@ -401,7 +400,7 @@ function updateAvailability(availability) {
         slotDiv.className = 'flex justify-between items-center py-2';
 
         const timeSpan = document.createElement('span');
-        timeSpan.className = 'px-6 py-2 rounded-md bg-gray-100 text-black';
+        timeSpan.className = 'px-6 py-2 rounded-md bg-white text-indigo-700';
         timeSpan.textContent = `${time} น.`;
 
         const statusButton = document.createElement('button');
@@ -410,7 +409,7 @@ function updateAvailability(availability) {
         statusButton.disabled = true;
 
         const bookButton = document.createElement('button');
-        bookButton.className = `custom-button px-4 py-2 rounded-md ${info.status === 'Available' ? 'bg-blue-900 text-white' : 'bg-gray-100 text-gray-400'}`;
+        bookButton.className = `custom-button px-4 py-2 rounded-md ${info.status === 'Available' ? 'bg-indigo-800 text-white' : 'bg-gray-100 text-gray-400'}`;
         bookButton.innerHTML = `<i class="fas fa-calendar-alt"></i> นัดหมาย`;
         bookButton.disabled = info.status !== 'Available';
         bookButton.addEventListener('click', () => {

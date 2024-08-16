@@ -44,7 +44,10 @@
       </div>
       <!-- Hidden User ID Line Field -->
       <input type="hidden" id="useridlineFilter">
-
+      <div>
+        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
+        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
+      </div>
       <div>
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
         <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
@@ -124,10 +127,12 @@
           });
 
           const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+          const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
           const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
 
           let filteredDetails = details.filter(detail => {
             const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
+            const matchesLocation = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
             const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
             return matchesStatus && matchesLocation && matchesUseridline;
           });

@@ -44,10 +44,7 @@
       </div>
       <!-- Hidden User ID Line Field -->
       <input type="hidden" id="useridlineFilter">
-      <div>
-        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
-        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
-      </div>
+
       <div>
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
         <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
@@ -127,12 +124,10 @@
           });
 
           const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-          const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
           const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
 
           let filteredDetails = details.filter(detail => {
             const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
-            const matchesLocation = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
             const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
             return matchesStatus && matchesLocation && matchesUseridline;
           });
@@ -180,12 +175,10 @@
           <h3 class="text-lg font-semibold mb-2">${detail.name}</h3>
           <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
           <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
-          <p class="text-sm text-gray-700"><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
-          <p class="text-sm text-gray-700"><strong>อีเมล:</strong> ${detail.note}</p>
+         
           <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
           <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
           <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
-          <p class="text-sm text-gray-700"><strong>ไลน์ไอดี:</strong> ${detail.userlineid}</p> 
           <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
             <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
             <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>

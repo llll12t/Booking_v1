@@ -32,6 +32,9 @@
   <main class="flex-1 bg-gray-100 p-4 md:p-8">
     <!-- Filter Section -->
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
+        <div>
+            <input type="hidden" id="useridlineFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์ไลน์ไอดี">
+          </div>
       <div>
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
         <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
@@ -41,14 +44,6 @@
           <option value="ยกเลิก">ยกเลิก</option>
           <option value="เสร็จสิ้น">เสร็จสิ้น</option>
         </select>
-      </div>
-      <div>
-        <label for="useridlineFilter" class="block text-xs font-medium text-gray-700">กรองตามไลน์ไอดี</label>
-        <input type="text" id="useridlineFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์ไลน์ไอดี">
-      </div>
-      <div>
-        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
-        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
       </div>
       <div>
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
@@ -193,12 +188,10 @@
           <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
           <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
           <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
-          <p class="text-sm text-gray-700"><strong>ไลน์ไอดี:</strong> ${detail.userlineid}</p> <!-- Added line for useridline -->
+          <p class="hidden"><strong>ไลน์ไอดี:</strong> ${detail.userlineid}</p> 
           <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
             <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
             <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
-            <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
-            <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
           </div>
         `;
 

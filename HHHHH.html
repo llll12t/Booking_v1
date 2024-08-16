@@ -29,10 +29,11 @@
 
   <!-- Main Content Area -->
   <main class="flex-1 bg-gray-100 p-4 md:p-8">
-    <!-- Filter Section --> <div>
-        <label for="userId" class="block text-xs font-medium text-gray-700">LINE User ID</label>
-        <input type="text" id="userId" class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-200" readonly>
-      </div>
+    <!-- Filter Section --> 
+    <div>
+      <label for="userId" class="block text-xs font-medium text-gray-700">LINE User ID</label>
+      <input type="text" id="userId" class="mt-1 block w-full p-2 border border-gray-300 rounded-md bg-gray-200" readonly>
+    </div>
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
       <div>
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
@@ -75,7 +76,7 @@
   </div>
 
   <script>
-     const LIFF_ID = '2005629952-2p0n3ERO';  // Replace with your LIFF ID
+    const LIFF_ID = '2005629952-2p0n3ERO';  // Replace with your LIFF ID
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
 
     const CARDS_PER_PAGE = 5;
@@ -102,348 +103,322 @@
     async function getUserProfile() {
       try {
         const profile = await liff.getProfile();
-        document.getElementById('userId').value = profile.userId;  // Set the userId in the input field
-        fetchData(profile.userId);
+        const userId = profile.userId;
+        document.getElementById('userId').value = userId;  // Set the userId in the input field
+        fetchAndPopulateCards(userId);  // Pass userId to filtering function
       } catch (error) {
         console.error('Error getting profile data:', error);
       }
     }
 
-    async function fetchData(userId) {
-      showLoading(true);
-      try {
-        const response = await fetch(DETAILS_SCRIPT_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ action: 'fetchData', userId: userId })
+    function fetchAndPopulateCards(userId) {
+      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+        .then(response => response.json())
+        .then(details => {
+          const filteredData = document.getElementById('filteredData');
+          filteredData.innerHTML = '';
+
+          // Parse date strings into Date objects using DD-MM-YYYY format
+          details.forEach(detail => {
+            const [day, month, year] = detail.date.split('-');
+            detail.parsedDate = new Date(`${year}-${month}-${day}`);
+          });
+
+          // Filter by userId
+          const userBookings = details.filter(detail => detail.userId === userId);
+
+          // Sort by date based on the selected sorting option
+          const dateSort = document.getElementById('dateSort').value;
+          userBookings.sort((a, b) => {
+            return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
+          });
+
+          // Apply additional filters
+          const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+          const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+
+          let filteredDetails = userBookings.filter(detail => {
+            const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
+            const matchesLocation = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
+            return matchesStatus && matchesLocation;
+          });
+
+          totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
+          displayCards(filteredDetails, currentPage);
+          createPaginationControls();
+        })
+        .catch(error => {
+          console.error('Error fetching user details:', error);
         });
+    }
 
-        const data = await response.json();
-        const userBookings = data.filter(row => row.userId === userId);
+    function displayCards(details, page) {
+      const filteredData = document.getElementById('filteredData');
+      filteredData.innerHTML = '';
 
-        if (userBookings.length > 0) {
-          displayData(userBookings);
-        } else {
-          console.log('No data found for userId:', userId);
+      const startIndex = (page - 1) * CARDS_PER_PAGE;
+      const endIndex = startIndex + CARDS_PER_PAGE;
+      const detailsToDisplay = details.slice(startIndex, endIndex);
+
+      detailsToDisplay.forEach(detail => {
+        detail.id = detail.idKey;
+        
+        let disableConfirm = false;
+        let disableCancel = false;
+        let disableComplete = false;
+        let disableReminder = false;
+
+        switch (detail.status) {
+          case 'รอการยืนยัน':
+            disableComplete = true;
+            break;
+          case 'ยืนยันแล้ว':
+            disableConfirm = true;
+            disableReminder = true;
+            break;
+          case 'ยกเลิก':
+          case 'เสร็จสิ้น':
+            disableCancel = true;
+            disableConfirm = true;
+            disableComplete = true;
+            disableReminder = true;
+            break;
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        showLoading(false);
+
+        const card = document.createElement('div');
+        card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
+
+        card.innerHTML = `
+          <h3 class="text-lg font-semibold mb-2">${detail.name}</h3>
+          <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
+          <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
+          <p class="text-sm text-gray-700"><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
+          <p class="text-sm text-gray-700"><strong>อีเมล:</strong> ${detail.note}</p>
+          <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
+          <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
+          <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
+          <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+            <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
+            <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
+            <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
+            <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
+          </div>
+        `;
+
+        filteredData.appendChild(card);
+      });
+
+      attachEventListeners();
+    }
+
+    function createPaginationControls() {
+      const paginationControls = document.getElementById('paginationControls');
+      paginationControls.innerHTML = '';
+
+      // Define the range of page buttons to show
+      const maxVisibleButtons = 3;
+      const startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+      const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+
+      // Previous button
+      const prevButton = document.createElement('button');
+      prevButton.textContent = 'Previous';
+      prevButton.disabled = currentPage === 1;
+      prevButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
+      prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchAndPopulateCards();
+        }
+      });
+      paginationControls.appendChild(prevButton);
+
+      // Page number buttons
+      for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600');
+        if (i === currentPage) {
+          pageButton.classList.add('bg-indigo-600');
+        }
+        pageButton.addEventListener('click', () => {
+          currentPage = i;
+          fetchAndPopulateCards();
+        });
+        paginationControls.appendChild(pageButton);
+      }
+
+      // Next button
+      const nextButton = document.createElement('button');
+      nextButton.textContent = 'Next';
+      nextButton.disabled = currentPage === totalPages;
+      nextButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
+      nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          fetchAndPopulateCards();
+        }
+      });
+      paginationControls.appendChild(nextButton);
+    }
+
+    function attachEventListeners() {
+      document.querySelectorAll('.confirm-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          confirmBooking(id);
+        });
+      });
+
+      document.querySelectorAll('.cancel-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          cancelBooking(id);
+        });
+      });
+
+      document.querySelectorAll('.complete-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          completeBooking(id);
+        });
+      });
+
+      document.querySelectorAll('.reminder-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          sendReminder(id);
+        });
+      });
+    }
+
+    function confirmBooking(id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to confirm this booking!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, confirm it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
+              fetchAndPopulateCards();
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error confirming the booking.', 'error');
+              console.error('Error confirming booking:', error);
+            });
+        }
+      });
+    }
+
+    function cancelBooking(id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to cancel this booking!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
+              fetchAndPopulateCards();
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error canceling the booking.', 'error');
+              console.error('Error canceling booking:', error);
+            });
+        }
+      });
+    }
+
+    function completeBooking(id) {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "You want to mark this booking as completed!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, complete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
+              fetchAndPopulateCards();
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error completing the booking.', 'error');
+              console.error('Error completing booking:', error);
+            });
+        }
+      });
+    }
+
+    function sendReminder(id) {
+      Swal.fire({
+        title: 'Send reminder?',
+        text: "A reminder will be sent to the user.",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, send it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);
+          fetch(`${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);
+              Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
+              fetchAndPopulateCards();
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              Swal.fire('Error!', 'There was an error sending the reminder.', 'error');
+              console.error('Error sending reminder:', error);
+            });
+        }
+      });
+    }
+
+    function showLoadingSpinner(show) {
+      const spinner = document.getElementById('loadingSpinner');
+      if (show) {
+        spinner.classList.remove('hidden');
+      } else {
+        spinner.classList.add('hidden');
       }
     }
 
-
-    document.addEventListener('DOMContentLoaded', function () {
-
-      function fetchAndPopulateCards() {
-        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-          .then(response => response.json())
-          .then(details => {
-            const filteredData = document.getElementById('filteredData');
-            filteredData.innerHTML = '';
-
-            // Parse date strings into Date objects using DD-MM-YYYY format
-            details.forEach(detail => {
-              const [day, month, year] = detail.date.split('-');
-              detail.parsedDate = new Date(`${year}-${month}-${day}`);
-            });
-
-            // Sort by date based on the selected sorting option
-            const dateSort = document.getElementById('dateSort').value;
-            details.sort((a, b) => {
-              return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
-            });
-
-            // Apply filters
-            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-            const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
-
-            let filteredDetails = details.filter(detail => {
-              const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
-              const matchesLocation = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
-              return matchesStatus && matchesLocation;
-            });
-
-            totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
-            displayCards(filteredDetails, currentPage);
-            createPaginationControls();
-          })
-          .catch(error => {
-            console.error('Error fetching user details:', error);
-          });
-      }
-
-      function displayCards(details, page) {
-        const filteredData = document.getElementById('filteredData');
-        filteredData.innerHTML = '';
-
-        const startIndex = (page - 1) * CARDS_PER_PAGE;
-        const endIndex = startIndex + CARDS_PER_PAGE;
-        const detailsToDisplay = details.slice(startIndex, endIndex);
-
-        detailsToDisplay.forEach(detail => {
-          detail.id = detail.idKey;
-          
-          let disableConfirm = false;
-          let disableCancel = false;
-          let disableComplete = false;
-          let disableReminder = false;
-
-          switch (detail.status) {
-            case 'รอการยืนยัน':
-              disableComplete = true;
-              break;
-            case 'ยืนยันแล้ว':
-              disableConfirm = true;
-              disableReminder = true;
-              break;
-            case 'ยกเลิก':
-            case 'เสร็จสิ้น':
-              disableCancel = true;
-              disableConfirm = true;
-              disableComplete = true;
-              disableReminder = true;
-              break;
-          }
-
-          const card = document.createElement('div');
-          card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
-
-          card.innerHTML = `
-            <h3 class="text-lg font-semibold mb-2">${detail.name}</h3>
-            <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
-            <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
-            <p class="text-sm text-gray-700"><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
-            <p class="text-sm text-gray-700"><strong>อีเมล:</strong> ${detail.note}</p>
-            <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
-            <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
-            <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
-            <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-              <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
-            </div>
-          `;
-
-          filteredData.appendChild(card);
-        });
-
-        attachEventListeners();
-      }
-
-      function createPaginationControls() {
-        const paginationControls = document.getElementById('paginationControls');
-        paginationControls.innerHTML = '';
-
-        // Define the range of page buttons to show
-        const maxVisibleButtons = 3;
-        const startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
-        const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
-
-        // Previous button
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.disabled = currentPage === 1;
-        prevButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
-        prevButton.addEventListener('click', () => {
-          if (currentPage > 1) {
-            currentPage--;
-            fetchAndPopulateCards();
-          }
-        });
-        paginationControls.appendChild(prevButton);
-
-        // Page number buttons
-        for (let i = startPage; i <= endPage; i++) {
-          const pageButton = document.createElement('button');
-          pageButton.textContent = i;
-          pageButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600');
-          if (i === currentPage) {
-            pageButton.classList.add('bg-indigo-600');
-          }
-          pageButton.addEventListener('click', () => {
-            currentPage = i;
-            fetchAndPopulateCards();
-          });
-          paginationControls.appendChild(pageButton);
-        }
-
-        // Next button
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
-        nextButton.addEventListener('click', () => {
-          if (currentPage < totalPages) {
-            currentPage++;
-            fetchAndPopulateCards();
-          }
-        });
-        paginationControls.appendChild(nextButton);
-      }
-
-      function attachEventListeners() {
-        document.querySelectorAll('.confirm-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            confirmBooking(id);
-          });
-        });
-
-        document.querySelectorAll('.cancel-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            cancelBooking(id);
-          });
-        });
-
-        document.querySelectorAll('.complete-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            completeBooking(id);
-          });
-        });
-
-        document.querySelectorAll('.reminder-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            sendReminder(id);
-          });
-        });
-      }
-
-      function confirmBooking(id) {
-        Swal.fire({
-          title: 'Are you sure?',
-          text: "You want to confirm this booking!",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, confirm it!'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            showLoadingSpinner(true);
-            fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-              .then(response => response.text())
-              .then(data => {
-                showLoadingSpinner(false);
-                Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
-                fetchAndPopulateCards();
-              })
-              .catch(error => {
-                showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error confirming the booking.', 'error');
-                console.error('Error confirming booking:', error);
-              });
-          }
-        });
-      }
-
-      function cancelBooking(id) {
-        Swal.fire({
-          title: 'Are you sure?',
-          text: "You want to cancel this booking!",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, cancel it!'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            showLoadingSpinner(true);
-            fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-              .then(response => response.text())
-              .then(data => {
-                showLoadingSpinner(false);
-                Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
-                fetchAndPopulateCards();
-              })
-              .catch(error => {
-                showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error canceling the booking.', 'error');
-                console.error('Error canceling booking:', error);
-              });
-          }
-        });
-      }
-
-      function completeBooking(id) {
-        Swal.fire({
-          title: 'Are you sure?',
-          text: "You want to mark this booking as completed!",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, complete it!'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            showLoadingSpinner(true);
-            fetch(`${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-              .then(response => response.text())
-              .then(data => {
-                showLoadingSpinner(false);
-                Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
-                fetchAndPopulateCards();
-              })
-              .catch(error => {
-                showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error completing the booking.', 'error');
-                console.error('Error completing booking:', error);
-              });
-          }
-        });
-      }
-
-      function sendReminder(id) {
-        Swal.fire({
-          title: 'Send reminder?',
-          text: "A reminder will be sent to the user.",
-          icon: 'info',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, send it!'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            showLoadingSpinner(true);
-            fetch(`${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`, { method: 'POST' })
-              .then(response => response.text())
-              .then(data => {
-                showLoadingSpinner(false);
-                Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
-                fetchAndPopulateCards();
-              })
-              .catch(error => {
-                showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error sending the reminder.', 'error');
-                console.error('Error sending reminder:', error);
-              });
-          }
-        });
-      }
-
-      function showLoadingSpinner(show) {
-        const spinner = document.getElementById('loadingSpinner');
-        if (show) {
-          spinner.classList.remove('hidden');
-        } else {
-          spinner.classList.add('hidden');
-        }
-      }
-
-      document.getElementById('applyFiltersButton').addEventListener('click', function () {
-        currentPage = 1;
-        fetchAndPopulateCards();
-      });
-
-      fetchAndPopulateCards();
+    document.getElementById('applyFiltersButton').addEventListener('click', function () {
+      currentPage = 1;
+      const userId = document.getElementById('userId').value;
+      fetchAndPopulateCards(userId);
     });
+
   </script>
 
 </body>

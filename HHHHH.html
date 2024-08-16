@@ -219,30 +219,30 @@
 
 
         async function cancelBooking(bookingId) {
-          try {
-              const result = await Swal.fire({
-                  title: 'ยืนยันการยกเลิกนัดหมาย',
-                  text: 'คุณแน่ใจว่าต้องการยกเลิกนัดหมายนี้หรือไม่?',
-                  icon: 'warning',
-                  showCancelButton: true,
-                  confirmButtonText: 'ใช่, ยกเลิกมัน!',
-                  cancelButtonText: 'ยกเลิก'
-              });
+    try {
+        const result = await Swal.fire({
+            title: 'ยืนยันการยกเลิกนัดหมาย',
+            text: 'คุณแน่ใจว่าต้องการยกเลิกนัดหมายนี้หรือไม่?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ยกเลิกมัน!',
+            cancelButtonText: 'ยกเลิก'
+        });
 
-              if (result.isConfirmed) {
-                  const response = await fetch(`${WEB_APP_URL}?action=cancelBooking&id=${encodeURIComponent(bookingId)}`, {
-                      method: 'POST'
-                  });
-                  if (!response.ok) throw new Error('Network response was not ok');
+        if (result.isConfirmed) {
+            const response = await fetch(`${WEB_APP_URL}?action=cancelBooking&id=${encodeURIComponent(bookingId)}`, {
+                method: 'POST'
+            });
+            if (!response.ok) throw new Error('Network response was not ok');
 
-                  Swal.fire('สำเร็จ!', 'นัดหมายถูกยกเลิก', 'success');
-                  applyFilter(); // Refresh the filtered results after cancellation.
-              }
-          } catch (error) {
-              console.error('There was a problem with the fetch operation:', error);
-              Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถยกเลิกนัดหมายได้ โปรดลองใหม่อีกครั้ง', 'error');
-          }
-      }
+            Swal.fire('สำเร็จ!', 'นัดหมายถูกยกเลิก', 'success');
+            applyFilter(); // Refresh the filtered results after cancellation.
+        }
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถยกเลิกนัดหมายได้ โปรดลองใหม่อีกครั้ง', 'error');
+    }
+}
 
     </script>
 </head>

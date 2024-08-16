@@ -178,6 +178,83 @@
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
 
     document.addEventListener('DOMContentLoaded', function () {
+
+     // Function to fetch and populate the table
+  function fetchAndPopulateTable() {
+    fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+      .then(response => response.json())
+      .then(details => {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = ''; // Clear old data
+
+        details.forEach(detail => {
+          // Assign keyid to detail.id
+          detail.id = detail.idKey;
+
+          // Determine button states based on status
+          let disableConfirm = false;
+          let disableComplete = false;
+          let disableCancel = false;
+          let disableReminder = false;
+
+          switch (detail.status) {
+            case 'รอการยืนยัน':
+              disableComplete = true;
+              break;
+            case 'ยืนยันแล้ว':
+              disableConfirm = true;
+              disableReminder = true;
+              break;
+            case 'ยกเลิก':
+              disableCancel = true;
+              disableConfirm = true;
+              break;
+            case 'เสร็จสิ้น':
+              disableConfirm = true;
+              disableCancel = true;
+              disableComplete = true;
+              disableReminder = true;
+              break;
+          }
+
+          // Create a new table row
+          const row = document.createElement('tr');
+
+          // Populate the row with data and disabled buttons as necessary
+          row.innerHTML = `
+            <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
+            <td class="px-4 py-2 border">${detail.name}</td>
+            <td class="px-4 py-2 border">${detail.service}</td>
+            <td class="px-4 py-2 border">${detail.locationservice}</td>
+            <td class="px-4 py-2 border">${detail.phonenumber}</td>
+            <td class="px-4 py-2 border">${detail.note}</td>
+            <td class="px-4 py-2 border">${detail.date}</td>
+            <td class="px-4 py-2 border">${detail.time}</td>
+            <td class="px-4 py-2 border">${detail.status}</td>
+            <td class="px-4 py-2 border">
+              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
+              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
+              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
+            </td>
+          `;
+
+          // Append the new row to the table body
+          tableBody.appendChild(row);
+        });
+
+        // Re-attach event listeners for the new buttons
+        attachEventListeners();
+      })
+      .catch(error => {
+        console.error('Error fetching user details:', error);
+      });
+  }
+
+  // Initial table population
+  fetchAndPopulateTable();
+
+
       // Fetch and populate the names list
       fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
         .then(response => response.json())
@@ -208,355 +285,316 @@
           console.error('Error fetching key numbers:', error);
         });
 
-      // Fetch all user details and populate the table
-      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-        .then(response => response.json())
-        .then(details => {
-          const tableBody = document.getElementById('tableBody');
-          tableBody.innerHTML = ''; // Clear old data
-
-          // Loop through each detail to create table rows
-          details.forEach(detail => {
-            // Assign keyid to detail.id
-            detail.id = detail.idKey;
-
-            // Create a new table row
-            const row = document.createElement('tr');
-            
-            // Populate the row with data
-            row.innerHTML = `
-              <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
-              <td class="px-4 py-2 border">${detail.name}</td>
-              <td class="px-4 py-2 border">${detail.service}</td>
-              <td class="px-4 py-2 border">${detail.locationservice}</td>
-              <td class="px-4 py-2 border">${detail.phonenumber}</td>
-              <td class="px-4 py-2 border">${detail.note}</td>
-              <td class="px-4 py-2 border">${detail.date}</td>
-              <td class="px-4 py-2 border">${detail.time}</td>
-              <td class="px-4 py-2 border">${detail.status}</td>
-              <td class="px-4 py-2 border">
-                <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Confirm</button>
-                <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Cancel</button>
-                <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Complete</button>
-                <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${detail.idKey}">Send Reminder</button>
-              </td>
-            `;
-
-            // Append the new row to the table body
-            tableBody.appendChild(row);
+      // Attach event listeners to the action buttons
+      function attachEventListeners() {
+        document.querySelectorAll('.confirm-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            confirmBooking(id);
           });
-
-          // Add event listeners for confirm, cancel, complete, and reminder buttons
-          document.querySelectorAll('.confirm-btn').forEach(button => {
-            button.addEventListener('click', function () {
-              const id = this.dataset.id;
-              confirmBooking(id);
-            });
-          });
-
-          document.querySelectorAll('.cancel-btn').forEach(button => {
-            button.addEventListener('click', function () {
-              const id = this.dataset.id;
-              cancelBooking(id);
-            });
-          });
-
-          document.querySelectorAll('.complete-btn').forEach(button => {
-            button.addEventListener('click', function () {
-              const id = this.dataset.id;
-              completeBooking(id);
-            });
-          });
-
-          document.querySelectorAll('.reminder-btn').forEach(button => {
-            button.addEventListener('click', function () {
-              const id = this.dataset.id;
-              sendReminder(id);
-            });
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching user details:', error);
         });
-    });
 
-    document.getElementById('fetchForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      const nameId = document.getElementById('nameId').value;
-      const keynumberId = document.getElementById('keynumberId').value;
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            cancelBooking(id);
+          });
+        });
 
-      let fetchUrl = '';
-      if (nameId) {
-        fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByNameId&nameId=${encodeURIComponent(nameId)}`;
-      } else if (keynumberId) {
-        fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByKeyNumberId&keynumberId=${encodeURIComponent(keynumberId)}`;
+        document.querySelectorAll('.complete-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            completeBooking(id);
+          });
+        });
+
+        document.querySelectorAll('.reminder-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            const id = this.dataset.id;
+            sendReminder(id);
+          });
+        });
       }
 
-      if (fetchUrl) {
-        showLoadingSpinner(true);
-        fetch(fetchUrl)
-          .then(response => response.json())
-          .then(data => {
-            showLoadingSpinner(false);
-            if (data && Object.keys(data).length > 0) {
-              document.getElementById('userIdInput').value = data.userlineId || '';  // Set userid value
-              document.getElementById('keyIdInput').value = data.keyid || '';
-              document.getElementById('nameIdInput').value = data.nameId || '';
-              document.getElementById('keynumberIdInput').value = data.keynumberId || '';
-              document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
-              document.getElementById('fileLinkInput').src = data.fileLink || '';
+      // Action functions with table update
 
-              // Format and set the timestamp
-              if (data.timestamp) {
-                const timestamp = new Date(data.timestamp);
-                const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
-                document.getElementById('timestampInput').value = formattedTimestamp;
+      function confirmBooking(id) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You want to confirm this booking!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, confirm it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            showLoadingSpinner(true);
+            fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+              .then(response => response.text())
+              .then(data => {
+                showLoadingSpinner(false);
+                Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
+                fetchAndPopulateTable();  // Update the table
+              })
+              .catch(error => {
+                showLoadingSpinner(false);
+                Swal.fire('Error!', 'There was an error confirming the booking.', 'error');
+                console.error('Error confirming booking:', error);
+              });
+          }
+        });
+      }
+
+      function cancelBooking(id) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You want to cancel this booking!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            showLoadingSpinner(true);
+            fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+              .then(response => response.text())
+              .then(data => {
+                showLoadingSpinner(false);
+                Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
+                fetchAndPopulateTable();  // Update the table
+              })
+              .catch(error => {
+                showLoadingSpinner(false);
+                Swal.fire('Error!', 'There was an error canceling the booking.', 'error');
+                console.error('Error canceling booking:', error);
+              });
+          }
+        });
+      }
+
+      function completeBooking(id) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You want to mark this booking as completed!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, complete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            showLoadingSpinner(true);
+            fetch(`${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+              .then(response => response.text())
+              .then(data => {
+                showLoadingSpinner(false);
+                Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
+                fetchAndPopulateTable();  // Update the table
+              })
+              .catch(error => {
+                showLoadingSpinner(false);
+                Swal.fire('Error!', 'There was an error completing the booking.', 'error');
+                console.error('Error completing booking:', error);
+              });
+          }
+        });
+      }
+
+      function sendReminder(id) {
+        Swal.fire({
+          title: 'Send reminder?',
+          text: "A reminder will be sent to the user.",
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, send it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            showLoadingSpinner(true);
+            fetch(`${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`, { method: 'POST' })
+              .then(response => response.text())
+              .then(data => {
+                showLoadingSpinner(false);
+                Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
+                fetchAndPopulateTable();  // Update the table
+              })
+              .catch(error => {
+                showLoadingSpinner(false);
+                Swal.fire('Error!', 'There was an error sending the reminder.', 'error');
+                console.error('Error sending reminder:', error);
+              });
+          }
+        });
+      }
+
+      document.getElementById('fetchForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const nameId = document.getElementById('nameId').value;
+        const keynumberId = document.getElementById('keynumberId').value;
+
+        let fetchUrl = '';
+        if (nameId) {
+          fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByNameId&nameId=${encodeURIComponent(nameId)}`;
+        } else if (keynumberId) {
+          fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByKeyNumberId&keynumberId=${encodeURIComponent(keynumberId)}`;
+        }
+
+        if (fetchUrl) {
+          showLoadingSpinner(true);
+          fetch(fetchUrl)
+            .then(response => response.json())
+            .then(data => {
+              showLoadingSpinner(false);
+              if (data && Object.keys(data).length > 0) {
+                document.getElementById('userIdInput').value = data.userlineId || '';  // Set userid value
+                document.getElementById('keyIdInput').value = data.keyid || '';
+                document.getElementById('nameIdInput').value = data.nameId || '';
+                document.getElementById('keynumberIdInput').value = data.keynumberId || '';
+                document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
+                document.getElementById('fileLinkInput').src = data.fileLink || '';
+
+                // Format and set the timestamp
+                if (data.timestamp) {
+                  const timestamp = new Date(data.timestamp);
+                  const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
+                  document.getElementById('timestampInput').value = formattedTimestamp;
+                } else {
+                  document.getElementById('timestampInput').value = '';
+                }
+
+                // Filter and display table based on userlineid
+                filterTableByUserlineId(data.userlineId);
+
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('noResult').classList.add('hidden');
               } else {
-                document.getElementById('timestampInput').value = '';
+                document.getElementById('result').classList.add('hidden');
+                document.getElementById('noResult').classList.remove('hidden');
               }
-
-              // Filter and display table based on userlineid
-              filterTableByUserlineId(data.userlineId);
-
-              document.getElementById('result').classList.remove('hidden');
-              document.getElementById('noResult').classList.add('hidden');
-            } else {
+            })
+            .catch(error => {
+              showLoadingSpinner(false);
+              console.error('Error fetching data:', error);
               document.getElementById('result').classList.add('hidden');
               document.getElementById('noResult').classList.remove('hidden');
-            }
+            });
+        } else {
+          document.getElementById('result').classList.add('hidden');
+          document.getElementById('noResult').classList.remove('hidden');
+        }
+      });
+
+      // Show the modal when "Add to Table" button is clicked
+      document.getElementById('addDataButton').addEventListener('click', function () {
+        document.getElementById('modal').classList.remove('hidden');
+      });
+
+      // Hide the modal when "Cancel" button is clicked
+      document.getElementById('cancelButton').addEventListener('click', function () {
+        document.getElementById('modal').classList.add('hidden');
+      });
+
+      // Handle form submission in the modal
+      document.getElementById('modalForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Get data from profile inputs
+        const userId = document.getElementById('userIdInput').value;
+        const nameId = document.getElementById('nameIdInput').value;
+        const keynumberId = document.getElementById('keynumberIdInput').value;
+        const keynumber2Id = document.getElementById('keynumber2IdInput').value;
+
+        // Get additional data from modal inputs
+        const service = document.getElementById('serviceInput').value;
+        const location = document.getElementById('locationInput').value;
+        const date = document.getElementById('dateInput').value;
+        const time = document.getElementById('timeInput').value;
+        const status = document.getElementById('statusInput').value;
+
+        // Insert new row into the table
+        const newRow = `
+          <tr>
+            <td class="hidden">${userId}</td> <!-- Hidden userlineid -->
+            <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
+            <td class="px-4 py-2 border">${service}</td> <!-- service -->
+            <td class="px-4 py-2 border">${location}</td> <!-- location -->
+            <td class="px-4 py-2 border">${keynumberId}</td> <!-- keynumberId -->
+            <td class="px-4 py-2 border">${keynumber2Id}</td> <!-- keynumber2Id -->
+            <td class="px-4 py-2 border">${date}</td> <!-- date -->
+            <td class="px-4 py-2 border">${time}</td> <!-- time -->
+            <td class="px-4 py-2 border">${status}</td> <!-- status -->
+            <td class="px-4 py-2 border">
+              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
+              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
+              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
+            </td>
+          </tr>
+        `;
+        document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
+
+        // Hide the modal after submission
+        document.getElementById('modal').classList.add('hidden');
+
+        // Save the data by calling the Google Script makeBooking function
+        const saveUrl = `${DETAILS_SCRIPT_URL}?action=makeBooking&userlineid=${encodeURIComponent(userId)}&name=${encodeURIComponent(nameId)}&service=${encodeURIComponent(service)}&locationservice=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&phonenumber=${encodeURIComponent(keynumberId)}&note=${encodeURIComponent(keynumber2Id)}`;
+        fetch(saveUrl, { method: 'POST' })
+          .then(response => response.text())
+          .then(data => {
+            console.log('Booking saved successfully:', data);
+            fetchAndPopulateTable();  // Update the table
           })
           .catch(error => {
-            showLoadingSpinner(false);
-            console.error('Error fetching data:', error);
-            document.getElementById('result').classList.add('hidden');
-            document.getElementById('noResult').classList.remove('hidden');
+            console.error('Error saving booking:', error);
           });
-      } else {
-        document.getElementById('result').classList.add('hidden');
-        document.getElementById('noResult').classList.remove('hidden');
+      });
+
+      function showLoadingSpinner(show) {
+        const spinner = document.getElementById('loadingSpinner');
+        if (show) {
+          spinner.classList.remove('hidden');
+        } else {
+          spinner.classList.add('hidden');
+        }
       }
-    });
 
-    // Show the modal when "Add to Table" button is clicked
-    document.getElementById('addDataButton').addEventListener('click', function () {
-      document.getElementById('modal').classList.remove('hidden');
-    });
-
-    // Hide the modal when "Cancel" button is clicked
-    document.getElementById('cancelButton').addEventListener('click', function () {
-      document.getElementById('modal').classList.add('hidden');
-    });
-
-    // Handle form submission in the modal
-    document.getElementById('modalForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-
-      // Get data from profile inputs
-      const userId = document.getElementById('userIdInput').value;
-      const nameId = document.getElementById('nameIdInput').value;
-      const keynumberId = document.getElementById('keynumberIdInput').value;
-      const keynumber2Id = document.getElementById('keynumber2IdInput').value;
-
-      // Get additional data from modal inputs
-      const service = document.getElementById('serviceInput').value;
-      const location = document.getElementById('locationInput').value;
-      const date = document.getElementById('dateInput').value;
-      const time = document.getElementById('timeInput').value;
-      const status = document.getElementById('statusInput').value;
-
-      // Insert new row into the table
-      const newRow = `
-        <tr>
-          <td class="hidden">${userId}</td> <!-- Hidden userlineid -->
-          <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
-          <td class="px-4 py-2 border">${service}</td> <!-- service -->
-          <td class="px-4 py-2 border">${location}</td> <!-- location -->
-          <td class="px-4 py-2 border">${keynumberId}</td> <!-- keynumberId -->
-          <td class="px-4 py-2 border">${keynumber2Id}</td> <!-- keynumber2Id -->
-          <td class="px-4 py-2 border">${date}</td> <!-- date -->
-          <td class="px-4 py-2 border">${time}</td> <!-- time -->
-          <td class="px-4 py-2 border">${status}</td> <!-- status -->
-          <td class="px-4 py-2 border">
-            <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
-            <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
-            <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
-            <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
-          </td>
-        </tr>
-      `;
-      document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
-
-      // Hide the modal after submission
-      document.getElementById('modal').classList.add('hidden');
-
-      // Save the data by calling the Google Script makeBooking function
-      const saveUrl = `${DETAILS_SCRIPT_URL}?action=makeBooking&userlineid=${encodeURIComponent(userId)}&name=${encodeURIComponent(nameId)}&service=${encodeURIComponent(service)}&locationservice=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&phonenumber=${encodeURIComponent(keynumberId)}&note=${encodeURIComponent(keynumber2Id)}`;
-      fetch(saveUrl, { method: 'POST' })
-        .then(response => response.text())
-        .then(data => {
-          console.log('Booking saved successfully:', data);
-        })
-        .catch(error => {
-          console.error('Error saving booking:', error);
+      function filterTableByUserlineId(userid) {
+        const tableRows = document.querySelectorAll('#tableBody tr');
+        tableRows.forEach(row => {
+          const lineIdCell = row.querySelector('td:nth-child(1)');
+          if (lineIdCell && lineIdCell.textContent !== userid) {
+            row.classList.add('hidden');
+          } else {
+            row.classList.remove('hidden');
+          }
         });
-    });
-
-    function showLoadingSpinner(show) {
-      const spinner = document.getElementById('loadingSpinner');
-      if (show) {
-        spinner.classList.remove('hidden');
-      } else {
-        spinner.classList.add('hidden');
       }
-    }
 
-    function filterTableByUserlineId(userid) {
-      const tableRows = document.querySelectorAll('#tableBody tr');
-      tableRows.forEach(row => {
-        const lineIdCell = row.querySelector('td:nth-child(1)');
-        if (lineIdCell && lineIdCell.textContent !== userid) {
-          row.classList.add('hidden');
-        } else {
-          row.classList.remove('hidden');
-        }
+      // Apply filters on the table based on status and location
+      document.getElementById('applyFiltersButton').addEventListener('click', function () {
+        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+
+        const tableRows = document.querySelectorAll('#tableBody tr');
+        tableRows.forEach(row => {
+          const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
+          const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+
+          const matchesStatus = statusFilter === '' || statusCell === statusFilter;
+          const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
+
+          if (matchesStatus && matchesLocation) {
+            row.classList.remove('hidden');
+          } else {
+            row.classList.add('hidden');
+          }
+        });
       });
-    }
 
-    // Apply filters on the table based on status and location
-    document.getElementById('applyFiltersButton').addEventListener('click', function () {
-      const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-      const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
-
-      const tableRows = document.querySelectorAll('#tableBody tr');
-      tableRows.forEach(row => {
-        const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
-        const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-
-        const matchesStatus = statusFilter === '' || statusCell === statusFilter;
-        const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
-
-        if (matchesStatus && matchesLocation) {
-          row.classList.remove('hidden');
-        } else {
-          row.classList.add('hidden');
-        }
-      });
     });
-
-    // Function to confirm booking
-    function confirmBooking(id) {
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "You want to confirm this booking!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, confirm it!'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          showLoadingSpinner(true);
-          fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-              showLoadingSpinner(false);
-              Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
-              document.querySelector(`.confirm-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยืนยันแล้ว';
-            })
-            .catch(error => {
-              showLoadingSpinner(false);
-              Swal.fire('Error!', 'There was an error confirming the booking.', 'error');
-              console.error('Error confirming booking:', error);
-            });
-        }
-      });
-    }
-
-    // Function to cancel booking
-    function cancelBooking(id) {
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "You want to cancel this booking!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, cancel it!'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          showLoadingSpinner(true);
-          fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-              showLoadingSpinner(false);
-              Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
-              document.querySelector(`.cancel-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'ยกเลิก';
-            })
-            .catch(error => {
-              showLoadingSpinner(false);
-              Swal.fire('Error!', 'There was an error canceling the booking.', 'error');
-              console.error('Error canceling booking:', error);
-            });
-        }
-      });
-    }
-
-    // Function to complete booking
-    function completeBooking(id) {
-      Swal.fire({
-        title: 'Are you sure?',
-        text: "You want to mark this booking as completed!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, complete it!'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          showLoadingSpinner(true);
-          fetch(`${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-              showLoadingSpinner(false);
-              Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
-              document.querySelector(`.complete-btn[data-id="${id}"]`).closest('tr').querySelector('td:nth-child(9)').innerText = 'เสร็จสิ้น';
-            })
-            .catch(error => {
-              showLoadingSpinner(false);
-              Swal.fire('Error!', 'There was an error completing the booking.', 'error');
-              console.error('Error completing booking:', error);
-            });
-        }
-      });
-    }
-
-    // Function to send reminder
-    function sendReminder(id) {
-      Swal.fire({
-        title: 'Send reminder?',
-        text: "A reminder will be sent to the user.",
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, send it!'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          showLoadingSpinner(true);
-          fetch(`${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`, { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-              showLoadingSpinner(false);
-              Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
-            })
-            .catch(error => {
-              showLoadingSpinner(false);
-              Swal.fire('Error!', 'There was an error sending the reminder.', 'error');
-              console.error('Error sending reminder:', error);
-            });
-        }
-      });
-    }
   </script>
 
 </body>

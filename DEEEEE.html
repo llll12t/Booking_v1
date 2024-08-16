@@ -4,14 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile Dashboard</title>
+  <title>Booking Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     .loader {
-      border-top-color: #3498db;
+      border-top-color: #4a0890;
       animation: spin 1s linear infinite;
-      border: 8px solid #f3f3f3;
+      border: 8px solid #fdefff;
       border-radius: 50%;
       width: 60px;
       height: 60px;
@@ -28,35 +28,35 @@
 <body class="bg-gray-100 min-h-screen flex">
 
   <!-- Sidebar -->
-  <aside class="w-64 bg-white shadow-lg p-6">
-    <h2 class="text-2xl font-bold mb-4">Search Member</h2>
+  <aside class="w-64 bg-white text-purple-700 shadow-lg p-6">
+    <h2 class="text-md font-bold mb-4">รายชื่อสมาชิก</h2>
     <form id="fetchForm" class="space-y-4">
       <div>
-        <label for="nameId" class="block text-xs font-medium text-gray-700">Name:</label>
+        <label for="nameId" class="block text-xs font-medium text-gray-700">ชื่อ</label>
         <input type="text" id="nameId" name="nameId" list="namesList" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
         <datalist id="namesList">
           <!-- Dynamically filled by JavaScript -->
         </datalist>
       </div>
       <div>
-        <label for="keynumberId" class="block text-xs font-medium text-gray-700">Key Number ID:</label>
+        <label for="keynumberId" class="block text-xs font-medium text-gray-700">เบอร์โทร</label>
         <input type="text" id="keynumberId" name="keynumberId" list="keynumbersList" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
         <datalist id="keynumbersList">
           <!-- Dynamically filled by JavaScript -->
         </datalist>
       </div>
-      <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Fetch Data</button>
+      <button type="submit" class="w-full py-2 px-4 bg-red-400 text-white font-semibold rounded-md hover:bg-red-200">ค้นหา</button>
     </form>
 
-    <h1 class="text-md font-bold mt-8 mb-4">Member Profile</h1>
+    <h1 class="text-sm font-bold mt-8 mb-4">รายละเอียด</h1>
     <div id="result" class="hidden">
       <div class="space-y-4">
         <!-- Add Button to Insert Data into Table -->
-        <button id="addDataButton" class="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700">Add to Table</button>
+        <button id="addDataButton" class="w-full py-2 px-4 bg-purple-400 text-white font-semibold rounded-md hover:bg-purple-500">เพิ่มการนัดหมาย</button>
 
         <!-- Profile Picture -->
         <div class="flex justify-center">
-          <img id="fileLinkInput" class="border border-gray-300 rounded-md max-w-xs w-32 h-32" alt="Profile Image">
+          <img id="fileLinkInput" class="border border-gray-300 rounded-md max-w-xs w-24 h-24" alt="Profile Image">
         </div>
         <!-- Profile Information -->
         <div>
@@ -67,15 +67,15 @@
           <input type="text" id="keyIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div>
-          <label for="nameIdInput" class="block text-xs font-medium text-gray-700">Name:</label>
+          <label for="nameIdInput" class="block text-xs font-medium text-gray-700">ชื่อ</label>
           <input type="text" id="nameIdInput" class="mt-1 text-xs block w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div>
-          <label for="keynumberIdInput" class="block text-xs font-medium text-gray-700">Key Number ID:</label>
+          <label for="keynumberIdInput" class="block text-xs font-medium text-gray-700">เบอร์ติดต่อ</label>
           <input type="text" id="keynumberIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div>
-          <label for="keynumber2IdInput" class="block text-xs font-medium text-gray-700">Key Number 2 ID:</label>
+          <label for="keynumber2IdInput" class="block text-xs font-medium text-gray-700">อีเมล</label>
           <input type="text" id="keynumber2IdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div>
@@ -86,7 +86,7 @@
       </div>
     </div>
     <div id="noResult" class="hidden text-gray-700 text-center mt-10">
-      No data found for the provided input.
+      ไม่มีข้อมูลในระบบ
     </div>
   </aside>
 
@@ -95,7 +95,7 @@
     <!-- Filter Section -->
     <div class="flex space-x-4 mb-4">
       <div>
-        <label for="statusFilter" class="block text-xs font-medium text-gray-700">Filter by Status:</label>
+        <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
         <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
           <option value="">All</option>
           <option value="รอการยืนยัน">รอการยืนยัน</option>
@@ -105,10 +105,10 @@
         </select>
       </div>
       <div>
-        <label for="locationFilter" class="block text-xs font-medium text-gray-700">Filter by Location:</label>
-        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Enter location">
+        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
+        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
       </div>
-      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Apply Filters</button>
+      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-red-400 text-white rounded-md hover:bg-red-200">คัดกรองข้อมูล</button>
     </div>
 
     <!-- Table Section -->
@@ -138,26 +138,26 @@
   <!-- Modal Popup -->
   <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-lg p-6 w-1/3">
-      <h2 class="text-xl font-semibold mb-4">Add Data to Table</h2>
+      <h2 class="text-md font-semibold mb-4">เพิ่มการนัดหมาย</h2>
       <form id="modalForm" class="space-y-4">
         <div>
-          <label for="serviceInput" class="block text-xs font-medium text-gray-700">Service:</label>
+          <label for="serviceInput" class="block text-xs font-medium text-gray-700">บริการ</label>
           <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
         </div>
         <div>
-          <label for="locationInput" class="block text-xs font-medium text-gray-700">Location:</label>
+          <label for="locationInput" class="block text-xs font-medium text-gray-700">สถานที่</label>
           <input type="text" id="locationInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
         </div>
         <div>
-          <label for="dateInput" class="block text-xs font-medium text-gray-700">Date:</label>
+          <label for="dateInput" class="block text-xs font-medium text-gray-700">วันที่:</label>
           <input type="date" id="dateInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
         </div>
         <div>
-          <label for="timeInput" class="block text-xs font-medium text-gray-700">Time:</label>
+          <label for="timeInput" class="block text-xs font-medium text-gray-700">เวลา:</label>
           <input type="time" id="timeInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
         </div>
         <div>
-          <label for="statusInput" class="block text-xs font-medium text-gray-700">Status:</label>
+          <label for="statusInput" class="block text-xs font-medium text-gray-700">สถานะ:</label>
           <input type="text" id="statusInput" value="รอการยืนยัน" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div class="flex justify-end space-x-2">
@@ -208,7 +208,7 @@
             case 'ยกเลิก':
               disableCancel = true;
               disableConfirm = true;
-              disableComplete = true;  
+              disableComplete = true;
               disableReminder = true;
               break;
             case 'เสร็จสิ้น':

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking Dashboard</title>
+  <title>user Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script> <!-- Include the LIFF SDK -->
@@ -71,8 +71,11 @@
   </div>
 
   <script>
+
     const LIFF_ID = '2005629952-2p0n3ERO'; // Replace with your LIFF ID
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
+
+
     const CARDS_PER_PAGE = 5;
     let currentPage = 1;
     let totalPages = 1;
@@ -177,7 +180,7 @@
           <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
           <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
           <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
-          <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+          <div class="mt-4 flex flex-row space-y-2 space-x-2">
             <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
             <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
           </div>

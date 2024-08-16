@@ -231,7 +231,7 @@
 
 
                 if (result.isConfirmed) {
-                    const response = await fetch(`${WEB_APP_URL}?action=cancelBooking&id=${bookingId}`, {
+                    const response = await fetch(`${WEB_APP_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, {
                         method: 'POST'
                     });
                     if (!response.ok) throw new Error('Network response was not ok');

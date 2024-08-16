@@ -149,7 +149,7 @@
             <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                 <div class="text-center font-semibold mb-6">
                     <div class="flex justify-center space-x-2">
-                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-indigo-700 rounded-md px-2 py-2">
+                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-indigo-700 rounded-md px-2 py-4">
                             <option value="0">มกราคม</option>
                             <option value="1">กุมภาพันธ์</option>
                             <option value="2">มีนาคม</option>
@@ -163,7 +163,7 @@
                             <option value="10">พฤศจิกายน</option>
                             <option value="11">ธันวาคม</option>
                         </select>
-                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-indigo-700 rounded-md px-2 py-2"></select>
+                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-indigo-700 rounded-md px-2 py-4"></select>
                     </div>
                 </div>
                 <div class="overflow-x-auto mb-4 no-scrollbar">
@@ -419,7 +419,7 @@ function updateAvailability(availability) {
                 <p>สถานที่: ${form.locationservice.value}</p>
                 <p>ชื่อ: ${form.name.value}</p>
                 <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
-                <p>เพิ่มเติม: ${form.note.value}</p>
+                <p>อีเมล: ${form.note.value}</p>
                 <p>วันที่: ${selectedDate}</p>
                 <p>เวลา: ${timeInput.value}</p>
             `, 'confirm');
@@ -489,7 +489,7 @@ function showPopup(title, content, type) {
         popupContent.innerHTML += `
             <div class="flex justify-between my-4">
                 <button id="cancelButton" class="px-2 py-4 bg-gray-300 text-gray-700 rounded-md">ยกเลิก</button>
-                <button id="confirmButton" class="px-2 py-4 bg-indigo-700 text-white rounded-md mr-2">ยืนยัน</button>
+                <button id="confirmButton" class="px-2 py-4 bg-indigo-700 text-white rounded-md mr-2">ยืนยันนัดหมาย</button>
             </div>
         `;
         document.getElementById('confirmButton').addEventListener('click', () => {

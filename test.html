@@ -8,14 +8,15 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex">
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
   <!-- Main Content Area -->
-  <main class="flex-1 bg-gray-100 p-8">
+  <main class="flex-1 bg-gray-100 p-4 sm:p-8">
     <!-- Filter Section -->
-    <div class="flex space-x-4 mb-4">
-      <div>
-        <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
-        <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-4">
+      <div class="flex-1">
+        <label for="statusFilter" class="block text-xs sm:text-sm font-medium text-gray-700">ค้นหาตามสถานะ</label>
+        <select id="statusFilter" class="mt-1 block w-full p-2 text-xs sm:text-sm border border-gray-300 rounded-md">
           <option value="">All</option>
           <option value="รอการยืนยัน">รอการยืนยัน</option>
           <option value="ยืนยันแล้ว">ยืนยันแล้ว</option>
@@ -23,34 +24,16 @@
           <option value="เสร็จสิ้น">เสร็จสิ้น</option>
         </select>
       </div>
-      <div>
-        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
-        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
+      <div class="flex-1">
+        <label for="locationFilter" class="block text-xs sm:text-sm font-medium text-gray-700">กรองตามสถานที่</label>
+        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 text-xs sm:text-sm border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
       </div>
-      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-red-400 text-white rounded-md hover:bg-red-200">คัดกรองข้อมูล</button>
+      <button id="applyFiltersButton" class="mt-2 sm:mt-6 py-2 px-4 text-xs sm:text-sm bg-red-400 text-white rounded-md hover:bg-red-200">คัดกรองข้อมูล</button>
     </div>
 
-    <!-- Table Section -->
-    <div id="filteredData" class="overflow-x-auto">
-      <table class="min-w-full text-xs bg-white">
-        <thead>
-          <tr>
-            <th class="hidden">Line ID</th> <!-- Hide the column header -->
-            <th class="px-4 py-2 border">ชื่อ</th>
-            <th class="px-4 py-2 border">บริการ</th>
-            <th class="px-4 py-2 border">สถานที่</th>
-            <th class="px-4 py-2 border">เบอร์โทร</th>
-            <th class="px-4 py-2 border">หมายเหตุ</th>
-            <th class="px-4 py-2 border">วันที่</th>
-            <th class="px-4 py-2 border">เวลา</th>
-            <th class="px-4 py-2 border">สถานะ</th>
-            <th class="px-4 py-2 border">Actions</th> <!-- Actions column -->
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <!-- ข้อมูลจะถูกแสดงที่นี่ -->
-        </tbody>
-      </table>
+    <!-- Cards Section -->
+    <div id="filteredData" class="space-y-4">
+      <!-- Cards will be inserted here -->
     </div>
   </main>
 
@@ -59,84 +42,86 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-     // Function to fetch and populate the table
-  function fetchAndPopulateTable() {
-    fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-      .then(response => response.json())
-      .then(details => {
-        const tableBody = document.getElementById('tableBody');
-        tableBody.innerHTML = ''; // Clear old data
+      // Function to fetch and populate the cards
+      function fetchAndPopulateCards() {
+        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+          .then(response => response.json())
+          .then(details => {
+            const filteredData = document.getElementById('filteredData');
+            filteredData.innerHTML = ''; // Clear old data
 
-        details.forEach(detail => {
-          // Assign keyid to detail.id
-          detail.id = detail.idKey;
+            details.forEach(detail => {
+              // Assign keyid to detail.id
+              detail.id = detail.idKey;
 
-          // Determine button states based on status
-          let disableConfirm = false;
-          let disableComplete = false;
-          let disableCancel = false;
-          let disableReminder = false;
+              // Determine button states based on status
+              let disableConfirm = false;
+              let disableComplete = false;
+              let disableCancel = false;
+              let disableReminder = false;
 
-          switch (detail.status) {
-            case 'รอการยืนยัน':
-              disableComplete = true;
-              break;
-            case 'ยืนยันแล้ว':
-              disableConfirm = true;
-              disableReminder = true;
-              break;
-            case 'ยกเลิก':
-              disableCancel = true;
-              disableConfirm = true;
-              disableComplete = true;
-              disableReminder = true;
-              break;
-            case 'เสร็จสิ้น':
-              disableConfirm = true;
-              disableCancel = true;
-              disableComplete = true;
-              disableReminder = true;
-              break;
-          }
+              switch (detail.status) {
+                case 'รอการยืนยัน':
+                  disableComplete = true;
+                  break;
+                case 'ยืนยันแล้ว':
+                  disableConfirm = true;
+                  disableReminder = true;
+                  break;
+                case 'ยกเลิก':
+                  disableCancel = true;
+                  disableConfirm = true;
+                  disableComplete = true;
+                  disableReminder = true;
+                  break;
+                case 'เสร็จสิ้น':
+                  disableConfirm = true;
+                  disableCancel = true;
+                  disableComplete = true;
+                  disableReminder = true;
+                  break;
+              }
 
-          // Create a new table row
-          const row = document.createElement('tr');
+              // Create a new card
+              const card = document.createElement('div');
+              card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'space-y-2');
 
-          // Populate the row with data and disabled buttons as necessary
-          row.innerHTML = `
-            <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
-            <td class="px-4 py-2 border">${detail.name}</td>
-            <td class="px-4 py-2 border">${detail.service}</td>
-            <td class="px-4 py-2 border">${detail.locationservice}</td>
-            <td class="px-4 py-2 border">${detail.phonenumber}</td>
-            <td class="px-4 py-2 border">${detail.note}</td>
-            <td class="px-4 py-2 border">${detail.date}</td>
-            <td class="px-4 py-2 border">${detail.time}</td>
-            <td class="px-4 py-2 border">${detail.status}</td>
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
-            </td>
-          `;
+              // Populate the card with data
+              card.innerHTML = `
+                <div class="flex justify-between">
+                  <h2 class="text-sm sm:text-base font-semibold">${detail.name}</h2>
+                  <span class="text-xs sm:text-sm text-gray-500">${detail.status}</span>
+                </div>
+                <p class="text-xs sm:text-sm"><strong>บริการ:</strong> ${detail.service}</p>
+                <p class="text-xs sm:text-sm"><strong>สถานที่:</strong> ${detail.locationservice}</p>
+                <p class="text-xs sm:text-sm"><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
+                <p class="text-xs sm:text-sm"><strong>หมายเหตุ:</strong> ${detail.note}</p>
+                <p class="text-xs sm:text-sm"><strong>วันที่:</strong> ${detail.date}</p>
+                <p class="text-xs sm:text-sm"><strong>เวลา:</strong> ${detail.time}</p>
+                <div class="flex space-x-2">
+                  <button class="confirm-btn bg-green-500 text-white text-xs sm:text-sm px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
+                  <button class="cancel-btn bg-red-500 text-white text-xs sm:text-sm px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
+                  <button class="complete-btn bg-blue-500 text-white text-xs sm:text-sm px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
+                  <button class="reminder-btn bg-yellow-500 text-white text-xs sm:text-sm px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
+                </div>
+              `;
 
-          // Append the new row to the table body
-          tableBody.appendChild(row);
-        });
+              // Append the new card to the filteredData
+              filteredData.appendChild(card);
+            });
 
-        // Re-attach event listeners for the new buttons
-        attachEventListeners();
-      })
-      .catch(error => {
-        console.error('Error fetching user details:', error);
-      });
-  }
+            // Re-attach event listeners for the new buttons
+            attachEventListeners();
+          })
+          .catch(error => {
+            console.error('Error fetching user details:', error);
+          });
+      }
 
-  // Initial table population
-  fetchAndPopulateTable();
+      // Initial card population
+      fetchAndPopulateCards();
 
-  // Attach event listeners to the action buttons
+      // Attach event listeners to the action buttons
       function attachEventListeners() {
         document.querySelectorAll('.confirm-btn').forEach(button => {
           button.addEventListener('click', function () {
@@ -167,7 +152,7 @@
         });
       }
 
-      // Action functions with table update
+      // Action functions with card update
 
       function confirmBooking(id) {
         Swal.fire({
@@ -186,7 +171,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();  // Update the cards
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -214,7 +199,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();  // Update the cards
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -242,7 +227,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();  // Update the cards
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -270,7 +255,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();  // Update the cards
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -281,51 +266,6 @@
         });
       }
 
-        // Get additional data from modal inputs
-        const service = document.getElementById('serviceInput').value;
-        const location = document.getElementById('locationInput').value;
-        const date = document.getElementById('dateInput').value;
-        const time = document.getElementById('timeInput').value;
-        const status = document.getElementById('statusInput').value;
-
-        // Insert new row into the table
-        const newRow = `
-          <tr>
-            <td class="hidden">${userId}</td> <!-- Hidden userlineid -->
-            <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
-            <td class="px-4 py-2 border">${service}</td> <!-- service -->
-            <td class="px-4 py-2 border">${location}</td> <!-- location -->
-            <td class="px-4 py-2 border">${keynumberId}</td> <!-- keynumberId -->
-            <td class="px-4 py-2 border">${keynumber2Id}</td> <!-- keynumber2Id -->
-            <td class="px-4 py-2 border">${date}</td> <!-- date -->
-            <td class="px-4 py-2 border">${time}</td> <!-- time -->
-            <td class="px-4 py-2 border">${status}</td> <!-- status -->
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
-            </td>
-          </tr>
-        `;
-        document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
-
-        // Hide the modal after submission
-        document.getElementById('modal').classList.add('hidden');
-
-        // Save the data by calling the Google Script makeBooking function
-        const saveUrl = `${DETAILS_SCRIPT_URL}?action=makeBooking&userlineid=${encodeURIComponent(userId)}&name=${encodeURIComponent(nameId)}&service=${encodeURIComponent(service)}&locationservice=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&phonenumber=${encodeURIComponent(keynumberId)}&note=${encodeURIComponent(keynumber2Id)}`;
-        fetch(saveUrl, { method: 'POST' })
-          .then(response => response.text())
-          .then(data => {
-            console.log('Booking saved successfully:', data);
-            fetchAndPopulateTable();  // Update the table
-          })
-          .catch(error => {
-            console.error('Error saving booking:', error);
-          });
-      });
-
       function showLoadingSpinner(show) {
         const spinner = document.getElementById('loadingSpinner');
         if (show) {
@@ -335,40 +275,27 @@
         }
       }
 
-      function filterTableByUserlineId(userid) {
-        const tableRows = document.querySelectorAll('#tableBody tr');
-        tableRows.forEach(row => {
-          const lineIdCell = row.querySelector('td:nth-child(1)');
-          if (lineIdCell && lineIdCell.textContent !== userid) {
-            row.classList.add('hidden');
-          } else {
-            row.classList.remove('hidden');
-          }
-        });
-      }
-
-      // Apply filters on the table based on status and location
+      // Apply filters on the cards based on status and location
       document.getElementById('applyFiltersButton').addEventListener('click', function () {
         const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
         const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
 
-        const tableRows = document.querySelectorAll('#tableBody tr');
-        tableRows.forEach(row => {
-          const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
-          const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+        const cards = document.querySelectorAll('#filteredData > div');
+        cards.forEach(card => {
+          const statusText = card.querySelector('span').textContent.toLowerCase();
+          const locationText = card.querySelector('p:nth-child(4)').textContent.toLowerCase();
 
-          const matchesStatus = statusFilter === '' || statusCell === statusFilter;
-          const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
+          const matchesStatus = statusFilter === '' || statusText === statusFilter;
+          const matchesLocation = locationFilter === '' || locationText.includes(locationFilter);
 
           if (matchesStatus && matchesLocation) {
-            row.classList.remove('hidden');
+            card.classList.remove('hidden');
           } else {
-            row.classList.add('hidden');
+            card.classList.add('hidden');
           }
         });
       });
-
-   ;
+    });
   </script>
 
 </body>

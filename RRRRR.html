@@ -9,13 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 <body>
-<div class="bg-gradient-to-br from-gray-100 to-blue-100 h-screen">
+<div class="bg-indigo-800 h-screen">
     <div class="max-w-md mx-auto px-4 py-4">
         <form>
-            <div class="bg-white relative p-10 shadow rounded-lg w-6/6 mx-auto">    
+            <div class="relative p-5 mx-auto">    
                 <div class="mb-5 text-center">
-                    <div class="mx-auto w-32 h-32 mb-2 border rounded-md relative bg-gray-100 mb-4 shadow-inset">
-                        <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Default Image" id="preview" class="h-32 w-32 object-cover rounded-2xl">
+                    <div class="mx-auto w-32 h-32 mb-2 border rounded-md  relative bg-gray-100 mb-4 shadow-inset">
+                        <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Default Image" id="preview" class="h-32 w-32 object-cover rounded-md">
                     </div>
                     <label for="file" class="cursor-pointer inline-flex justify-between items-center focus:outline-none border py-2 px-4 rounded-lg shadow-sm text-left text-gray-600 bg-white hover:bg-gray-100 font-medium">
                         <img src="https://img.icons8.com/?size=100&id=748&format=png&color=000000" class="w-6 h-6 mx-1">
@@ -26,30 +26,30 @@
                 </div>
               
                 <div class="flex items-center space-x-2 mb-4">
-                    <span class="border border-gray-300 rounded-md p-2">
+                    <span class="bg-white border border-white rounded-md p-2">
                         <img src="https://img.icons8.com/?size=100&id=82753&format=png&color=000000" class="w-6 h-6">
                     </span>
-                    <input type="text" class="input-field w-full border bg-gray-200 to-gray-100 border-gray-300 p-2 text-gray-500 rounded-md" id="userlineId" placeholder="lineId" name="userlineId" >
+                    <input type="text" class="input-field w-full border bg-indigo-100 border-white p-2 text-gray-500 rounded-md" id="userlineId" placeholder="lineId" name="userlineId" >
                 </div>
                 <div class="flex items-center space-x-2 mb-4">
-                    <span class="border border-gray-300 rounded-md p-2">
+                    <span class="bg-white border border-white rounded-md p-2">
                         <img src="https://img.icons8.com/?size=100&id=xXjlE05o3dcg&format=png&color=000000" class="w-6 h-6">
                     </span>
-                    <input type="text" class="input-field w-full border border-gray-300 p-2 text-md rounded-md" id="nameId" placeholder="ชื่อ-สกุล" name="nameId" required>
+                    <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="nameId" placeholder="ชื่อ-สกุล" name="nameId" required>
                 </div>
                 <div class="flex items-center space-x-2 mb-4">
-                    <span class="border border-gray-300 rounded-md p-2">
-                        <img src="https://img.icons8.com/?size=100&id=39594&format=png&color=000000" class="w-6 h-6">
+                    <span class="bg-white border border-white rounded-md p-2">
+                        <img src="https://img.icons8.com/?size=100&id=9659&format=png&color=000000" class="w-6 h-6">
                     </span>
-                    <input type="text" class="input-field w-full border border-gray-300 p-2 text-md rounded-md" id="keynumberId" placeholder="เบอร์ติดต่อ" name="keynumberId" required>
+                    <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="keynumberId" placeholder="เบอร์ติดต่อ" name="keynumberId" required>
                 </div>
                 <div class="flex items-center space-x-2 mb-6">
-                    <span class="border border-gray-300 rounded-md p-2">
-                        <img src="https://img.icons8.com/?size=100&id=6LvtpL48Lmmx&format=png&color=000000" class="w-6 h-6">
+                    <span class="bg-white border border-white rounded-md p-2">
+                        <img src="https://img.icons8.com/?size=100&id=mtfWz20b5AxB&format=png&color=000000" class="w-6 h-6">
                     </span>
-                    <input type="text" class="input-field w-full border border-gray-300 p-2 text-md rounded-md" id="keynumber2Id" placeholder="ข้อความส่วนตัว" name="keynumber2Id" required>
+                    <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="keynumber2Id" placeholder="อีเมล" name="keynumber2Id" required>
                 </div>
-                <button type="button" id="submitBtn" class="bg-gradient-to-b from-gray-800 to-gray-900 text-center w-full text-white py-4 px-4 rounded-md hover:bg-blue-700">บันทึกข้อมูล</button>
+                <button type="button" id="submitBtn" class="bg-indigo-500  text-center w-full text-white py-4 px-4 rounded-md hover:bg-blue-700">บันทึกข้อมูล</button>
             </div>
         </form>
     </div>
@@ -67,7 +67,7 @@ const LIFF_ID = '2005629952-NjKA9QLn'; // LIFF ID
 
 // ฟังก์ชันเริ่มต้น LIFF SDK
 window.onload = function () {
-    initializeLiff();
+  //  initializeLiff();
 };
 
 // ฟังก์ชันสำหรับเริ่มต้น LIFF SDK

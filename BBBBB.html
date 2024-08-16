@@ -488,8 +488,8 @@ function showPopup(title, content, type) {
     if (type === 'confirm') {
         popupContent.innerHTML += `
             <div class="flex justify-between my-4">
-                <button id="cancelButton" class="px-4 py-4 bg-gray-300 text-gray-700 rounded-md">ยกเลิก</button>
-                <button id="confirmButton" class="px-4 py-4 bg-blue-900 text-white rounded-md mr-2">ยืนยันการนัดหมาย</button>
+                <button id="cancelButton" class="px-2 py-4 bg-gray-300 text-gray-700 rounded-md">ยกเลิก</button>
+                <button id="confirmButton" class="px-2 py-4 bg-indigo-700 text-white rounded-md mr-2">ยืนยัน</button>
             </div>
         `;
         document.getElementById('confirmButton').addEventListener('click', () => {

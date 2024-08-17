@@ -174,14 +174,18 @@
         card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
 
         card.innerHTML = `
+          <div class="flex justify-between p-2">
           <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
           <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
+          </div>
+          <div class="flex justify-between p-2">
           <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
           <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
+          </div>
           <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
           <div class="mt-4 flex flex-row justify-between">
-            <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยันนัดหมาย</button>
-            <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+            <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded-md ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยันนัดหมาย</button>
+            <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded-md ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
           </div>
         `;
 

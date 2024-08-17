@@ -259,7 +259,7 @@
         async function getUserProfile() {
             try {
                 const profile = await liff.getProfile();
-                document.getElementById('userId').value = profile.userId;
+                document.getElementById('userlineid').value = profile.userId;
                 document.getElementById('displayName').value = profile.displayName;
                 fetchData(profile.userId);
             } catch (error) {

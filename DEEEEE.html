@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking Dashboard</title>
+  <title>history admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
@@ -25,10 +25,10 @@
   </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-indigo-100 min-h-screen flex flex-col">
 
   <!-- Main Content Area -->
-  <main class="flex-1 bg-gray-100 p-4 md:p-8">
+  <main class="max-w-md m-auto">
     <!-- Filter Section -->
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
       <div>
@@ -42,8 +42,8 @@
         </select>
       </div>
       <div>
-        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
-        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
+        <label for="serviceFilter" class="block text-xs font-medium text-gray-700">กรองตามบริการ</label>
+        <input type="text" id="serviceFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์บริการ">
       </div>
       <div>
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
@@ -52,11 +52,11 @@
           <option value="oldest">วันที่เก่าสุด</option>
         </select>
       </div>
-      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">คัดกรองข้อมูล</button>
+      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">กรองข้อมูล</button>
     </div>
 
     <!-- Card Display Section -->
-    <div id="filteredData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div id="filteredData" class="grid grid-cols-1">
       <!-- Cards will be inserted here -->
     </div>
 
@@ -100,12 +100,12 @@
 
             // Apply filters
             const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-            const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+            const serviceFilter = document.getElementById('serviceFilter').value.toLowerCase();
 
             let filteredDetails = details.filter(detail => {
               const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
-              const matchesLocation = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
-              return matchesStatus && matchesLocation;
+              const matchesService = serviceFilter === '' || detail.service.toLowerCase().includes(serviceFilter);
+              return matchesStatus && matchesService;
             });
 
             totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
@@ -127,7 +127,7 @@
 
         detailsToDisplay.forEach(detail => {
           detail.id = detail.idKey;
-          
+
           let disableConfirm = false;
           let disableCancel = false;
           let disableComplete = false;
@@ -151,22 +151,28 @@
           }
 
           const card = document.createElement('div');
-          card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
+          card.classList.add('w-full','bg-white','p-2', 'mb-2','rounded-lg', 'shadow-md');
 
           card.innerHTML = `
-            <h3 class="text-lg font-semibold mb-2">${detail.name}</h3>
-            <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
-            <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
-            <p class="text-sm text-gray-700"><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
-            <p class="text-sm text-gray-700"><strong>อีเมล:</strong> ${detail.note}</p>
-            <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
-            <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
-            <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
-            <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-              <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
+          <h3 class="text-lg font-semibold p-2 mb-2">${detail.name}</h3>
+          <div class="flex justify-between p-2">
+          <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
+          <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
+          
+          </div>
+          <div class="flex justify-between p-2">
+          <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
+          <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
+          </div>
+          <div class="flex justify-between p-2">
+          <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
+          </div>
+            <div class="mt-4 flex justify-between text-sm">
+              <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
+              <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+  
+              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
             </div>
           `;
 
@@ -259,13 +265,13 @@
 
       function confirmBooking(id) {
         Swal.fire({
-          title: 'Are you sure?',
-          text: "You want to confirm this booking!",
+          title: 'คุณแน่ใจหรือไม่?',
+          text: "คุณต้องการยืนยันการนัดหมายนี้หรือไม่!",
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
           cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, confirm it!'
+          confirmButtonText: 'ใช่, ยืนยันเลย!'
         }).then((result) => {
           if (result.isConfirmed) {
             showLoadingSpinner(true);
@@ -273,12 +279,12 @@
               .then(response => response.text())
               .then(data => {
                 showLoadingSpinner(false);
-                Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
+                Swal.fire('ยืนยันแล้ว!', 'การจองได้รับการยืนยันแล้ว.', 'success');
                 fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error confirming the booking.', 'error');
+                Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยืนยันการนัดหมาย.', 'error');
                 console.error('Error confirming booking:', error);
               });
           }
@@ -287,13 +293,13 @@
 
       function cancelBooking(id) {
         Swal.fire({
-          title: 'Are you sure?',
-          text: "You want to cancel this booking!",
+          title: 'คุณแน่ใจหรือไม่?',
+          text: "คุณต้องการยกเลิกการนัดหมายนี้หรือไม่!",
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
           cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, cancel it!'
+          confirmButtonText: 'ใช่, ยกเลิกเลย!'
         }).then((result) => {
           if (result.isConfirmed) {
             showLoadingSpinner(true);
@@ -301,12 +307,12 @@
               .then(response => response.text())
               .then(data => {
                 showLoadingSpinner(false);
-                Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
+                Swal.fire('ยกเลิกแล้ว!', 'การนัดหมายถูกยกเลิกแล้ว.', 'success');
                 fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error canceling the booking.', 'error');
+                Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยกเลิกการนัดหมาย.', 'error');
                 console.error('Error canceling booking:', error);
               });
           }
@@ -315,13 +321,13 @@
 
       function completeBooking(id) {
         Swal.fire({
-          title: 'Are you sure?',
-          text: "You want to mark this booking as completed!",
+          title: 'คุณแน่ใจหรือไม่?',
+          text: "คุณต้องการ เสร็จสิ้น การนัดหมายนี้หรือไม่!",
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
           cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, complete it!'
+          confirmButtonText: 'ใช่, การนัดหมายเสร็จสิ้น!'
         }).then((result) => {
           if (result.isConfirmed) {
             showLoadingSpinner(true);
@@ -329,12 +335,12 @@
               .then(response => response.text())
               .then(data => {
                 showLoadingSpinner(false);
-                Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
+                Swal.fire('ยืนยันแล้ว!', 'การนัดหมายได้เสร็จสิ้นแล้ว.', 'success');
                 fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error completing the booking.', 'error');
+                Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการ การนัดหมายเสร็จสิ้น .', 'error');
                 console.error('Error completing booking:', error);
               });
           }
@@ -343,13 +349,14 @@
 
       function sendReminder(id) {
         Swal.fire({
-          title: 'Send reminder?',
-          text: "A reminder will be sent to the user.",
+          title: 'ส่งการเตือนความจำ?',
+          text: "การเตือนความจำจะถูกส่งไปยังผู้ใช้.",
           icon: 'info',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
           cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, send it!'
+          confirmButtonText: 'ใช่, ส่งเลย!',
+          cancelButtonText: 'ยกเลิก'
         }).then((result) => {
           if (result.isConfirmed) {
             showLoadingSpinner(true);
@@ -357,12 +364,12 @@
               .then(response => response.text())
               .then(data => {
                 showLoadingSpinner(false);
-                Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
+                Swal.fire('ส่งการเตือนสำเร็จ!', 'การเตือนความจำถูกส่งเรียบร้อยแล้ว.', 'success');
                 fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
-                Swal.fire('Error!', 'There was an error sending the reminder.', 'error');
+                Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการส่งการเตือนความจำ.', 'error');
                 console.error('Error sending reminder:', error);
               });
           }

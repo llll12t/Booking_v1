@@ -207,23 +207,37 @@
         const LIFF_ID = '2005629952-LVg8Kpvz';
 
         function selectOption(option) {
-            if (option === 1) {
-                WEB_APP_URL = WEB_APP_URL_1;
-            } else if (option === 2) {
-                WEB_APP_URL = WEB_APP_URL_2;
-            }
-            document.getElementById('step0').style.display = 'none';
-            document.getElementById('step1').style.display = 'block';
-            fetchDropdownData(); // Fetch the data after selecting the option
+        if (option === 1) {
+            WEB_APP_URL = WEB_APP_URL_1;
+        } else if (option === 2) {
+            WEB_APP_URL = WEB_APP_URL_2;
         }
+        document.getElementById('step0').style.display = 'none';
+        document.getElementById('step1').style.display = 'block';
+        fetchDropdownData(); // Fetch the data after selecting the option
 
-        window.onload = function () {
+        // Fetch availability data for the current date
+        const currentDate = new Date();
+        selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    }
+
+            window.onload = function () {
             document.getElementById('step0').style.display = 'block';
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'none';
-            initializeLiff();
+             initializeLiff(); // LIFF initialization (currently commented out)
         };
 
+        // Function to load calendar and dropdown data (only when you want to)
+        async function loadCalendarData() {
+            showLoading(true);
+            
+            const currentDate = new Date();
+            populateYearSelect(currentDate.getFullYear());
+            await Promise.all([fetchDropdownData(), updateCalendar(currentDate)]);
+            
+            showLoading(false);
+        }
         async function initializeLiff() {
             try {
                 await liff.init({ liffId: LIFF_ID });

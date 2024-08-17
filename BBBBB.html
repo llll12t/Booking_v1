@@ -111,43 +111,45 @@
             </div>
 
             <!-- Step 1: Booking Form -->
-            <div id="step1" class="grid gap-5 max-w-sm mx-auto" style="display:none;">
+            <div id="step1" class="max-w-sm mx-auto" style="display:none;">
                 <div>
                     <input type="text" id="userlineid" name="userlineid" class="w-full p-2 border border-blue-900 rounded-md hidden" required>
                 </div>
-                <div class="flex">
-                    <span class="bg-white flex items-center border rounded-l p-2 w-24">
+                <div class="flex mb-4">
+                    <span class="bg-white flex items-center border rounded-lg p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> บริการ </span>
                     </span>
-                    <select id="service" name="service" class="rounded-r bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
+                    <select id="service" name="service" class="rounded-lg bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
                 </div>
-                <div class="flex">
-                    <span class="bg-white flex items-center border rounded-l p-2 w-24">
+                <div class="flex mb-4">
+                    <span class="bg-white flex items-center border rounded-lg p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> สถานที่ </span>
                     </span>
-                    <select id="locationservice" name="locationservice" class="rounded-r bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
+                    <select id="locationservice" name="locationservice" class="rounded-lg bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
-                <div class="bg-indigo-200 px-4 py-6 rounded-lg">
+                <div class="bg-indigo-100 px-4 py-4 rounded-lg">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
                         <div id="loadingOverlay">
                             <div class="text-center text-white">ค้นหารายชื่อ..</div>
                         </div>
+                        <div class="pb-4">ฟอร์มข้อมูล</div>
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
-                                <div class="flex border border-blue-900 mb-4 rounded">
-                                    <span class="flex items-center bg-indigo-700 rounded-l p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
-                                    <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-r">
+                               
+                                <div class="flex mb-6 rounded-md">
+                                    <span class="flex items-center bg-indigo-700 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
+                                    <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
-                                <div class="flex border border-blue-900 mb-4 rounded">
-                                    <span class="flex items-center bg-indigo-700 rounded-l p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
-                                    <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-r">
+                                <div class="flex  mb-6 rounded-md">
+                                    <span class="flex items-center bg-indigo-700 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                    <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
-                                <div class="flex border border-blue-900 rounded">
-                                    <span class="flex items-center bg-indigo-700 rounded-l p-2 w-32"><span class="text-white text-sm">อีเมล</span></span>
-                                    <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-r">
+                                <div class="flex rounded-md">
+                                    <span class="flex items-center bg-indigo-700 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">อีเมล</span></span>
+                                    <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
                                 <input type="hidden" id="userId" name="userId">
                                 <input type="hidden" id="userlineid" name="userlineid">
@@ -206,36 +208,44 @@
         const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
         const LIFF_ID = '2005629952-LVg8Kpvz';
 
-        function selectOption(option) {
-        if (option === 1) {
-            WEB_APP_URL = WEB_APP_URL_1;
-        } else if (option === 2) {
-            WEB_APP_URL = WEB_APP_URL_2;
-        }
-        document.getElementById('step0').style.display = 'none';
-        document.getElementById('step1').style.display = 'block';
-        fetchDropdownData(); // Fetch the data after selecting the option
+        async function selectOption(option) {
+            if (option === 1) {
+                WEB_APP_URL = WEB_APP_URL_1;
+            } else if (option === 2) {
+                WEB_APP_URL = WEB_APP_URL_2;
+            }
 
-        // Fetch availability data for the current date
-        const currentDate = new Date();
-        selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    }
+            document.getElementById('step0').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+            showLoading(true);
+            // Fetch the data after selecting the option
+            await fetchDropdownData();
+
+            // Fetch availability data for the current date
+            const currentDate = new Date();
+            selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+            populateYearSelect(currentDate.getFullYear());
+            monthSelect.value = currentDate.getMonth();
+            yearSelect.value = currentDate.getFullYear();
+
+            await updateCalendar(currentDate);
+             showLoading(false);
+        }
+
 
             window.onload = function () {
             document.getElementById('step0').style.display = 'block';
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'none';
-             initializeLiff(); // LIFF initialization (currently commented out)
+            initializeLiff(); // LIFF initialization (currently commented out)
         };
 
         // Function to load calendar and dropdown data (only when you want to)
         async function loadCalendarData() {
             showLoading(true);
-            
             const currentDate = new Date();
             populateYearSelect(currentDate.getFullYear());
             await Promise.all([fetchDropdownData(), updateCalendar(currentDate)]);
-            
             showLoading(false);
         }
         async function initializeLiff() {
@@ -325,15 +335,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            showLoading(true);
-            const currentDate = new Date();
-            populateYearSelect(currentDate.getFullYear());
+            // showLoading(true);
+            // const currentDate = new Date();
+            // populateYearSelect(currentDate.getFullYear());
 
-            monthSelect.value = currentDate.getMonth();
-            yearSelect.value = currentDate.getFullYear();
+            // monthSelect.value = currentDate.getMonth();
+            // yearSelect.value = currentDate.getFullYear();
 
-            await Promise.all([fetchDropdownData(), updateCalendar(currentDate)]);
-            showLoading(false);
+            // await Promise.all([fetchDropdownData(), updateCalendar(currentDate)]);
+            // showLoading(false);
         });
 
         async function fetchDropdownData() {

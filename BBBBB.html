@@ -102,11 +102,11 @@
             <!-- Step 0: Initial Selection -->
             <div id="step0" class="grid gap-5 max-w-sm mx-auto">
                 <div class="text-center font-semibold mb-6">
-                    <h2 class="text-xl">เลือกตัวเลือก</h2>
+                    <h2 class="text-xl">เลือกบริการ</h2>
                 </div>
-                <div class="space-y-4">
-                    <button type="button" onclick="selectOption(1)" class="w-full bg-indigo-700 text-white py-3 rounded-lg">ตัวเลือก 1</button>
-                    <button type="button" onclick="selectOption(2)" class="w-full bg-green-700 text-white py-3 rounded-lg">ตัวเลือก 2</button>
+                <div class="flex justify-between">
+                    <button type="button" onclick="selectOption(1)" class="w-full h-48 mx-2 bg-indigo-700 text-white py-3 rounded-lg">ทรีทเมนท์</button>
+                    <button type="button" onclick="selectOption(2)" class="w-full h-48 mx-2 bg-green-700 text-white py-3 rounded-lg">พบแพทย์</button>
                 </div>
             </div>
 
@@ -328,18 +328,6 @@
                 }
             }
         }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            // showLoading(true);
-            // const currentDate = new Date();
-            // populateYearSelect(currentDate.getFullYear());
-
-            // monthSelect.value = currentDate.getMonth();
-            // yearSelect.value = currentDate.getFullYear();
-
-            // await Promise.all([fetchDropdownData(), updateCalendar(currentDate)]);
-            // showLoading(false);
-        });
 
         async function fetchDropdownData() {
             try {

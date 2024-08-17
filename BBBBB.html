@@ -259,7 +259,7 @@
         async function getUserProfile() {
             try {
                 const profile = await liff.getProfile();
-                document.getElementById('userlineid').value = profile.userId;
+                document.getElementById('userId').value = profile.userId;
                 document.getElementById('displayName').value = profile.displayName;
                 fetchData(profile.userId);
             } catch (error) {
@@ -290,7 +290,7 @@
         }
 
         function displayData(row) {
-            document.getElementById('userlineid').value = row[1] || '';
+            document.getElementById('userId').value = row[1] || '';
             document.getElementById('name').value = row[2] || '';
             document.getElementById('phonenumber').value = row[3] || '';
             document.getElementById('note').value = row[4] || '';

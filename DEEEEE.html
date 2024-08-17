@@ -25,75 +25,12 @@
   </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex">
-
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white text-purple-700 shadow-lg p-6">
-    <h2 class="text-md font-bold mb-4">รายชื่อสมาชิก</h2>
-    <form id="fetchForm" class="space-y-4">
-      <div>
-        <label for="nameId" class="block text-xs font-medium text-gray-700">ชื่อ</label>
-        <input type="text" id="nameId" name="nameId" list="namesList" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-        <datalist id="namesList">
-          <!-- Dynamically filled by JavaScript -->
-        </datalist>
-      </div>
-      <div>
-        <label for="keynumberId" class="block text-xs font-medium text-gray-700">เบอร์โทร</label>
-        <input type="text" id="keynumberId" name="keynumberId" list="keynumbersList" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-        <datalist id="keynumbersList">
-          <!-- Dynamically filled by JavaScript -->
-        </datalist>
-      </div>
-      <button type="submit" class="w-full py-2 px-4 bg-red-400 text-white font-semibold rounded-md hover:bg-red-200">ค้นหา</button>
-    </form>
-
-    <h1 class="text-sm font-bold mt-8 mb-4">รายละเอียด</h1>
-    <div id="result" class="hidden">
-      <div class="space-y-4">
-        <!-- Add Button to Insert Data into Table -->
-        <button id="addDataButton" class="w-full py-2 px-4 bg-purple-400 text-white font-semibold rounded-md hover:bg-purple-500">เพิ่มการนัดหมาย</button>
-
-        <!-- Profile Picture -->
-        <div class="flex justify-center">
-          <img id="fileLinkInput" class="border border-gray-300 rounded-md max-w-xs w-24 h-24" alt="Profile Image">
-        </div>
-        <!-- Profile Information -->
-        <div>
-          <input type="text" id="userIdInput" class="mt-1 block w-full text-xs p-2 border bg-gray-300 rounded-md" readonly>
-        </div>
-        <div>
-          <label for="keyIdInput" class="block text-xs font-medium text-gray-700">Key ID:</label>
-          <input type="text" id="keyIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
-        </div>
-        <div>
-          <label for="nameIdInput" class="block text-xs font-medium text-gray-700">ชื่อ</label>
-          <input type="text" id="nameIdInput" class="mt-1 text-xs block w-full p-2 border border-gray-300 rounded-md" readonly>
-        </div>
-        <div>
-          <label for="keynumberIdInput" class="block text-xs font-medium text-gray-700">เบอร์ติดต่อ</label>
-          <input type="text" id="keynumberIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
-        </div>
-        <div>
-          <label for="keynumber2IdInput" class="block text-xs font-medium text-gray-700">อีเมล</label>
-          <input type="text" id="keynumber2IdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
-        </div>
-        <div>
-          <label for="timestampInput" class="block text-xs font-medium text-gray-700">Timestamp:</label>
-          <input type="text" id="timestampInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
-        </div>
-
-      </div>
-    </div>
-    <div id="noResult" class="hidden text-gray-700 text-center mt-10">
-      ไม่มีข้อมูลในระบบ
-    </div>
-  </aside>
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
   <!-- Main Content Area -->
-  <main class="flex-1 bg-gray-100 p-8">
+  <main class="flex-1 bg-gray-100 p-4 md:p-8">
     <!-- Filter Section -->
-    <div class="flex space-x-4 mb-4">
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
       <div>
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
         <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
@@ -108,65 +45,26 @@
         <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
         <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
       </div>
-      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-red-400 text-white rounded-md hover:bg-red-200">คัดกรองข้อมูล</button>
+      <div>
+        <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
+        <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+          <option value="latest">วันที่ล่าสุด</option>
+          <option value="oldest">วันที่เก่าสุด</option>
+        </select>
+      </div>
+      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">คัดกรองข้อมูล</button>
     </div>
 
-    <!-- Table Section -->
-    <div id="filteredData" class="overflow-x-auto">
-      <table class="min-w-full text-xs bg-white">
-        <thead>
-          <tr>
-            <th class="hidden">Line ID</th> <!-- Hide the column header -->
-            <th class="px-4 py-2 border">ชื่อ</th>
-            <th class="px-4 py-2 border">บริการ</th>
-            <th class="px-4 py-2 border">สถานที่</th>
-            <th class="px-4 py-2 border">เบอร์โทร</th>
-            <th class="px-4 py-2 border">หมายเหตุ</th>
-            <th class="px-4 py-2 border">วันที่</th>
-            <th class="px-4 py-2 border">เวลา</th>
-            <th class="px-4 py-2 border">สถานะ</th>
-            <th class="px-4 py-2 border">Actions</th> <!-- Actions column -->
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <!-- ข้อมูลจะถูกแสดงที่นี่ -->
-        </tbody>
-      </table>
+    <!-- Card Display Section -->
+    <div id="filteredData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Cards will be inserted here -->
+    </div>
+
+    <!-- Pagination Controls -->
+    <div id="paginationControls" class="mt-6 flex justify-center space-x-2">
+      <!-- Pagination buttons will be inserted here -->
     </div>
   </main>
-
-  <!-- Modal Popup -->
-  <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg p-6 w-1/3">
-      <h2 class="text-md font-semibold mb-4">เพิ่มการนัดหมาย</h2>
-      <form id="modalForm" class="space-y-4">
-        <div>
-          <label for="serviceInput" class="block text-xs font-medium text-gray-700">บริการ</label>
-          <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-        </div>
-        <div>
-          <label for="locationInput" class="block text-xs font-medium text-gray-700">สถานที่</label>
-          <input type="text" id="locationInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-        </div>
-        <div>
-          <label for="dateInput" class="block text-xs font-medium text-gray-700">วันที่:</label>
-          <input type="date" id="dateInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-        </div>
-        <div>
-          <label for="timeInput" class="block text-xs font-medium text-gray-700">เวลา:</label>
-          <input type="time" id="timeInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
-        </div>
-        <div>
-          <label for="statusInput" class="block text-xs font-medium text-gray-700">สถานะ:</label>
-          <input type="text" id="statusInput" value="รอการยืนยัน" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
-        </div>
-        <div class="flex justify-end space-x-2">
-          <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- Loading Spinner -->
   <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
@@ -174,27 +72,65 @@
   </div>
 
   <script>
-    const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
+    const CARDS_PER_PAGE = 5;
+    let currentPage = 1;
+    let totalPages = 1;
 
     document.addEventListener('DOMContentLoaded', function () {
 
-     // Function to fetch and populate the table
-  function fetchAndPopulateTable() {
-    fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-      .then(response => response.json())
-      .then(details => {
-        const tableBody = document.getElementById('tableBody');
-        tableBody.innerHTML = ''; // Clear old data
+      function fetchAndPopulateCards() {
+        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+          .then(response => response.json())
+          .then(details => {
+            const filteredData = document.getElementById('filteredData');
+            filteredData.innerHTML = '';
 
-        details.forEach(detail => {
-          // Assign keyid to detail.id
+            // Parse date strings into Date objects using DD-MM-YYYY format
+            details.forEach(detail => {
+              const [day, month, year] = detail.date.split('-');
+              detail.parsedDate = new Date(`${year}-${month}-${day}`);
+            });
+
+            // Sort by date based on the selected sorting option
+            const dateSort = document.getElementById('dateSort').value;
+            details.sort((a, b) => {
+              return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
+            });
+
+            // Apply filters
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+
+            let filteredDetails = details.filter(detail => {
+              const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
+              const matchesLocation = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
+              return matchesStatus && matchesLocation;
+            });
+
+            totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
+            displayCards(filteredDetails, currentPage);
+            createPaginationControls();
+          })
+          .catch(error => {
+            console.error('Error fetching user details:', error);
+          });
+      }
+
+      function displayCards(details, page) {
+        const filteredData = document.getElementById('filteredData');
+        filteredData.innerHTML = '';
+
+        const startIndex = (page - 1) * CARDS_PER_PAGE;
+        const endIndex = startIndex + CARDS_PER_PAGE;
+        const detailsToDisplay = details.slice(startIndex, endIndex);
+
+        detailsToDisplay.forEach(detail => {
           detail.id = detail.idKey;
-
-          // Determine button states based on status
+          
           let disableConfirm = false;
-          let disableComplete = false;
           let disableCancel = false;
+          let disableComplete = false;
           let disableReminder = false;
 
           switch (detail.status) {
@@ -206,88 +142,91 @@
               disableReminder = true;
               break;
             case 'ยกเลิก':
-              disableCancel = true;
-              disableConfirm = true;
-              disableComplete = true;
-              disableReminder = true;
-              break;
             case 'เสร็จสิ้น':
-              disableConfirm = true;
               disableCancel = true;
+              disableConfirm = true;
               disableComplete = true;
               disableReminder = true;
               break;
           }
 
-          // Create a new table row
-          const row = document.createElement('tr');
+          const card = document.createElement('div');
+          card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
 
-          // Populate the row with data and disabled buttons as necessary
-          row.innerHTML = `
-            <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
-            <td class="px-4 py-2 border">${detail.name}</td>
-            <td class="px-4 py-2 border">${detail.service}</td>
-            <td class="px-4 py-2 border">${detail.locationservice}</td>
-            <td class="px-4 py-2 border">${detail.phonenumber}</td>
-            <td class="px-4 py-2 border">${detail.note}</td>
-            <td class="px-4 py-2 border">${detail.date}</td>
-            <td class="px-4 py-2 border">${detail.time}</td>
-            <td class="px-4 py-2 border">${detail.status}</td>
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
-            </td>
+          card.innerHTML = `
+            <h3 class="text-lg font-semibold mb-2">${detail.name}</h3>
+            <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
+            <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
+            <p class="text-sm text-gray-700"><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
+            <p class="text-sm text-gray-700"><strong>อีเมล:</strong> ${detail.note}</p>
+            <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
+            <p class="text-sm text-gray-700"><strong>เวลา:</strong> ${detail.time}</p>
+            <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
+            <div class="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
+              <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">Confirm</button>
+              <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">Cancel</button>
+              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">Complete</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">Send Reminder</button>
+            </div>
           `;
 
-          // Append the new row to the table body
-          tableBody.appendChild(row);
+          filteredData.appendChild(card);
         });
 
-        // Re-attach event listeners for the new buttons
         attachEventListeners();
-      })
-      .catch(error => {
-        console.error('Error fetching user details:', error);
-      });
-  }
+      }
 
-  // Initial table population
-  fetchAndPopulateTable();
+      function createPaginationControls() {
+        const paginationControls = document.getElementById('paginationControls');
+        paginationControls.innerHTML = '';
 
+        // Define the range of page buttons to show
+        const maxVisibleButtons = 3;
+        const startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+        const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
 
-      // Fetch and populate the names list
-      fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
-        .then(response => response.json())
-        .then(data => {
-          const namesList = document.getElementById('namesList');
-          data.forEach(name => {
-            const option = document.createElement('option');
-            option.value = name;
-            namesList.appendChild(option);
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching names:', error);
+        // Previous button
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.disabled = currentPage === 1;
+        prevButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
+        prevButton.addEventListener('click', () => {
+          if (currentPage > 1) {
+            currentPage--;
+            fetchAndPopulateCards();
+          }
         });
+        paginationControls.appendChild(prevButton);
 
-      // Fetch and populate the key numbers list
-      fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllKeyNumbers`)
-        .then(response => response.json())
-        .then(data => {
-          const keynumbersList = document.getElementById('keynumbersList');
-          data.forEach(keynumber => {
-            const option = document.createElement('option');
-            option.value = keynumber;
-            keynumbersList.appendChild(option);
+        // Page number buttons
+        for (let i = startPage; i <= endPage; i++) {
+          const pageButton = document.createElement('button');
+          pageButton.textContent = i;
+          pageButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600');
+          if (i === currentPage) {
+            pageButton.classList.add('bg-indigo-600');
+          }
+          pageButton.addEventListener('click', () => {
+            currentPage = i;
+            fetchAndPopulateCards();
           });
-        })
-        .catch(error => {
-          console.error('Error fetching key numbers:', error);
-        });
+          paginationControls.appendChild(pageButton);
+        }
 
-      // Attach event listeners to the action buttons
+        // Next button
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'Next';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
+        nextButton.addEventListener('click', () => {
+          if (currentPage < totalPages) {
+            currentPage++;
+            fetchAndPopulateCards();
+          }
+        });
+        paginationControls.appendChild(nextButton);
+      }
+
       function attachEventListeners() {
         document.querySelectorAll('.confirm-btn').forEach(button => {
           button.addEventListener('click', function () {
@@ -318,8 +257,6 @@
         });
       }
 
-      // Action functions with table update
-
       function confirmBooking(id) {
         Swal.fire({
           title: 'Are you sure?',
@@ -337,7 +274,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Confirmed!', 'Booking has been confirmed.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -365,7 +302,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Canceled!', 'Booking has been canceled.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -393,7 +330,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Completed!', 'Booking has been marked as completed.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -421,7 +358,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('Reminder Sent!', 'The reminder has been sent successfully.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateCards();
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -432,128 +369,6 @@
         });
       }
 
-      document.getElementById('fetchForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const nameId = document.getElementById('nameId').value;
-        const keynumberId = document.getElementById('keynumberId').value;
-
-        let fetchUrl = '';
-        if (nameId) {
-          fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByNameId&nameId=${encodeURIComponent(nameId)}`;
-        } else if (keynumberId) {
-          fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByKeyNumberId&keynumberId=${encodeURIComponent(keynumberId)}`;
-        }
-
-        if (fetchUrl) {
-          showLoadingSpinner(true);
-          fetch(fetchUrl)
-            .then(response => response.json())
-            .then(data => {
-              showLoadingSpinner(false);
-              if (data && Object.keys(data).length > 0) {
-                document.getElementById('userIdInput').value = data.userlineId || '';  // Set userid value
-                document.getElementById('keyIdInput').value = data.keyid || '';
-                document.getElementById('nameIdInput').value = data.nameId || '';
-                document.getElementById('keynumberIdInput').value = data.keynumberId || '';
-                document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
-                document.getElementById('fileLinkInput').src = data.fileLink || '';
-
-                // Format and set the timestamp
-                if (data.timestamp) {
-                  const timestamp = new Date(data.timestamp);
-                  const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
-                  document.getElementById('timestampInput').value = formattedTimestamp;
-                } else {
-                  document.getElementById('timestampInput').value = '';
-                }
-
-                // Filter and display table based on userlineid
-                filterTableByUserlineId(data.userlineId);
-
-                document.getElementById('result').classList.remove('hidden');
-                document.getElementById('noResult').classList.add('hidden');
-              } else {
-                document.getElementById('result').classList.add('hidden');
-                document.getElementById('noResult').classList.remove('hidden');
-              }
-            })
-            .catch(error => {
-              showLoadingSpinner(false);
-              console.error('Error fetching data:', error);
-              document.getElementById('result').classList.add('hidden');
-              document.getElementById('noResult').classList.remove('hidden');
-            });
-        } else {
-          document.getElementById('result').classList.add('hidden');
-          document.getElementById('noResult').classList.remove('hidden');
-        }
-      });
-
-      // Show the modal when "Add to Table" button is clicked
-      document.getElementById('addDataButton').addEventListener('click', function () {
-        document.getElementById('modal').classList.remove('hidden');
-      });
-
-      // Hide the modal when "Cancel" button is clicked
-      document.getElementById('cancelButton').addEventListener('click', function () {
-        document.getElementById('modal').classList.add('hidden');
-      });
-
-      // Handle form submission in the modal
-      document.getElementById('modalForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        // Get data from profile inputs
-        const userId = document.getElementById('userIdInput').value;
-        const nameId = document.getElementById('nameIdInput').value;
-        const keynumberId = document.getElementById('keynumberIdInput').value;
-        const keynumber2Id = document.getElementById('keynumber2IdInput').value;
-
-        // Get additional data from modal inputs
-        const service = document.getElementById('serviceInput').value;
-        const location = document.getElementById('locationInput').value;
-        const date = document.getElementById('dateInput').value;
-        const time = document.getElementById('timeInput').value;
-        const status = document.getElementById('statusInput').value;
-
-        // Insert new row into the table
-        const newRow = `
-          <tr>
-            <td class="hidden">${userId}</td> <!-- Hidden userlineid -->
-            <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
-            <td class="px-4 py-2 border">${service}</td> <!-- service -->
-            <td class="px-4 py-2 border">${location}</td> <!-- location -->
-            <td class="px-4 py-2 border">${keynumberId}</td> <!-- keynumberId -->
-            <td class="px-4 py-2 border">${keynumber2Id}</td> <!-- keynumber2Id -->
-            <td class="px-4 py-2 border">${date}</td> <!-- date -->
-            <td class="px-4 py-2 border">${time}</td> <!-- time -->
-            <td class="px-4 py-2 border">${status}</td> <!-- status -->
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
-            </td>
-          </tr>
-        `;
-        document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
-
-        // Hide the modal after submission
-        document.getElementById('modal').classList.add('hidden');
-
-        // Save the data by calling the Google Script makeBooking function
-        const saveUrl = `${DETAILS_SCRIPT_URL}?action=makeBooking&userlineid=${encodeURIComponent(userId)}&name=${encodeURIComponent(nameId)}&service=${encodeURIComponent(service)}&locationservice=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&phonenumber=${encodeURIComponent(keynumberId)}&note=${encodeURIComponent(keynumber2Id)}`;
-        fetch(saveUrl, { method: 'POST' })
-          .then(response => response.text())
-          .then(data => {
-            console.log('Booking saved successfully:', data);
-            fetchAndPopulateTable();  // Update the table
-          })
-          .catch(error => {
-            console.error('Error saving booking:', error);
-          });
-      });
-
       function showLoadingSpinner(show) {
         const spinner = document.getElementById('loadingSpinner');
         if (show) {
@@ -563,39 +378,12 @@
         }
       }
 
-      function filterTableByUserlineId(userid) {
-        const tableRows = document.querySelectorAll('#tableBody tr');
-        tableRows.forEach(row => {
-          const lineIdCell = row.querySelector('td:nth-child(1)');
-          if (lineIdCell && lineIdCell.textContent !== userid) {
-            row.classList.add('hidden');
-          } else {
-            row.classList.remove('hidden');
-          }
-        });
-      }
-
-      // Apply filters on the table based on status and location
       document.getElementById('applyFiltersButton').addEventListener('click', function () {
-        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
-
-        const tableRows = document.querySelectorAll('#tableBody tr');
-        tableRows.forEach(row => {
-          const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
-          const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-
-          const matchesStatus = statusFilter === '' || statusCell === statusFilter;
-          const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
-
-          if (matchesStatus && matchesLocation) {
-            row.classList.remove('hidden');
-          } else {
-            row.classList.add('hidden');
-          }
-        });
+        currentPage = 1;
+        fetchAndPopulateCards();
       });
 
+      fetchAndPopulateCards();
     });
   </script>
 

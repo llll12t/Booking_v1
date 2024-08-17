@@ -111,10 +111,10 @@ async function sendFlexMessage() {
                 contents: [
                     {
                         type: 'text',
-                        text: 'ข้อมูลลงทะเบียนสำเร็จ',
+                        text: '✅ข้อมูลลงทะเบียนสำเร็จ',
                         weight: 'bold',
                         size: 'lg',
-                        color: '#000000',
+                        color: '#ffffff',
                         align: 'center'
                     }
                 ]
@@ -156,7 +156,7 @@ async function sendFlexMessage() {
                                 contents: [
                                     {
                                         type: 'text',
-                                        text: 'รหัสพนักงาน',
+                                        text: 'เบอร์ติดต่อ',
                                         size: 'sm',
                                         color: '#555555',
                                         flex: 1
@@ -260,9 +260,8 @@ function validateForm() {
     const userlineId = userlineIdInput.value.trim();
     const nameId = nameIdInput.value.trim();
     const keynumberId = keynumberIdInput.value.trim();
-    const keynumber2Id = keynumber2IdInput.value.trim();
 
-    if (userlineId === '' || nameId === '' || keynumberId === '' || keynumber2Id === '') {
+    if (userlineId === '' || nameId === '' || keynumberId === '' ) {
         return false;
     }
 

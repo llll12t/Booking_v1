@@ -218,9 +218,11 @@
             document.getElementById('step0').style.display = 'none';
             document.getElementById('step1').style.display = 'block';
             showLoading(true);
-            // Fetch the data after selecting the option
-            await fetchDropdownData();
-            initializeLiff(); // LIFF initialization (currently commented out)
+              // Fetch the data and initialize LIFF simultaneously
+            await Promise.all([
+                fetchDropdownData(),
+                initializeLiff() // LIFF initialization (currently commented out)
+            ]);
 
             // Fetch availability data for the current date
             const currentDate = new Date();
@@ -232,13 +234,6 @@
             await updateCalendar(currentDate);
              showLoading(false);
         }
-
-
-        //     window.onload = function () {
-        //     document.getElementById('step0').style.display = 'block';
-        //     document.getElementById('step1').style.display = 'none';
-        //     document.getElementById('step2').style.display = 'none';
-        // };
 
         // Function to load calendar and dropdown data (only when you want to)
         async function loadCalendarData() {

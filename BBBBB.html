@@ -220,6 +220,7 @@
             showLoading(true);
             // Fetch the data after selecting the option
             await fetchDropdownData();
+            initializeLiff(); // LIFF initialization (currently commented out)
 
             // Fetch availability data for the current date
             const currentDate = new Date();
@@ -233,12 +234,11 @@
         }
 
 
-            window.onload = function () {
-            document.getElementById('step0').style.display = 'block';
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'none';
-            initializeLiff(); // LIFF initialization (currently commented out)
-        };
+        //     window.onload = function () {
+        //     document.getElementById('step0').style.display = 'block';
+        //     document.getElementById('step1').style.display = 'none';
+        //     document.getElementById('step2').style.display = 'none';
+        // };
 
         // Function to load calendar and dropdown data (only when you want to)
         async function loadCalendarData() {

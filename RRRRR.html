@@ -9,8 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 <body>
-<div class="bg-indigo-800 h-screen">
-    <div class="max-w-md mx-auto px-4 py-4">
+<div class="bg-indigo-800">
+    <div class="flex items-center justify-center max-w-sm mx-auto min-h-screen">
         <form>
             <div class="">    
                 <div class="mb-5 text-center">
@@ -49,7 +49,7 @@
                     </span>
                     <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="keynumber2Id" placeholder="อีเมล(ถ้ามี)" name="keynumber2Id" >
                 </div>
-                <button type="button" id="submitBtn" class="bg-indigo-500  text-center w-full text-white py-4 px-4 rounded-md hover:bg-blue-700">บันทึกข้อมูล</button>
+                <button type="button" id="submitBtn" class="bg-indigo-500  text-center w-full text-white p-4 rounded-md hover:bg-blue-700">บันทึกข้อมูล</button>
             </div>
         </form>
     </div>
@@ -57,17 +57,13 @@
 <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
 <script>
 
-
-
 // ค่าคงที่สำหรับ URL ของแอปเว็บและ LIFF ID
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec'; 
 const LIFF_ID = '2005629952-NjKA9QLn'; // LIFF ID
 
-
-
 // ฟังก์ชันเริ่มต้น LIFF SDK
 window.onload = function () {
-    initializeLiff();
+   initializeLiff();
 };
 
 // ฟังก์ชันสำหรับเริ่มต้น LIFF SDK
@@ -100,7 +96,7 @@ async function sendFlexMessage() {
             type: 'bubble',
             styles: {
                 header: {
-                    backgroundColor: '#f0f0f0'
+                    backgroundColor: '#4a0890'
                 },
                 footer: {
                     backgroundColor: '#f0f0f0'

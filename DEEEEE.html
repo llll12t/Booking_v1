@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>history admin</title>
+  <title>Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
@@ -28,10 +28,10 @@
 <body class="bg-indigo-100 min-h-screen flex flex-col">
 
   <!-- Main Content Area -->
-  <main class="max-w-md m-auto">
+  <main class="max-w-md m-auto p-2">
     <!-- Filter Section -->
-    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
-      <div>
+    <div class="flex mb-4">
+      <div class="p-2">
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
         <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
           <option value="">All</option>
@@ -41,20 +41,25 @@
           <option value="เสร็จสิ้น">เสร็จสิ้น</option>
         </select>
       </div>
-      <div>
+      <div class="p-2">
         <label for="serviceFilter" class="block text-xs font-medium text-gray-700">กรองตามบริการ</label>
-        <input type="text" id="serviceFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์บริการ">
+        <input type="text" id="serviceFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+          placeholder="พิมพ์บริการ">
       </div>
-      <div>
+    </div>
+    <div class="flex mb-4">
+      <div class="p-2">
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
         <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
           <option value="latest">วันที่ล่าสุด</option>
           <option value="oldest">วันที่เก่าสุด</option>
         </select>
       </div>
-      <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">กรองข้อมูล</button>
+      <div class="p-2">
+        <button id="applyFiltersButton"
+          class="mt-5 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">กรองข้อมูล</button>
+      </div>
     </div>
-
     <!-- Card Display Section -->
     <div id="filteredData" class="grid grid-cols-1">
       <!-- Cards will be inserted here -->
@@ -151,7 +156,7 @@
           }
 
           const card = document.createElement('div');
-          card.classList.add('w-full','bg-white','p-2', 'mb-2','rounded-lg', 'shadow-md');
+          card.classList.add('w-full', 'bg-white', 'p-2', 'mb-2', 'rounded-lg', 'shadow-md');
 
           card.innerHTML = `
           <h3 class="text-lg font-semibold p-2 mb-2">${detail.name}</h3>

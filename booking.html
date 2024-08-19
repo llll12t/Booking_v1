@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบนัดหามาย</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://slateic.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <style>
         .selected {
-            background-color: #0f172a  !IMPORTANT;
+            background-color: #4338ca;
             color: white;
         }
         .no-scrollbar {
@@ -35,7 +35,7 @@
         .loading-spinner {
             border: 16px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 16px solid #1a1a1a;
+            border-top: 16px solid #4338ca;
             width: 120px;
             height: 120px;
             animation: spin 2s linear infinite;
@@ -99,47 +99,48 @@
             <input type="hidden" name="action" value="makeBooking">
             <div id="step1" class="grid gap-5 max-w-sm mx-auto">
                 <div>
-                    <input type="text" id="userlineid" name="userlineid" class="w-full p-2  rounded-2xl hidden" required>
+                    <input type="text" id="userlineid" name="userlineid" class="w-full p-2 border border-slate-900 rounded-2xl hidden" required>
                 </div>
                 <div class="flex">
-                    <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
+                    <span class="bg-white flex items-center border rounded-l p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> บริการ </span>
                     </span>
-                    <select id="service" name="service" class="rounded-2xl bg-white border text-slate-900 block text-center  flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
+                    <select id="service" name="service" class="rounded-2xl bg-white border text-slate-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
                 </div>
                 <div class="flex">
-                    <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
+                    <span class="bg-white flex items-center border rounded-l p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> สถานที่ </span>
                     </span>
-                    <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-center  text-slate-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
+                    <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-slate-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
-                    <div class="bg-slate-300 px-4 py-4 my-4 rounded-2xl">
+                <div class="bg-slate-200 px-4 py-6 rounded-2xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
                         <div id="loadingOverlay">
                             <div class="text-center text-white">ค้นหารายชื่อ..</div>
                         </div>
-                        <div class="pb-4">ฟอร์มข้อมูล</div>
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
-                                <div class="flex mb-6">
-                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
+                                <div class="flex border border-slate-900 mb-4 rounded">
+                                    <span class="flex items-center bg-slate-900 rounded-l p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
                                     <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <div class="flex  mb-6">
-                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                <div class="flex border border-slate-900 mb-4 rounded">
+                                    <span class="flex items-center bg-slate-900 rounded-l p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
                                     <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <div class="flex">
-                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เพิ่มเติม(ถ้ามี)</span></span>
+                                <div class="flex border border-slate-900 rounded">
+                                    <span class="flex items-center bg-slate-900 rounded-l p-2 w-32"><span class="text-white text-sm">อีเมล</span></span>
                                     <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
+                                <input type="hidden" id="userId" name="userId">
                                 <input type="hidden" id="userlineid" name="userlineid">
                             </div>
                         </div>
                     </div>
+                </div>
                 <div id="buttons" class="">
                     <button type="button" onclick="nextStep()" class="w-full bg-slate-900 text-white py-3 mt-4 rounded-2xl">ถัดไป</button>
                 </div>
@@ -172,7 +173,7 @@
               
                 <div class="hidden">
                     <label for="time" class="block text-sm">Time:</label>
-                    <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3  rounded-2xl">
+                    <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3 border border-slate-900 rounded-2xl">
                 </div>
                 <div class="hidden text-center">
                     <input type="submit" value="Submit" class="px-6 py-4 bg-slate-100 text-black font-semibold rounded-2xl">
@@ -183,13 +184,12 @@
         </form>
     </div>
     <script>
-
-const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
+        const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
         const LIFF_ID = '2006029649-bj0ez4Og';
 
         window.onload = function () {
-             initializeLiff();
+             // initializeLiff();
         };
 
         async function initializeLiff() {
@@ -349,7 +349,7 @@ function populateDays(month, year, currentDay) {
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
         const dayElement = document.createElement('div');
-        dayElement.classList.add('bg-white', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-indigo-700', 'text-center', 'rounded-md', 'cursor-pointer');
+        dayElement.classList.add('bg-white', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-slate-900', 'text-center', 'rounded-2xl', 'cursor-pointer');
         dayElement.textContent = `${daysOfWeek[date.getDay()]} ${day}`;
         if (day === currentDay) {
             dayElement.id = 'currentDay';
@@ -400,16 +400,16 @@ function updateAvailability(availability) {
         slotDiv.className = 'flex justify-between items-center py-2';
 
         const timeSpan = document.createElement('span');
-        timeSpan.className = 'px-6 py-2 rounded-md bg-white text-indigo-700';
+        timeSpan.className = 'px-6 py-2 rounded-2xl bg-white text-slate-900';
         timeSpan.textContent = `${time} น.`;
 
         const statusButton = document.createElement('button');
-        statusButton.className = `px-6 py-2 rounded-md ${info.status === 'Available' ? 'bg-green-200 text-green-600 cursor-not-allowed' : 'bg-red-200 text-red-600 cursor-not-allowed'}`;
+        statusButton.className = `px-6 py-2 rounded-2xl ${info.status === 'Available' ? 'bg-green-200 text-green-600 cursor-not-allowed' : 'bg-red-200 text-red-600 cursor-not-allowed'}`;
         statusButton.textContent = info.status === 'Available' ? `ว่าง (${info.remaining}/${info.total})` : `เต็ม (${info.remaining}/${info.total})`;
         statusButton.disabled = true;
 
         const bookButton = document.createElement('button');
-        bookButton.className = `custom-button px-4 py-2 rounded-md ${info.status === 'Available' ? 'bg-indigo-700 text-white' : 'bg-gray-100 text-gray-400'}`;
+        bookButton.className = `custom-button px-4 py-2 rounded-2xl ${info.status === 'Available' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`;
         bookButton.innerHTML = `<i class="fas fa-calendar-alt"></i> นัดหมาย`;
         bookButton.disabled = info.status !== 'Available';
         bookButton.addEventListener('click', () => {
@@ -470,7 +470,7 @@ form.addEventListener('submit', (e) => {
         showPopup('เกิดข้อผิดพลาด', 'กรุณาเลือกวันที่', 'error');
         return;
     }
-    showPopup('<p class="text-blue-900">📆 ยืนยันการนัดหมาย</p>', `
+    showPopup('<p class="text-slate-900">📆 ยืนยันการนัดหมาย</p>', `
         <p>บริการ: ${form.service.value}</p>
         <p>สถานที่: ${form.locationservice.value}</p>
         <p>ชื่อ: ${form.name.value}</p>
@@ -488,8 +488,8 @@ function showPopup(title, content, type) {
     if (type === 'confirm') {
         popupContent.innerHTML += `
             <div class="flex justify-between my-4">
-                <button id="cancelButton" class="px-4 py-4 bg-gray-300 text-gray-700 rounded-md">ยกเลิก</button>
-                <button id="confirmButton" class="px-4 py-4 bg-blue-900 text-white rounded-md mr-2">ยืนยันการนัดหมาย</button>
+                <button id="cancelButton" class="px-4 py-4 bg-slate-300 text-slate-900 rounded-2xl">ยกเลิก</button>
+                <button id="confirmButton" class="px-4 py-4 bg-slate-900 text-white rounded-2xl mr-2">ยืนยันการนัดหมาย</button>
             </div>
         `;
         document.getElementById('confirmButton').addEventListener('click', () => {
@@ -498,7 +498,7 @@ function showPopup(title, content, type) {
         });
         document.getElementById('cancelButton').addEventListener('click', hidePopup);
     } else {
-        popupContent.innerHTML += `<div class="mt-4"><button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md">ปิด</button></div>`;
+        popupContent.innerHTML += `<div class="mt-4"><button onclick="hidePopup()" class="px-4 py-2 bg-slate-300 text-slate-900 rounded-2xl">ปิด</button></div>`;
     }
     popup.style.display = 'flex';
 }

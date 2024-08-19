@@ -25,7 +25,7 @@
   </style>
 </head>
 
-<body class="bg-indigo-100 min-h-screen flex flex-col">
+<body class="bg-slate-100 min-h-screen flex flex-col">
 
   <!-- Main Content Area -->
   <main class="max-w-md m-auto p-2">
@@ -33,7 +33,7 @@
     <div class="flex mb-4">
       <div class="p-2">
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
-        <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-2xl">
           <option value="">All</option>
           <option value="รอการยืนยัน">รอการยืนยัน</option>
           <option value="ยืนยันแล้ว">ยืนยันแล้ว</option>
@@ -43,21 +43,21 @@
       </div>
       <div class="p-2">
         <label for="serviceFilter" class="block text-xs font-medium text-gray-700">กรองตามบริการ</label>
-        <input type="text" id="serviceFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+        <input type="text" id="serviceFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-2xl"
           placeholder="พิมพ์บริการ">
       </div>
     </div>
     <div class="flex mb-4">
       <div class="p-2">
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
-        <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+        <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-2xl">
           <option value="latest">วันที่ล่าสุด</option>
           <option value="oldest">วันที่เก่าสุด</option>
         </select>
       </div>
       <div class="p-2">
         <button id="applyFiltersButton"
-          class="mt-5 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">กรองข้อมูล</button>
+          class="mt-5 py-2 px-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-800">กรองข้อมูล</button>
       </div>
     </div>
     <!-- Card Display Section -->
@@ -72,7 +72,7 @@
   </main>
 
   <!-- Loading Spinner -->
-  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+  <div id="loadingSpinner" class="fixed inset-0 bg-slate-800 bg-opacity-50 flex items-center justify-center hidden">
     <div class="loader"></div>
   </div>
 
@@ -200,7 +200,7 @@
         const prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
         prevButton.disabled = currentPage === 1;
-        prevButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
+        prevButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded', 'hover:bg-slate-600', 'disabled:opacity-50');
         prevButton.addEventListener('click', () => {
           if (currentPage > 1) {
             currentPage--;
@@ -213,9 +213,9 @@
         for (let i = startPage; i <= endPage; i++) {
           const pageButton = document.createElement('button');
           pageButton.textContent = i;
-          pageButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600');
+          pageButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded', 'hover:bg-slate-600');
           if (i === currentPage) {
-            pageButton.classList.add('bg-indigo-600');
+            pageButton.classList.add('bg-slate-600');
           }
           pageButton.addEventListener('click', () => {
             currentPage = i;
@@ -228,7 +228,7 @@
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
         nextButton.disabled = currentPage === totalPages;
-        nextButton.classList.add('px-4', 'py-2', 'bg-indigo-800', 'text-white', 'rounded', 'hover:bg-indigo-600', 'disabled:opacity-50');
+        nextButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded', 'hover:bg-slate-600', 'disabled:opacity-50');
         nextButton.addEventListener('click', () => {
           if (currentPage < totalPages) {
             currentPage++;

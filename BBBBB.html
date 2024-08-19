@@ -137,15 +137,15 @@
                             <div class="max-w-md">
                                
                                 <div class="flex mb-6 rounded-md">
-                                    <span class="flex items-center bg-slate-100 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
+                                    <span class="flex items-center bg-indigo-900 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
                                     <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
                                 <div class="flex  mb-6 rounded-md">
-                                    <span class="flex items-center bg-slate-100 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                    <span class="flex items-center bg-indigo-900 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
                                     <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
                                 <div class="flex rounded-md">
-                                    <span class="flex items-center bg-slate-100 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">อีเมล(ถ้ามี)</span></span>
+                                    <span class="flex items-center bg-indigo-900 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">อีเมล(ถ้ามี)</span></span>
                                     <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
                                 <input type="hidden" id="userlineid" name="userlineid">
@@ -162,7 +162,7 @@
             <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                 <div class="text-center font-semibold mb-6">
                     <div class="flex justify-center space-x-2">
-                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-slate-100 rounded-md px-2 py-4">
+                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-indigo-900 rounded-md px-2 py-4">
                             <option value="0">มกราคม</option>
                             <option value="1">กุมภาพันธ์</option>
                             <option value="2">มีนาคม</option>
@@ -176,7 +176,7 @@
                             <option value="10">พฤศจิกายน</option>
                             <option value="11">ธันวาคม</option>
                         </select>
-                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-slate-100 rounded-md px-2 py-4"></select>
+                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-indigo-900 rounded-md px-2 py-4"></select>
                     </div>
                 </div>
                 <div class="overflow-x-auto mb-4 no-scrollbar">
@@ -191,7 +191,7 @@
                 <div class="hidden text-center">
                     <input type="submit" value="Submit" class="px-6 py-4 bg-gray-100 text-black font-semibold rounded-md">
                 </div>
-                <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-slate-100 py-3 rounded-lg">กลับหน้าหลัก</button>
+                <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-indigo-900 py-3 rounded-lg">กลับหน้าหลัก</button>
             </div>
         </form>
     </div>
@@ -385,7 +385,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const dayElement = document.createElement('div');
-                dayElement.classList.add('bg-white', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-slate-100', 'text-center', 'rounded-md', 'cursor-pointer');
+                dayElement.classList.add('bg-white', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-indigo-900', 'text-center', 'rounded-md', 'cursor-pointer');
                 dayElement.textContent = `${daysOfWeek[date.getDay()]} ${day}`;
                 if (day === currentDay) {
                     dayElement.id = 'currentDay';
@@ -436,7 +436,7 @@
                 slotDiv.className = 'flex justify-between items-center py-2';
 
                 const timeSpan = document.createElement('span');
-                timeSpan.className = 'px-6 py-2 rounded-md bg-white text-slate-100';
+                timeSpan.className = 'px-6 py-2 rounded-md bg-white text-indigo-900';
                 timeSpan.textContent = `${time} น.`;
 
                 const statusButton = document.createElement('button');
@@ -445,7 +445,7 @@
                 statusButton.disabled = true;
 
                 const bookButton = document.createElement('button');
-                bookButton.className = `custom-button px-4 py-2 rounded-md ${info.status === 'Available' ? 'bg-slate-100 text-white' : 'bg-gray-100 text-gray-400'}`;
+                bookButton.className = `custom-button px-4 py-2 rounded-md ${info.status === 'Available' ? 'bg-indigo-900 text-white' : 'bg-gray-100 text-gray-400'}`;
                 bookButton.innerHTML = `<i class="fas fa-calendar-alt"></i> นัดหมาย`;
                 bookButton.disabled = info.status !== 'Available';
                 bookButton.addEventListener('click', () => {
@@ -525,7 +525,7 @@
                 popupContent.innerHTML += `
                     <div class="flex justify-between my-4">
                         <button id="cancelButton" class="px-2 py-4 bg-gray-300 text-gray-700 rounded-md">ยกเลิก</button>
-                        <button id="confirmButton" class="px-2 py-4 bg-slate-100 text-white rounded-md mr-2">ยืนยันนัดหมาย</button>
+                        <button id="confirmButton" class="px-2 py-4 bg-indigo-900 text-white rounded-md mr-2">ยืนยันนัดหมาย</button>
                     </div>
                 `;
                 document.getElementById('confirmButton').addEventListener('click', () => {

@@ -156,7 +156,7 @@
           }
 
           const card = document.createElement('div');
-          card.classList.add('w-full', 'bg-white', 'p-2', 'mb-2', 'rounded-lg', 'shadow-md');
+          card.classList.add('w-full', 'bg-white', 'p-2', 'mb-2', 'rounded-2xl', 'shadow-md');
 
           card.innerHTML = `
           <h3 class="text-lg font-semibold p-2 mb-2">${detail.name}</h3>
@@ -173,11 +173,11 @@
           <p class="text-sm text-gray-700"><strong>สถานะ:</strong> ${detail.status}</p>
           </div>
             <div class="mt-4 flex justify-between text-sm">
-              <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
-              <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+              <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded-2xl ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
+              <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded-2xl ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
   
-              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
+              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded-2xl ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-2xl ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
             </div>
           `;
 
@@ -200,7 +200,7 @@
         const prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
         prevButton.disabled = currentPage === 1;
-        prevButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded', 'hover:bg-slate-600', 'disabled:opacity-50');
+        prevButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded-2xl', 'hover:bg-slate-600', 'disabled:opacity-50');
         prevButton.addEventListener('click', () => {
           if (currentPage > 1) {
             currentPage--;
@@ -213,7 +213,7 @@
         for (let i = startPage; i <= endPage; i++) {
           const pageButton = document.createElement('button');
           pageButton.textContent = i;
-          pageButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded', 'hover:bg-slate-600');
+          pageButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded-2xl', 'hover:bg-slate-600');
           if (i === currentPage) {
             pageButton.classList.add('bg-slate-600');
           }
@@ -228,7 +228,7 @@
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
         nextButton.disabled = currentPage === totalPages;
-        nextButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded', 'hover:bg-slate-600', 'disabled:opacity-50');
+        nextButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded-2xl', 'hover:bg-slate-600', 'disabled:opacity-50');
         nextButton.addEventListener('click', () => {
           if (currentPage < totalPages) {
             currentPage++;

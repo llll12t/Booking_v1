@@ -55,7 +55,7 @@
     </div>
 
     <!-- Card Display Section -->
-    <div id="filteredData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div id="filteredData" class="grid grid-cols-1 ">
       <!-- Cards will be inserted here -->
     </div>
 
@@ -171,7 +171,7 @@
         }
 
         const card = document.createElement('div');
-        card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
+        card.classList.add('bg-white', 'p-4', 'mb-2', 'rounded-lg', 'shadow-md');
 
         card.innerHTML = `
           <div class="flex justify-between p-2">

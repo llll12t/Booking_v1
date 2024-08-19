@@ -73,25 +73,25 @@ async function getUserProfile() {
     }
 }
 
-// ฟังก์ชันสำหรับส่งข้อความ Flex
 async function sendFlexMessage() {
+    const name = document.getElementById('nameId').value || 'ไม่ระบุ';
+    const phone = document.getElementById('keynumberId').value || 'ไม่ระบุ';
+    const email = document.getElementById('keynumber2Id').value || 'ไม่ระบุ';
+
     const flexMessage = {
         type: 'flex',
         altText: 'ลงทะเบียนเรียบร้อย',
         contents: {
             type: 'bubble',
             styles: {
-                header: {
-                    backgroundColor: '#4a0890'
+                body: {
+                    backgroundColor: '#ffffff'
                 },
                 footer: {
                     backgroundColor: '#f0f0f0'
-                },
-                body: {
-                    backgroundColor: '#ffffff'
                 }
             },
-            header: {
+            body: {
                 type: 'box',
                 layout: 'vertical',
                 contents: [
@@ -100,15 +100,9 @@ async function sendFlexMessage() {
                         text: '✅ข้อมูลลงทะเบียนสำเร็จ',
                         weight: 'bold',
                         size: 'lg',
-                        color: '#ffffff',
+                        color: '#000000',
                         align: 'center'
-                    }
-                ]
-            },
-            body: {
-                type: 'box',
-                layout: 'vertical',
-                contents: [
+                    },
                     {
                         type: 'box',
                         layout: 'vertical',
@@ -128,7 +122,7 @@ async function sendFlexMessage() {
                                     },
                                     {
                                         type: 'text',
-                                        text: document.getElementById('nameId').value,
+                                        text: name,
                                         size: 'sm',
                                         color: '#111111',
                                         align: 'end',
@@ -149,7 +143,7 @@ async function sendFlexMessage() {
                                     },
                                     {
                                         type: 'text',
-                                        text: document.getElementById('keynumberId').value,
+                                        text: phone,
                                         size: 'sm',
                                         color: '#111111',
                                         align: 'end',
@@ -170,7 +164,7 @@ async function sendFlexMessage() {
                                     },
                                     {
                                         type: 'text',
-                                        text: document.getElementById('keynumber2Id').value,
+                                        text: email,
                                         size: 'sm',
                                         color: '#111111',
                                         align: 'end',
@@ -200,6 +194,7 @@ async function sendFlexMessage() {
 
     await liff.sendMessages([flexMessage]);
 }
+
 
 let url = `${WEB_APP_URL}`;
 let fileInput = document.getElementById("file");

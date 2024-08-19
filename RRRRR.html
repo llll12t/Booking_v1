@@ -5,19 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ลงทะเบียน</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 </head>
 <body>
-<div class="bg-gradient-to-r from-slate-900 to-slate-700">
-    <div class="flex items-center justify-center max-w-sm mx-auto min-h-screen">
+<div class="bg-slate-700">
+    <div class="flex items-center justify-center max-w-md mx-auto min-h-screen">
         <form>
-            <div class="">    
                 <div class="mb-5 text-center">
-                    <div class="mx-auto w-32 h-32 mb-2 border rounded-md  relative  mb-4 shadow-inset">
-                        <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Default Image" id="preview" class="h-32 w-32 object-cover rounded-md">
+                    <div class="mx-auto w-32 h-32 mb-2 border rounded-2xl relative bg-gray-100 mb-4 shadow-inset">
+                        <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Default Image" id="preview" class="h-32 w-32 object-cover rounded-2xl">
                     </div>
-                    <label for="file" class="cursor-pointer inline-flex justify-between items-center focus:outline-none border py-2 px-4 rounded-lg shadow-sm text-left text-gray-600 bg-white hover:bg-gray-100 font-medium">
+                    <label for="file" class="cursor-pointer inline-flex justify-between items-center focus:outline-none border py-2 px-4 rounded-2xl shadow-sm text-left text-gray-600 bg-white hover:bg-gray-100 font-medium">
                         <img src="https://img.icons8.com/?size=100&id=748&format=png&color=000000" class="w-6 h-6 mx-1">
                         อัพโหลดรูป
                         <input type="file" id="file" name="file" accept="image/*" class="hidden">
@@ -26,31 +25,18 @@
                 </div>
               
                 <div class="flex items-center space-x-2 mb-4">
-                    <span class="bg-white border border-white rounded-md p-2">
-                        <img src="https://img.icons8.com/?size=100&id=82753&format=png&color=000000" class="w-6 h-6">
-                    </span>
-                    <input type="text" class="input-field w-full border bg-slate-100 border-white p-2 text-gray-500 rounded-md" id="userlineId" placeholder="lineId" name="userlineId" >
+                    <input type="text" class="input-field w-full bg-slate-800 p-2 text-gray-100 text-center rounded-2xl" id="userlineId" placeholder="lineId" name="userlineId" >
                 </div>
                 <div class="flex items-center space-x-2 mb-4">
-                    <span class="bg-white border border-white rounded-md p-2">
-                        <img src="https://img.icons8.com/?size=100&id=xXjlE05o3dcg&format=png&color=000000" class="w-6 h-6">
-                    </span>
-                    <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="nameId" placeholder="ชื่อ-สกุล" name="nameId" required>
+                    <input type="text" class="input-field w-full border border-white px-4 py-2 text-md rounded-2xl" id="nameId" placeholder="ชื่อ-สกุล" name="nameId" required>
                 </div>
                 <div class="flex items-center space-x-2 mb-4">
-                    <span class="bg-white border border-white rounded-md p-2">
-                        <img src="https://img.icons8.com/?size=100&id=9659&format=png&color=000000" class="w-6 h-6">
-                    </span>
-                    <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="keynumberId" placeholder="เบอร์ติดต่อ" name="keynumberId" required>
+                    <input type="text" class="input-field w-full border border-white px-4 py-2 text-md rounded-2xl" id="keynumberId" placeholder="เบอร์ติดต่อ" name="keynumberId" required>
                 </div>
                 <div class="flex items-center space-x-2 mb-6">
-                    <span class="bg-white border border-white rounded-md p-2">
-                        <img src="https://img.icons8.com/?size=100&id=mtfWz20b5AxB&format=png&color=000000" class="w-6 h-6">
-                    </span>
-                    <input type="text" class="input-field w-full border border-white p-2 text-md rounded-md" id="keynumber2Id" placeholder="อีเมล(ถ้ามี)" name="keynumber2Id" >
+                    <input type="text" class="input-field w-full border border-white px-4 py-2 text-md rounded-2xl" id="keynumber2Id" placeholder="เพิ่มเติม(ถ้ามี)" name="keynumber2Id" >
                 </div>
-                <button type="button" id="submitBtn" class="bg-slate-800  text-center w-full text-white p-4 rounded-md hover:bg-blue-700">บันทึกข้อมูล</button>
-            </div>
+                <button type="button" id="submitBtn" class="bg-slate-800  text-center w-full text-white p-4 rounded-2xl hover:bg-blue-700">บันทึกข้อมูล</button>
         </form>
     </div>
 </div>
@@ -63,7 +49,7 @@ const LIFF_ID = '2006029649-d8jEJVoG'; // LIFF ID
 
 // ฟังก์ชันเริ่มต้น LIFF SDK
 window.onload = function () {
-   initializeLiff();
+    initializeLiff();
 };
 
 // ฟังก์ชันสำหรับเริ่มต้น LIFF SDK

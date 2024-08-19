@@ -115,32 +115,31 @@
                     </span>
                     <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-center  text-slate-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
-                <div class="bg-slate-200 px-4 py-6 rounded-2xl">
+                    <div class="bg-slate-300 px-4 py-4 my-4 rounded-2xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
                         <div id="loadingOverlay">
                             <div class="text-center text-white">ค้นหารายชื่อ..</div>
                         </div>
+                        <div class="pb-4">ฟอร์มข้อมูล</div>
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
-                                <div class="flex  mb-4">
-                                    <span class="flex items-center bg-slate-900 rounded-2xl px-4 py-1 mr-1 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
+                                <div class="flex mb-6">
+                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
                                     <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <div class="flex  mb-4">
-                                    <span class="flex items-center bg-slate-900 rounded-2xl px-4 py-1 mr-1 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                <div class="flex  mb-6">
+                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
                                     <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
                                 <div class="flex">
-                                    <span class="flex items-center bg-slate-900 rounded-2xl px-4 py-1 mr-1 w-32"><span class="text-white text-sm">เพิ่มเติม</span></span>
+                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เพิ่มเติม(ถ้ามี)</span></span>
                                     <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <input type="hidden" id="userId" name="userId">
                                 <input type="hidden" id="userlineid" name="userlineid">
                             </div>
                         </div>
                     </div>
-                </div>
                 <div id="buttons" class="">
                     <button type="button" onclick="nextStep()" class="w-full bg-slate-900 text-white py-3 mt-4 rounded-2xl">ถัดไป</button>
                 </div>

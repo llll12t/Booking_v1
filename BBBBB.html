@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบนัดหมาย</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <style>
         .selected {
@@ -81,9 +81,9 @@
         .blink { animation: blink 1s infinite; }
     </style>
 </head>
-<body class="bg-indigo-50 flex flex-col min-h-screen">
+<body class="bg-slate-100 flex flex-col min-h-screen">
     <!-- Header Section -->
-    <div class="bg-indigo-700 text-white p-10">
+    <div class="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-10">
         <h1 class="text-xl font-bold">นัดหมาย BOOKING APP</h1>
         <p class="text-sm">เปิด 10:00-17:00 น.</p>
     </div>
@@ -105,8 +105,8 @@
                     <h2 class="text-xl">เลือกบริการ</h2>
                 </div>
                 <div class="flex justify-between">
-                    <button type="button" onclick="selectOption(1)" class="w-full h-48 mx-2 bg-indigo-700 text-white py-3 rounded-lg">ทรีทเมนท์</button>
-                    <button type="button" onclick="selectOption(2)" class="w-full h-48 mx-2 bg-green-700 text-white py-3 rounded-lg">พบแพทย์</button>
+                    <button type="button" onclick="selectOption(1)" class="w-full h-48 mx-2 bg-teal-100 text-black py-3 rounded-2xl">ทรีทเมนท์</button>
+                    <button type="button" onclick="selectOption(2)" class="w-full h-48 mx-2 bg-blue-200 text-black py-3 rounded-2xl">พบแพทย์</button>
                 </div>
             </div>
 

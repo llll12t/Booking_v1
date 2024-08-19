@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบนัดหามาย</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://slateic.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <style>
         .selected {
-            background-color: #4338ca;
+            background-color: #0f172a  !IMPORTANT;
             color: white;
         }
         .no-scrollbar {
@@ -35,7 +35,7 @@
         .loading-spinner {
             border: 16px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 16px solid #4338ca;
+            border-top: 16px solid #1a1a1a;
             width: 120px;
             height: 120px;
             animation: spin 2s linear infinite;
@@ -81,9 +81,9 @@
         .blink { animation: blink 1s infinite; }
     </style>
 </head>
-<body class="bg-indigo-50 flex flex-col min-h-screen">
+<body class="bg-slate-100 flex flex-col min-h-screen">
     <!-- Header Section -->
-    <div class="bg-indigo-700 text-white p-10">
+    <div class="bg-slate-900 text-white p-10">
     <h1 class="text-xl font-bold">นัดหมาย BOOKING APP</h1>
     <p class="text-sm">เปิด 10:00-17:00 น.</p>
 </div>
@@ -99,23 +99,23 @@
             <input type="hidden" name="action" value="makeBooking">
             <div id="step1" class="grid gap-5 max-w-sm mx-auto">
                 <div>
-                    <input type="text" id="userlineid" name="userlineid" class="w-full p-2 border border-blue-900 rounded-md hidden" required>
+                    <input type="text" id="userlineid" name="userlineid" class="w-full p-2  rounded-2xl hidden" required>
                 </div>
                 <div class="flex">
-                    <span class="bg-white flex items-center border rounded-l p-2 w-24">
+                    <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> บริการ </span>
                     </span>
-                    <select id="service" name="service" class="rounded-r bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
+                    <select id="service" name="service" class="rounded-2xl bg-white border text-slate-900 block text-center  flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
                 </div>
                 <div class="flex">
-                    <span class="bg-white flex items-center border rounded-l p-2 w-24">
+                    <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> สถานที่ </span>
                     </span>
-                    <select id="locationservice" name="locationservice" class="rounded-r bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
+                    <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-center  text-slate-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
-                <div class="bg-indigo-200 px-4 py-6 rounded-lg">
+                <div class="bg-slate-200 px-4 py-6 rounded-2xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
                         <div id="loadingOverlay">
@@ -123,17 +123,17 @@
                         </div>
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
-                                <div class="flex border border-blue-900 mb-4 rounded">
-                                    <span class="flex items-center bg-indigo-700 rounded-l p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
-                                    <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-r">
+                                <div class="flex  mb-4">
+                                    <span class="flex items-center bg-slate-900 rounded-2xl px-4 py-1 mr-1 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
+                                    <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <div class="flex border border-blue-900 mb-4 rounded">
-                                    <span class="flex items-center bg-indigo-700 rounded-l p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
-                                    <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-r">
+                                <div class="flex  mb-4">
+                                    <span class="flex items-center bg-slate-900 rounded-2xl px-4 py-1 mr-1 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                    <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <div class="flex border border-blue-900 rounded">
-                                    <span class="flex items-center bg-indigo-700 rounded-l p-2 w-32"><span class="text-white text-sm">อีเมล</span></span>
-                                    <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-r">
+                                <div class="flex">
+                                    <span class="flex items-center bg-slate-900 rounded-2xl px-4 py-1 mr-1 w-32"><span class="text-white text-sm">เพิ่มเติม</span></span>
+                                    <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
                                 <input type="hidden" id="userId" name="userId">
                                 <input type="hidden" id="userlineid" name="userlineid">
@@ -142,14 +142,14 @@
                     </div>
                 </div>
                 <div id="buttons" class="">
-                    <button type="button" onclick="nextStep()" class="w-full bg-red-400 text-white py-3 mt-4 rounded-lg">ถัดไป</button>
+                    <button type="button" onclick="nextStep()" class="w-full bg-slate-900 text-white py-3 mt-4 rounded-2xl">ถัดไป</button>
                 </div>
 
             </div>
             <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                 <div class="text-center font-semibold mb-6">
                     <div class="flex justify-center space-x-2">
-                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-indigo-700 rounded-md px-2 py-2">
+                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-slate-900 rounded-2xl px-2 py-2">
                             <option value="0">มกราคม</option>
                             <option value="1">กุมภาพันธ์</option>
                             <option value="2">มีนาคม</option>
@@ -163,7 +163,7 @@
                             <option value="10">พฤศจิกายน</option>
                             <option value="11">ธันวาคม</option>
                         </select>
-                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-indigo-700 rounded-md px-2 py-2"></select>
+                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-slate-900 rounded-2xl px-2 py-2"></select>
                     </div>
                 </div>
                 <div class="overflow-x-auto mb-4 no-scrollbar">
@@ -173,19 +173,19 @@
               
                 <div class="hidden">
                     <label for="time" class="block text-sm">Time:</label>
-                    <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3 border border-blue-900 rounded-md">
+                    <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3  rounded-2xl">
                 </div>
                 <div class="hidden text-center">
-                    <input type="submit" value="Submit" class="px-6 py-4 bg-gray-100 text-black font-semibold rounded-md">
+                    <input type="submit" value="Submit" class="px-6 py-4 bg-slate-100 text-black font-semibold rounded-2xl">
                 </div>
-                    <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-indigo-700 py-3 rounded-lg">กลับหน้าหลัก</button>
+                    <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-slate-900 py-3 rounded-2xl">กลับหน้าหลัก</button>
                
             </div>
         </form>
     </div>
     <script>
-       
-       const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
+
+const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
         const LIFF_ID = '2006029649-bj0ez4Og';
 

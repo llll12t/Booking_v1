@@ -33,9 +33,9 @@
             align-items: center;
         }
         .loading-spinner {
-            border: 16px solid #1e293b;
+            border: 16px solid #aaaaaa;
             border-radius: 50%;
-            border-top: 16px solid #4338ca;
+            border-top: 16px solid #1e293b;
             width: 120px;
             height: 120px;
             animation: spin 2s linear infinite;
@@ -50,7 +50,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgb(0 28 131 / 50%);
+            background: rgb(30 41 59 0.5);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -145,7 +145,7 @@
                                     <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
                                 <div class="flex rounded-md">
-                                    <span class="flex items-center bg-slate-800 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">อีเมล(ถ้ามี)</span></span>
+                                    <span class="flex items-center bg-slate-800 rounded-md mr-2 p-2 w-32"><span class="text-white text-sm">เพิ่มเติม(ถ้ามี)</span></span>
                                     <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-md">
                                 </div>
                                 <input type="hidden" id="userlineid" name="userlineid">
@@ -189,7 +189,7 @@
                     <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3 border border-blue-900 rounded-md">
                 </div>
                 <div class="hidden text-center">
-                    <input type="submit" value="Submit" class="px-6 py-4 bg-gray-100 text-black font-semibold rounded-md">
+                    <input type="submit" value="Submit" class="px-6 py-4 bg-slate-800 text-black font-semibold rounded-md">
                 </div>
                 <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-slate-800 py-3 rounded-lg">กลับหน้าหลัก</button>
             </div>

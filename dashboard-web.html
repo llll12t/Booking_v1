@@ -8,13 +8,37 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    body {
+      font-family: "Noto Sans Thai", sans-serif;
+    }
+
+    .bg-main {
+      background-color: #513709;
+    }
+
+    .text-main {
+      color: #513709;
+    }
+
+    .bg-sub {
+      background-color: #FFFCF7;
+    }
+
+    .bg-sub2 {
+      background-color: #faebd7;
+    }
+
+    .border-main {
+      border: 2px solid #513709;
+    }
+
     .loader {
-      border-top-color: #1e293b;
-      animation: spin 1s linear infinite;
-      border: 8px solid #fdefff;
+      border: 8px solid rgba(255, 255, 255, 0.3);
+      border-top: 8px solid #ffffff;
       border-radius: 50%;
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
     }
 
     @keyframes spin {
@@ -29,7 +53,7 @@
 
   <!-- Sidebar -->
   <aside class="w-64 bg-white text-slate-800 shadow-lg p-6">
-    <h2 class="text-md font-bold mb-4">IIIRN STUDIO</h2>
+    <h2 class="text-md font-bold mb-4">ดอกเตอร์ชมคลีนิก</h2>
     <p class="text-sm font-bold mb-4">รายชื่อสมาชิก</p>
 
     <form id="fetchForm" class="space-y-4">
@@ -50,13 +74,13 @@
         </datalist>
       </div>
       <button type="submit"
-        class="w-full py-2 px-4 bg-slate-800 text-white font-semibold rounded-2xl hover:bg-slate-600">ค้นหา</button>
+        class="w-full py-2 px-4 bg-main text-white font-semibold rounded-2xl hover:bg-slate-600">ค้นหา</button>
     </form>
     <div id="result" class="hidden">
       <div class="space-y-4 p-4 bg-slate-50 rounded-2xl">
         <!-- Add Button to Insert Data into Table -->
         <button id="addDataButton"
-          class="w-full py-2 px-4 bg-slate-600 text-white font-semibold rounded-2xl hover:bg-slate-400">เพิ่มการนัดหมาย</button>
+          class="w-full py-2 px-4 bg-main text-white font-semibold rounded-2xl hover:bg-slate-400">เพิ่มการนัดหมาย</button>
 
         <!-- Profile Picture -->
         <div class="flex justify-center">
@@ -89,8 +113,8 @@
         </div>
         <div>
           <label for="timestampInput" class="block text-xs font-medium text-slate-700">Timestamp:</label>
-          <input type="text" id="timestampInput" class="mt-1 block text-xs w-full p-2 border border-slate-300 rounded-2xl"
-            readonly>
+          <input type="text" id="timestampInput"
+            class="mt-1 block text-xs w-full p-2 border border-slate-300 rounded-2xl" readonly>
         </div>
 
       </div>
@@ -116,11 +140,23 @@
       </div>
       <div>
         <label for="locationFilter" class="block text-xs font-medium text-slate-700">กรองตามสถานที่</label>
-        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl"
-          placeholder="พิมพ์สถานที่">
+        <select id="locationFilter" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
+          <option value="">สถานที่</option>
+          <option value="ลพบุรี">ลพบุรี</option>
+          <option value="สิงห์บุรี">สิงห์บุรี</option>
+        </select>
       </div>
+      <div>
+        <label for="dateSortFilter" class="block text-xs font-medium text-slate-700">กรองตามวันที่</label>
+        <select id="dateSortFilter" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
+          <option value="">ไม่เลือก</option>
+          <option value="latest">ล่าสุด</option>
+          <option value="oldest">เก่าสุด</option>
+        </select>
+      </div>
+
       <button id="applyFiltersButton"
-        class="mt-6 py-2 px-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-600">คัดกรองข้อมูล</button>
+        class="mt-5 py-2 px-4 bg-main text-white rounded-2xl hover:bg-slate-600">คัดกรองข้อมูล</button>
     </div>
 
     <!-- Table Section -->
@@ -133,7 +169,7 @@
             <th class="px-4 py-2 border border-slate-100">บริการ</th>
             <th class="px-4 py-2 border border-slate-100">สถานที่</th>
             <th class="px-4 py-2 border border-slate-100">เบอร์โทร</th>
-            <th class="px-4 py-2 border border-slate-100">อีเมล</th>
+            <th class="px-4 py-2 border border-slate-100">หมายเหตุ</th>
             <th class="px-4 py-2 border border-slate-100">วันที่</th>
             <th class="px-4 py-2 border border-slate-100">เวลา</th>
             <th class="px-4 py-2 border border-slate-100">สถานะ</th>
@@ -145,6 +181,11 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination Controls Section -->
+    <div id="paginationControls" class="mt-4 flex justify-center">
+      <!-- ปุ่มควบคุมการแบ่งหน้าจะถูกสร้างที่นี่ -->
+    </div>
   </main>
 
   <!-- Modal Popup -->
@@ -154,7 +195,8 @@
       <form id="modalForm" class="space-y-4">
         <div>
           <label for="serviceInput" class="block text-xs font-medium text-slate-700">บริการ</label>
-          <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl" required>
+          <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl"
+            required>
         </div>
         <div>
           <label for="locationInput" class="block text-xs font-medium text-slate-700">สถานที่</label>
@@ -187,88 +229,192 @@
   </div>
 
   <script>
-    const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
-    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
+
+    const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpMhWdIuNQqLzPj8DLs4jh2zrGk5N9k4-_7PwTS23ULcmF2n_h4QetfcIVV7hx0Jk/exec';
+    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPHUFlrLbGCtR0oXfM5ZKMZrhxB1foSLtpX4L9t2g8fiNpfBDEcYPJ9WaUhf8sInY2/exec';
 
     document.addEventListener('DOMContentLoaded', function () {
+      let currentPage = 1;
+      const rowsPerPage = 15;
+      let filteredDetails = [];
 
-      // Function to fetch and populate the table
-      function fetchAndPopulateTable() {
-        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-          .then(response => response.json())
-          .then(details => {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; // Clear old data
+      // ฟังก์ชันกรองและจัดเรียงข้อมูล
+      function applyFilters(details) {
+        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+        const dateSortFilter = document.getElementById('dateSortFilter').value.toLowerCase();
 
-            details.forEach(detail => {
-              // Assign keyid to detail.id
-              detail.id = detail.idKey;
+        filteredDetails = details.filter(detail => {
+          const statusMatches = statusFilter === '' || detail.status.toLowerCase() === statusFilter;
+          const locationMatches = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
+          return statusMatches && locationMatches;
+        });
 
-              // Determine button states based on status
-              let disableConfirm = false;
-              let disableComplete = false;
-              let disableCancel = false;
-              let disableReminder = false;
-
-              switch (detail.status) {
-                case 'รอการยืนยัน':
-                  disableComplete = true;
-                  break;
-                case 'ยืนยันแล้ว':
-                  disableConfirm = true;
-                  disableReminder = true;
-                  break;
-                case 'ยกเลิก':
-                  disableCancel = true;
-                  disableConfirm = true;
-                  disableComplete = true;
-                  disableReminder = true;
-                  break;
-                case 'เสร็จสิ้น':
-                  disableConfirm = true;
-                  disableCancel = true;
-                  disableComplete = true;
-                  disableReminder = true;
-                  break;
-              }
-
-              // Create a new table row
-              const row = document.createElement('tr');
-
-              // Populate the row with data and disabled buttons as necessary
-              row.innerHTML = `
-            <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
-            <td class="px-4 py-2 border">${detail.name}</td>
-            <td class="px-4 py-2 border">${detail.service}</td>
-            <td class="px-4 py-2 border">${detail.locationservice}</td>
-            <td class="px-4 py-2 border">${detail.phonenumber}</td>
-            <td class="px-4 py-2 border">${detail.note}</td>
-            <td class="px-4 py-2 border">${detail.date}</td>
-            <td class="px-4 py-2 border">${detail.time}</td>
-            <td class="px-4 py-2 border">${detail.status}</td>
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded-2xl ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded-2xl ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded-2xl ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded-2xl ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
-            </td>
-          `;
-
-              // Append the new row to the table body
-              tableBody.appendChild(row);
-            });
-
-            // Re-attach event listeners for the new buttons
-            attachEventListeners();
-          })
-          .catch(error => {
-            console.error('Error fetching user details:', error);
+        // จัดเรียงข้อมูลตามวันที่ (แปลงเป็นรูปแบบที่จัดเรียงได้)
+        if (dateSortFilter === 'latest') {
+          filteredDetails.sort((a, b) => {
+            return convertToSortableDate(b.date) - convertToSortableDate(a.date);
           });
+        } else if (dateSortFilter === 'oldest') {
+          filteredDetails.sort((a, b) => {
+            return convertToSortableDate(a.date) - convertToSortableDate(b.date);
+          });
+        }
+
+        paginateData();
       }
 
-      // Initial table population
+      // ฟังก์ชันการแบ่งหน้า
+      function paginateData() {
+  const tableBody = document.getElementById('tableBody');
+  tableBody.innerHTML = ''; // Clear old data
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedDetails = filteredDetails.slice(startIndex, endIndex);
+
+  paginatedDetails.forEach(detail => {
+    // Determine button states based on status
+    let disableConfirm = false;
+    let disableComplete = false;
+    let disableCancel = false;
+    let disableReminder = false;
+
+    switch (detail.status) {
+      case 'รอการยืนยัน':
+        disableComplete = true;
+        break;
+      case 'ยืนยันแล้ว':
+        disableConfirm = true;
+        disableReminder = true;
+        break;
+      case 'ยกเลิก':
+        disableCancel = true;
+        disableConfirm = true;
+        disableComplete = true;
+        disableReminder = true;
+        break;
+      case 'เสร็จสิ้น':
+        disableConfirm = true;
+        disableCancel = true;
+        disableComplete = true;
+        disableReminder = true;
+        break;
+    }
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="hidden">${detail.userlineid}</td>
+      <td class="px-4 py-2 border">${detail.name}</td>
+      <td class="px-4 py-2 border">${detail.service}</td>
+      <td class="px-4 py-2 border">${detail.locationservice}</td>
+      <td class="px-4 py-2 border">${detail.phonenumber}</td>
+      <td class="px-4 py-2 border">${detail.note}</td>
+      <td class="px-4 py-2 border">${convertToDisplayDate(detail.date)}</td>
+      <td class="px-4 py-2 border">${detail.time}</td>
+      <td class="px-4 py-2 border">${detail.status}</td>
+      <td class="px-4 py-2 border">
+        <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded-2xl ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
+        <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded-2xl ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+        <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded-2xl ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
+        <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded-2xl ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  renderPaginationControls();
+  attachEventListeners(); // Re-attach event listeners after paginating
+}
+
+
+      // ฟังก์ชันแปลงวันที่จาก DD-MM-YYYY เป็น YYYY-MM-DD เพื่อจัดเรียง
+      function convertToSortableDate(dateStr) {
+        const [day, month, year] = dateStr.split('-');
+        return new Date(`${year}-${month}-${day}`);
+      }
+// ฟังก์ชันแปลงวันที่จาก YYYY-MM-DD เป็น DD-MM-YYYY เพื่อแสดงผล
+function convertToDisplayDate(dateStr) {
+    // Check if the date is in YYYY-MM-DD format
+    if (/\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        const [year, month, day] = dateStr.split('-');
+        return `${day}-${month}-${year}`;
+    }
+    // If the date is already in DD-MM-YYYY format or another format, return it as is
+    return dateStr;
+}
+
+
+      // ฟังก์ชันแสดงปุ่มควบคุมการแบ่งหน้า
+      function renderPaginationControls() {
+        const paginationControls = document.getElementById('paginationControls');
+        paginationControls.innerHTML = '';
+
+        const totalPages = Math.ceil(filteredDetails.length / rowsPerPage);
+
+        // ปุ่มย้อนกลับ
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'ย้อนกลับ';
+        prevButton.disabled = currentPage === 1;
+        prevButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
+        prevButton.addEventListener('click', () => {
+          if (currentPage > 1) {
+            currentPage--;
+            paginateData();
+          }
+        });
+        paginationControls.appendChild(prevButton);
+
+        // แสดงเลขหน้า
+        for (let i = 1; i <= totalPages; i++) {
+          const pageButton = document.createElement('button');
+          pageButton.textContent = i;
+          pageButton.disabled = i === currentPage;
+          pageButton.classList.add('mx-1', 'py-1', 'px-2', 'rounded-2xl', i === currentPage ? 'bg-gray-300' : 'bg-main', 'text-white');
+          pageButton.addEventListener('click', () => {
+            currentPage = i;
+            paginateData();
+          });
+          paginationControls.appendChild(pageButton);
+        }
+
+        // ปุ่มถัดไป
+        const nextButton = document.createElement('button');
+        nextButton.textContent = 'ถัดไป';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
+        nextButton.addEventListener('click', () => {
+          if (currentPage < totalPages) {
+            currentPage++;
+            paginateData();
+          }
+        });
+        paginationControls.appendChild(nextButton);
+      }
+      // ดึงข้อมูลและแสดงตารางครั้งแรก
       fetchAndPopulateTable();
 
+      // ฟังก์ชันหลักในการดึงข้อมูลและกรอง
+      function fetchAndPopulateTable() {
+  showLoadingSpinner(true); // Show loading spinner
+
+        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+            .then(response => response.json())
+            .then(details => {
+            applyFilters(details);
+            })
+            .catch(error => {
+            console.error('Error fetching user details:', error);
+            })
+            .finally(() => {
+            showLoadingSpinner(false); // Hide loading spinner after the data is fetched
+            });
+        }
+
+      // เรียกใช้ฟังก์ชันเมื่อผู้ใช้คลิกปุ่มคัดกรองข้อมูล
+      document.getElementById('applyFiltersButton').addEventListener('click', function () {
+        fetchAndPopulateTable();
+      });
 
       // Fetch and populate the names list
       fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
@@ -332,7 +478,6 @@
       }
 
       // Action functions with table update
-
       function confirmBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -589,27 +734,6 @@
           }
         });
       }
-
-      // Apply filters on the table based on status and location
-      document.getElementById('applyFiltersButton').addEventListener('click', function () {
-        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
-
-        const tableRows = document.querySelectorAll('#tableBody tr');
-        tableRows.forEach(row => {
-          const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
-          const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-
-          const matchesStatus = statusFilter === '' || statusCell === statusFilter;
-          const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
-
-          if (matchesStatus && matchesLocation) {
-            row.classList.remove('hidden');
-          } else {
-            row.classList.add('hidden');
-          }
-        });
-      });
 
     });
   </script>

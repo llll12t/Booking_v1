@@ -29,7 +29,7 @@
             background: rgb(30 41 59 0.8);
             z-index: 1000;
             display: flex;
-            justify-content: center;0
+            justify-content: center;
             align-items: center;
         }
         .loading-spinner {
@@ -136,18 +136,22 @@
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
                                 <div class="flex mb-6">
-                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
+                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ-สกุล</span></span>
                                     <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
                                 <div class="flex  mb-6">
-                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อเล่น</span></span>
+                                    <input type="tel" id="nickname" name="nickname" class="w-full p-2 shadow-sm rounded-2xl">
+                                </div>
+                                <div class="flex  mb-6">
+                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
                                     <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
                                 <div class="flex">
-                                    <span class="flex items-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เพิ่มเติม(ถ้ามี)</span></span>
+                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">หมายเหตุ</span></span>
                                     <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
-                                <input type="hidden" id="userlineid" name="userlineid">
+                                <input type="text" id="userlineid" name="userlineid">
                             </div>
                         </div>
                     </div>
@@ -288,8 +292,9 @@
         function displayData(row) {
             document.getElementById('userlineid').value = row[1] || '';
             document.getElementById('name').value = row[2] || '';
-            document.getElementById('phonenumber').value = row[3] || '';
-            document.getElementById('note').value = row[4] || '';
+            document.getElementById('nickname').value = row[3] || '';
+            document.getElementById('phonenumber').value = row[4] || '';
+            document.getElementById('note').value = row[5] || '';
         }
 
         function showLoading(isLoading) {
@@ -452,9 +457,10 @@
                     showPopup('ยืนยันการนัดหมาย', `
                         <p>บริการ: ${form.service.value}</p>
                         <p>สถานที่: ${form.locationservice.value}</p>
-                        <p>ชื่อ: ${form.name.value}</p>
+                        <p>ชื่อ-สกุล: ${form.name.value}</p>
+                        <p>ชื่อเล่น: ${form.nickname.value}</p>
                         <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
-                        <p>อีเมล: ${form.note.value}</p>
+                        <p>หมายเหตุ: ${form.note.value}</p>
                         <p>วันที่: ${selectedDate}</p>
                         <p>เวลา: ${timeInput.value}</p>
                     `, 'confirm');
@@ -508,9 +514,10 @@
             showPopup('<p class="text-blue-900">📆 ยืนยันการนัดหมาย</p>', `
                 <p>บริการ: ${form.service.value}</p>
                 <p>สถานที่: ${form.locationservice.value}</p>
-                <p>ชื่อ: ${form.name.value}</p>
+                <p>ชื่อ-สกุล: ${form.name.value}</p>
+                <p>ชื่อเล่น: ${form.nickname.value}</p>
                 <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
-                <p>เพิ่มเติม: ${form.note.value}</p>
+                <p>หมายเหตุ: ${form.note.value}</p>
                 <p>วันที่: ${selectedDate}</p>
                 <p>เวลา: ${timeInput.value}</p>
             `, 'confirm');

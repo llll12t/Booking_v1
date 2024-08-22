@@ -82,10 +82,7 @@
         <button id="addDataButton"
           class="w-full py-2 px-4 bg-main text-white font-semibold rounded-2xl hover:bg-slate-400">เพิ่มการนัดหมาย</button>
 
-        <!-- Profile Picture 
-        <div class="flex justify-center">
-          <img id="fileLinkInput" class=" border border-slate-300 rounded-2xl max-w-xs w-24 h-24" alt="Profile Image">
-        </div>
+       
         <!-- Profile Information -->
         <div>
           <input type="text" id="userIdInput" class="mt-1 block w-full text-xs p-2 border bg-slate-100 rounded-2xl"
@@ -238,40 +235,41 @@
       const rowsPerPage = 15;
       let filteredDetails = [];
 
-      // ฟังก์ชันกรองและจัดเรียงข้อมูล
-      function applyFilters(details) {
-        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
-        const dateSortFilter = document.getElementById('dateSortFilter').value.toLowerCase();
 
-        filteredDetails = details.filter(detail => {
-          const statusMatches = statusFilter === '' || detail.status.toLowerCase() === statusFilter;
-          const locationMatches = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
-          return statusMatches && locationMatches;
-        });
+        // เก็บค่าฟิลเตอร์
+        let filterSettings = {
+          statusFilter: '',
+          locationFilter: '',
+          dateSortFilter: ''
+        };
+    // ฟังก์ชันกรองและจัดเรียงข้อมูล
+    function applyFilters(details) {
+    // ใช้ค่าฟิลเตอร์จาก filterSettings
+    const { statusFilter, locationFilter, dateSortFilter } = filterSettings;
 
-        // จัดเรียงข้อมูลตามวันที่ (แปลงเป็นรูปแบบที่จัดเรียงได้)
-        if (dateSortFilter === 'latest') {
-          filteredDetails.sort((a, b) => {
-            return convertToSortableDate(b.date) - convertToSortableDate(a.date);
-          });
-        } else if (dateSortFilter === 'oldest') {
-          filteredDetails.sort((a, b) => {
-            return convertToSortableDate(a.date) - convertToSortableDate(b.date);
-          });
-        }
+    filteredDetails = details.filter(detail => {
+      const statusMatches = statusFilter === '' || detail.status.toLowerCase() === statusFilter;
+      const locationMatches = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
+      return statusMatches && locationMatches;
+    });
 
-        paginateData();
-      }
+    if (dateSortFilter === 'latest') {
+      filteredDetails.sort((a, b) => convertToSortableDate(b.date) - convertToSortableDate(a.date));
+    } else if (dateSortFilter === 'oldest') {
+      filteredDetails.sort((a, b) => convertToSortableDate(a.date) - convertToSortableDate(b.date));
+    }
 
-      // ฟังก์ชันการแบ่งหน้า
-      function paginateData() {
-  const tableBody = document.getElementById('tableBody');
-  tableBody.innerHTML = ''; // Clear old data
+    paginateData();
+  }
 
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedDetails = filteredDetails.slice(startIndex, endIndex);
+  // ฟังก์ชันการแบ่งหน้า
+  function paginateData() {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedDetails = filteredDetails.slice(startIndex, endIndex);
 
   paginatedDetails.forEach(detail => {
     // Determine button states based on status
@@ -346,75 +344,83 @@ function convertToDisplayDate(dateStr) {
 
 
       // ฟังก์ชันแสดงปุ่มควบคุมการแบ่งหน้า
-      function renderPaginationControls() {
-        const paginationControls = document.getElementById('paginationControls');
-        paginationControls.innerHTML = '';
+  function renderPaginationControls() {
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = '';
 
-        const totalPages = Math.ceil(filteredDetails.length / rowsPerPage);
+    const totalPages = Math.ceil(filteredDetails.length / rowsPerPage);
 
-        // ปุ่มย้อนกลับ
-        const prevButton = document.createElement('button');
-        prevButton.textContent = 'ย้อนกลับ';
-        prevButton.disabled = currentPage === 1;
-        prevButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
-        prevButton.addEventListener('click', () => {
-          if (currentPage > 1) {
-            currentPage--;
-            paginateData();
-          }
-        });
-        paginationControls.appendChild(prevButton);
+    // ปุ่มย้อนกลับ
+    const prevButton = document.createElement('button');
+    prevButton.textContent = 'ย้อนกลับ';
+    prevButton.disabled = currentPage === 1;
+    prevButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
+    prevButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        paginateData();
+      }
+    });
+    paginationControls.appendChild(prevButton);
 
         // แสดงเลขหน้า
-        for (let i = 1; i <= totalPages; i++) {
-          const pageButton = document.createElement('button');
-          pageButton.textContent = i;
-          pageButton.disabled = i === currentPage;
-          pageButton.classList.add('mx-1', 'py-1', 'px-2', 'rounded-2xl', i === currentPage ? 'bg-gray-300' : 'bg-main', 'text-white');
-          pageButton.addEventListener('click', () => {
-            currentPage = i;
-            paginateData();
-          });
-          paginationControls.appendChild(pageButton);
-        }
+    for (let i = 1; i <= totalPages; i++) {
+      const pageButton = document.createElement('button');
+      pageButton.textContent = i;
+      pageButton.disabled = i === currentPage;
+      pageButton.classList.add('mx-1', 'py-1', 'px-2', 'rounded-2xl', i === currentPage ? 'bg-gray-300' : 'bg-main', 'text-white');
+      pageButton.addEventListener('click', () => {
+        currentPage = i;
+        paginateData();
+      });
+      paginationControls.appendChild(pageButton);
+    }
 
-        // ปุ่มถัดไป
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'ถัดไป';
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
-        nextButton.addEventListener('click', () => {
-          if (currentPage < totalPages) {
-            currentPage++;
-            paginateData();
-          }
-        });
-        paginationControls.appendChild(nextButton);
+    // ปุ่มถัดไป
+    const nextButton = document.createElement('button');
+    nextButton.textContent = 'ถัดไป';
+    nextButton.disabled = currentPage === totalPages;
+    nextButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
+    nextButton.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        paginateData();
       }
+    });
+    paginationControls.appendChild(nextButton);
+  }
+
       // ดึงข้อมูลและแสดงตารางครั้งแรก
       fetchAndPopulateTable();
 
-      // ฟังก์ชันหลักในการดึงข้อมูลและกรอง
-      function fetchAndPopulateTable() {
-  showLoadingSpinner(true); // Show loading spinner
+    // ฟังก์ชันหลักในการดึงข้อมูลและกรอง
+  function fetchAndPopulateTable() {
+    showLoadingSpinner(true); 
 
-        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-            .then(response => response.json())
-            .then(details => {
-            applyFilters(details);
-            })
-            .catch(error => {
-            console.error('Error fetching user details:', error);
-            })
-            .finally(() => {
-            showLoadingSpinner(false); // Hide loading spinner after the data is fetched
-            });
-        }
-
-      // เรียกใช้ฟังก์ชันเมื่อผู้ใช้คลิกปุ่มคัดกรองข้อมูล
-      document.getElementById('applyFiltersButton').addEventListener('click', function () {
-        fetchAndPopulateTable();
+    fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+      .then(response => response.json())
+      .then(details => {
+        applyFilters(details);
+      })
+      .catch(error => {
+        console.error('Error fetching user details:', error);
+      })
+      .finally(() => {
+        showLoadingSpinner(false);
       });
+  }
+
+    // เรียกใช้ฟังก์ชันเมื่อผู้ใช้คลิกปุ่มคัดกรองข้อมูล
+  document.getElementById('applyFiltersButton').addEventListener('click', function () {
+    filterSettings.statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+    filterSettings.locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+    filterSettings.dateSortFilter = document.getElementById('dateSortFilter').value.toLowerCase();
+
+    fetchAndPopulateTable();
+  });
+
+
+
 
       // Fetch and populate the names list
       fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
@@ -616,7 +622,6 @@ function convertToDisplayDate(dateStr) {
                 document.getElementById('nameIdInput').value = data.nameId || '';
                 document.getElementById('keynumberIdInput').value = data.keynumberId || '';
                 document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
-                document.getElementById('fileLinkInput').src = data.fileLink || '';
 
                 // Format and set the timestamp
                 if (data.timestamp) {

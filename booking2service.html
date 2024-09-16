@@ -82,24 +82,28 @@
     </style>
 </head>
 <body class="bg-slate-100 flex flex-col min-h-screen">
-    <!-- Header Section -->
+    <!-- ส่วนหัวของระบบ -->
     <div class="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-10">
         <h1 class="text-xl font-bold">นัดหมาย BOOKING APP</h1>
         <p class="text-sm">เปิด 10:00-17:00 น.</p>
     </div>
 
+    <!-- Overlay เมื่อโหลด -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
+
+    <!-- ป็อปอัพสำหรับแสดงการยืนยันการนัดหมาย -->
     <div class="popup" id="popup">
         <div class="max-w-md popup-content mx-auto" id="popupContent"></div>
     </div>
     
     <div class=" w-full mx-auto rounded py-4 px-4 mb-4">
+        <!-- ฟอร์มสำหรับการจอง -->
         <form id="bookingForm" class="space-y-2 pt-2" novalidate>
             <input type="hidden" name="action" value="makeBooking">
 
-            <!-- Step 0: Initial Selection -->
+            <!-- Step 0: เลือกบริการ -->
             <div id="step0" class="grid gap-5 max-w-sm mx-auto">
                 <div class="text-center font-semibold mb-6">
                     <h2 class="text-xl">เลือกบริการ</h2>
@@ -110,7 +114,7 @@
                 </div>
             </div>
 
-            <!-- Step 1: Booking Form -->
+            <!-- Step 1: ฟอร์มการกรอกข้อมูล -->
             <div id="step1" class="max-w-sm mx-auto" style="display:none;">
                 <div class="flex mb-4">
                     <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
@@ -161,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- Step 2: Date and Time Selection -->
+            <!-- Step 2: เลือกวันเวลา -->
             <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                 <div class="text-center font-semibold mb-6">
                     <div class="flex justify-center space-x-2">
@@ -207,6 +211,7 @@
         const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
         const LIFF_ID = '2006029649-ANdgDbZ8';
 
+        // ฟังก์ชันเลือกตัวเลือกบริการ (ทรีทเมนท์หรือพบแพทย์)
         async function selectOption(option) {
             if (option === 1) {
                 WEB_APP_URL = WEB_APP_URL_1;
@@ -214,16 +219,16 @@
                 WEB_APP_URL = WEB_APP_URL_2;
             }
 
-            document.getElementById('step0').style.display = 'none';
-            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step0').style.display = 'none'; // ซ่อน Step 0
+            document.getElementById('step1').style.display = 'block'; // แสดง Step 1
             showLoading(true);
-              // Fetch the data and initialize LIFF simultaneously
+            // ดึงข้อมูลบริการและสถานที่จาก Google Apps Script และเริ่มต้น LIFF
             await Promise.all([
                 fetchDropdownData(),
-                 initializeLiff() // LIFF initialization (currently commented out)
+                initializeLiff() 
             ]);
 
-            // Fetch availability data for the current date
+            // ตั้งค่าเริ่มต้นวันที่
             const currentDate = new Date();
             selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
             populateYearSelect(currentDate.getFullYear());
@@ -232,10 +237,10 @@
 
             await updateCalendar(currentDate);
             
-             showLoading(false);
+            showLoading(false);
         }
 
-        // Function to load calendar and dropdown data (only when you want to)
+        // ฟังก์ชันโหลดข้อมูลปฏิทินและ dropdown (บริการและสถานที่)
         async function loadCalendarData() {
             showLoading(true);
             const currentDate = new Date();
@@ -243,6 +248,8 @@
             await Promise.all([fetchDropdownData(), updateCalendar(currentDate)]);
             showLoading(false);
         }
+
+        // ฟังก์ชันเริ่มต้น LIFF
         async function initializeLiff() {
             try {
                 await liff.init({ liffId: LIFF_ID });
@@ -256,6 +263,7 @@
             }
         }
 
+        // ฟังก์ชันดึงข้อมูลโปรไฟล์ผู้ใช้จาก LIFF
         async function getUserProfile() {
             try {
                 const profile = await liff.getProfile();
@@ -267,6 +275,7 @@
             }
         }
 
+        // ฟังก์ชันดึงข้อมูลการจองจาก Google Apps Script
         async function fetchData(userId) {
             showLoading(true);
             try {
@@ -289,6 +298,7 @@
             }
         }
 
+        // ฟังก์ชันแสดงข้อมูลผู้ใช้ในฟอร์ม
         function displayData(row) {
             document.getElementById('userlineid').value = row[1] || '';
             document.getElementById('name').value = row[2] || '';
@@ -296,6 +306,7 @@
             document.getElementById('phonenumber').value = row[3] || '';
         }
 
+        // ฟังก์ชันแสดงหรือซ่อน overlay โหลด
         function showLoading(isLoading) {
             const overlay = document.getElementById('loadingOverlay');
             const inputs = document.querySelectorAll('.input-field');
@@ -307,6 +318,7 @@
         let selectedDate = '';
         let isSubmitting = false;
 
+        // ฟังก์ชันไปยังขั้นตอนถัดไป
         function nextStep() {
             if (currentStep < 2) {
                 document.getElementById(`step${currentStep}`).style.display = 'none';
@@ -318,6 +330,7 @@
             }
         }
 
+        // ฟังก์ชันย้อนกลับไปยังขั้นตอนก่อนหน้า
         function prevStep() {
             if (currentStep > 1) {
                 document.getElementById(`step${currentStep}`).style.display = 'none';
@@ -329,6 +342,7 @@
             }
         }
 
+        // ฟังก์ชันดึงข้อมูล dropdown สำหรับบริการและสถานที่
         async function fetchDropdownData() {
             try {
                 const response = await fetch(`${WEB_APP_URL}?action=fetchServicesAndlocationservice`);
@@ -343,6 +357,7 @@
             }
         }
 
+        // ฟังก์ชันเติมข้อมูลลงใน dropdown
         function populateDropdown(dropdownId, items) {
             const dropdown = document.getElementById(dropdownId);
             dropdown.innerHTML = '';
@@ -366,6 +381,7 @@
 
         const daysOfWeek = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
+        // ฟังก์ชันเติมข้อมูลใน dropdown ปี
         function populateYearSelect(currentYear) {
             yearSelect.innerHTML = '';
             for (let i = currentYear; i <= currentYear + 3; i++) {
@@ -376,12 +392,14 @@
             }
         }
 
+        // ฟังก์ชันอัพเดทปฏิทิน
         async function updateCalendar(date) {
             const month = date.getMonth();
             const year = date.getFullYear();
             populateDays(month, year, date.getDate());
         }
 
+        // ฟังก์ชันเติมวันที่ลงในปฏิทิน
         function populateDays(month, year, currentDay) {
             calendarDays.innerHTML = '';
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -405,6 +423,7 @@
             scrollToCurrentDay();
         }
 
+        // ฟังก์ชันเลื่อนให้วันปัจจุบันอยู่กลางหน้าจอ
         function scrollToCurrentDay() {
             setTimeout(() => {
                 const currentDayElement = document.getElementById('currentDay');
@@ -414,6 +433,7 @@
             }, 100);
         }
 
+        // ฟังก์ชันเลือกวันที่และแสดงข้อมูลการนัดหมาย
         async function selectDate(year, month, day) {
             selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
             showLoading(true);
@@ -432,6 +452,7 @@
             }
         }
 
+        // ฟังก์ชันอัพเดทข้อมูลความพร้อมของการนัดหมาย
         function updateAvailability(availability) {
             availabilityDiv.innerHTML = '';
             for (const [time, info] of Object.entries(availability)) {
@@ -472,14 +493,17 @@
             }
         }
 
+        // ฟังก์ชันแสดง overlay โหลด
         function showLoading(isLoading = true) {
             document.getElementById('loadingOverlay').style.display = isLoading ? 'flex' : 'none';
         }
 
+        // ฟังก์ชันซ่อน popup
         function hidePopup() {
             document.getElementById('popup').style.display = 'none';
         }
 
+        // ฟังก์ชันส่งข้อมูลการจอง
         async function submitBooking() {
             if (isSubmitting) return;
             isSubmitting = true;
@@ -504,6 +528,7 @@
             }
         }
 
+        // ฟังก์ชันเมื่อผู้ใช้กดส่งฟอร์ม
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!selectedDate) {
@@ -522,6 +547,7 @@
             `, 'confirm');
         });
 
+        // ฟังก์ชันแสดง popup ยืนยันการนัดหมาย
         function showPopup(title, content, type) {
             const popup = document.getElementById('popup');
             const popupContent = document.getElementById('popupContent');

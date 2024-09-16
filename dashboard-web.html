@@ -5,9 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Booking Dashboard</title>
+  <!-- ใช้ Tailwind CSS สำหรับการตกแต่ง -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- ใช้ SweetAlert2 สำหรับการแสดง popup แจ้งเตือน -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* การตกแต่งตัวโหลดแบบ spinner */
     .loader {
       border-top-color: #4a0890;
       animation: spin 1s linear infinite;
@@ -17,6 +20,7 @@
       height: 60px;
     }
 
+    /* คีย์เฟรมสำหรับการหมุน spinner */
     @keyframes spin {
       to {
         transform: rotate(360deg);
@@ -30,37 +34,37 @@
   <!-- Sidebar -->
   <aside class="w-64 bg-white text-indigo-800 shadow-lg p-6">
     <h2 class="text-md font-bold mb-4">รายชื่อสมาชิก</h2>
+    <!-- ฟอร์มสำหรับการค้นหาข้อมูล -->
     <form id="fetchForm" class="space-y-4">
       <div>
         <label for="nameId" class="block text-xs font-medium text-gray-700">ชื่อ</label>
         <input type="text" id="nameId" name="nameId" list="namesList"
           class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-        <datalist id="namesList">
-          <!-- Dynamically filled by JavaScript -->
-        </datalist>
+        <!-- รายชื่อจะถูกเติมโดย JavaScript -->
+        <datalist id="namesList"></datalist>
       </div>
       <div>
         <label for="keynumberId" class="block text-xs font-medium text-gray-700">เบอร์โทร</label>
         <input type="text" id="keynumberId" name="keynumberId" list="keynumbersList"
           class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-        <datalist id="keynumbersList">
-          <!-- Dynamically filled by JavaScript -->
-        </datalist>
+        <!-- เบอร์โทรจะถูกเติมโดย JavaScript -->
+        <datalist id="keynumbersList"></datalist>
       </div>
+      <!-- ปุ่มค้นหา -->
       <button type="submit"
         class="w-full py-2 px-4 bg-indigo-800 text-white font-semibold rounded-md hover:bg-indigo-600">ค้นหา</button>
     </form>
     <div id="result" class="hidden">
       <div class="space-y-4 p-4 bg-indigo-50 rounded-md">
-        <!-- Add Button to Insert Data into Table -->
+        <!-- ปุ่มสำหรับเพิ่มข้อมูลการนัดหมายลงในตาราง -->
         <button id="addDataButton"
           class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-400">เพิ่มการนัดหมาย</button>
 
-        <!-- Profile Picture -->
+        <!-- รูปภาพโปรไฟล์ -->
         <div class="flex justify-center">
           <img id="fileLinkInput" class="border border-gray-300 rounded-md max-w-xs w-24 h-24" alt="Profile Image">
         </div>
-        <!-- Profile Information -->
+        <!-- ข้อมูลโปรไฟล์ -->
         <div>
           <input type="text" id="userIdInput" class="mt-1 block w-full text-xs p-2 border bg-indigo-100 rounded-md"
             readonly>
@@ -93,6 +97,7 @@
 
       </div>
     </div>
+    <!-- แสดงข้อความถ้าไม่มีผลลัพธ์ -->
     <div id="noResult" class="hidden text-gray-700 text-center mt-10">
       ไม่มีข้อมูลในระบบ
     </div>
@@ -100,7 +105,7 @@
 
   <!-- Main Content Area -->
   <main class="flex-1 bg-gray-100 p-8">
-    <!-- Filter Section -->
+    <!-- ส่วนสำหรับการกรองข้อมูล -->
     <div class="flex space-x-4 mb-4">
       <div>
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
@@ -117,16 +122,17 @@
         <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
           placeholder="พิมพ์สถานที่">
       </div>
+      <!-- ปุ่มสำหรับคัดกรองข้อมูล -->
       <button id="applyFiltersButton"
         class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">คัดกรองข้อมูล</button>
     </div>
 
-    <!-- Table Section -->
+    <!-- ส่วนแสดงข้อมูลเป็นตาราง -->
     <div id="filteredData" class="overflow-x-auto">
       <table class="min-w-full text-xs bg-white">
         <thead>
           <tr>
-            <th class="hidden">Line ID</th> <!-- Hide the column header -->
+            <th class="hidden">Line ID</th> <!-- ซ่อนหัวข้อคอลัมน์ -->
             <th class="px-4 py-2 border">ชื่อ</th>
             <th class="px-4 py-2 border">บริการ</th>
             <th class="px-4 py-2 border">สถานที่</th>
@@ -135,7 +141,7 @@
             <th class="px-4 py-2 border">วันที่</th>
             <th class="px-4 py-2 border">เวลา</th>
             <th class="px-4 py-2 border">สถานะ</th>
-            <th class="px-4 py-2 border">Actions</th> <!-- Actions column -->
+            <th class="px-4 py-2 border">Actions</th> <!-- คอลัมน์สำหรับปุ่มกระทำ -->
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -145,10 +151,11 @@
     </div>
   </main>
 
-  <!-- Modal Popup -->
+  <!-- Modal Popup สำหรับการเพิ่มข้อมูล -->
   <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-lg p-6 w-1/3">
       <h2 class="text-md font-semibold mb-4">เพิ่มการนัดหมาย</h2>
+      <!-- ฟอร์มใน modal สำหรับกรอกข้อมูล -->
       <form id="modalForm" class="space-y-4">
         <div>
           <label for="serviceInput" class="block text-xs font-medium text-gray-700">บริการ</label>
@@ -173,7 +180,9 @@
             class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div class="flex justify-end space-x-2">
+          <!-- ปุ่มยกเลิกการกรอก -->
           <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
+          <!-- ปุ่มบันทึกข้อมูล -->
           <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Save</button>
         </div>
       </form>
@@ -186,24 +195,26 @@
   </div>
 
   <script>
+    /* URL สำหรับ Google Script */
     const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
 
+    /* เมื่อเอกสารพร้อมใช้งาน */
     document.addEventListener('DOMContentLoaded', function () {
 
-      // Function to fetch and populate the table
+      // ฟังก์ชันดึงข้อมูลและเติมลงในตาราง
       function fetchAndPopulateTable() {
         fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
           .then(response => response.json())
           .then(details => {
             const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; // Clear old data
+            tableBody.innerHTML = ''; // ลบข้อมูลเก่าออก
 
             details.forEach(detail => {
-              // Assign keyid to detail.id
+              // กำหนด id จาก idKey
               detail.id = detail.idKey;
 
-              // Determine button states based on status
+              // กำหนดสถานะของปุ่มตามสถานะปัจจุบัน
               let disableConfirm = false;
               let disableComplete = false;
               let disableCancel = false;
@@ -231,12 +242,12 @@
                   break;
               }
 
-              // Create a new table row
+              // สร้างแถวใหม่ในตาราง
               const row = document.createElement('tr');
 
-              // Populate the row with data and disabled buttons as necessary
+              // เติมข้อมูลลงในแถว
               row.innerHTML = `
-            <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
+            <td class="hidden">${detail.userlineid}</td> <!-- ซ่อน userlineid -->
             <td class="px-4 py-2 border">${detail.name}</td>
             <td class="px-4 py-2 border">${detail.service}</td>
             <td class="px-4 py-2 border">${detail.locationservice}</td>
@@ -253,11 +264,11 @@
             </td>
           `;
 
-              // Append the new row to the table body
+              // เพิ่มแถวใหม่ลงในตาราง
               tableBody.appendChild(row);
             });
 
-            // Re-attach event listeners for the new buttons
+            // เพิ่ม event listener ให้กับปุ่มใหม่
             attachEventListeners();
           })
           .catch(error => {
@@ -265,11 +276,10 @@
           });
       }
 
-      // Initial table population
+      // ดึงข้อมูลตารางในครั้งแรก
       fetchAndPopulateTable();
 
-
-      // Fetch and populate the names list
+      // ดึงข้อมูลรายชื่อจาก Google Script และเติมลงใน Datalist
       fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
         .then(response => response.json())
         .then(data => {
@@ -284,7 +294,7 @@
           console.error('Error fetching names:', error);
         });
 
-      // Fetch and populate the key numbers list
+      // ดึงข้อมูลเบอร์โทรจาก Google Script และเติมลงใน Datalist
       fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllKeyNumbers`)
         .then(response => response.json())
         .then(data => {
@@ -299,39 +309,7 @@
           console.error('Error fetching key numbers:', error);
         });
 
-      // Attach event listeners to the action buttons
-      function attachEventListeners() {
-        document.querySelectorAll('.confirm-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            confirmBooking(id);
-          });
-        });
-
-        document.querySelectorAll('.cancel-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            cancelBooking(id);
-          });
-        });
-
-        document.querySelectorAll('.complete-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            completeBooking(id);
-          });
-        });
-
-        document.querySelectorAll('.reminder-btn').forEach(button => {
-          button.addEventListener('click', function () {
-            const id = this.dataset.id;
-            sendReminder(id);
-          });
-        });
-      }
-
-      // Action functions with table update
-
+      // ฟังก์ชันสำหรับการยืนยันการนัดหมาย
       function confirmBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -349,7 +327,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('ยืนยันแล้ว!', 'การจองได้รับการยืนยันแล้ว.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateTable();  // อัพเดทตาราง
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -360,6 +338,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับการยกเลิกการนัดหมาย
       function cancelBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -377,7 +356,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('ยกเลิกแล้ว!', 'การนัดหมายถูกยกเลิกแล้ว.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateTable();  // อัพเดทตาราง
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -388,6 +367,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับการเสร็จสิ้นการนัดหมาย
       function completeBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -405,7 +385,7 @@
               .then(data => {
                 showLoadingSpinner(false);
                 Swal.fire('ยืนยันแล้ว!', 'การนัดหมายได้เสร็จสิ้นแล้ว.', 'success');
-                fetchAndPopulateTable();  // Update the table
+                fetchAndPopulateTable();  // อัพเดทตาราง
               })
               .catch(error => {
                 showLoadingSpinner(false);
@@ -416,6 +396,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับการส่งการเตือนความจำ
       function sendReminder(id) {
         Swal.fire({
           title: 'ส่งการเตือนความจำ?',
@@ -445,7 +426,7 @@
         });
       }
 
-
+      // เมื่อกดปุ่มค้นหาในฟอร์ม
       document.getElementById('fetchForm').addEventListener('submit', function (event) {
         event.preventDefault();
         const nameId = document.getElementById('nameId').value;
@@ -465,14 +446,15 @@
             .then(data => {
               showLoadingSpinner(false);
               if (data && Object.keys(data).length > 0) {
-                document.getElementById('userIdInput').value = data.userlineId || '';  // Set userid value
+                // กรอกข้อมูลลงใน input ต่างๆ
+                document.getElementById('userIdInput').value = data.userlineId || '';  
                 document.getElementById('keyIdInput').value = data.keyid || '';
                 document.getElementById('nameIdInput').value = data.nameId || '';
                 document.getElementById('keynumberIdInput').value = data.keynumberId || '';
                 document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
                 document.getElementById('fileLinkInput').src = data.fileLink || '';
 
-                // Format and set the timestamp
+                // กำหนด timestamp ที่ได้รับมา
                 if (data.timestamp) {
                   const timestamp = new Date(data.timestamp);
                   const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
@@ -481,7 +463,7 @@
                   document.getElementById('timestampInput').value = '';
                 }
 
-                // Filter and display table based on userlineid
+                // แสดงผลลัพธ์ในตาราง
                 filterTableByUserlineId(data.userlineId);
 
                 document.getElementById('result').classList.remove('hidden');
@@ -503,37 +485,37 @@
         }
       });
 
-      // Show the modal when "Add to Table" button is clicked
+      // แสดง modal เมื่อกดปุ่ม "เพิ่มการนัดหมาย"
       document.getElementById('addDataButton').addEventListener('click', function () {
         document.getElementById('modal').classList.remove('hidden');
       });
 
-      // Hide the modal when "Cancel" button is clicked
+      // ซ่อน modal เมื่อกดปุ่มยกเลิก
       document.getElementById('cancelButton').addEventListener('click', function () {
         document.getElementById('modal').classList.add('hidden');
       });
 
-      // Handle form submission in the modal
+      // เมื่อส่งฟอร์มใน modal
       document.getElementById('modalForm').addEventListener('submit', function (event) {
         event.preventDefault();
 
-        // Get data from profile inputs
+        // รับข้อมูลจาก input ของโปรไฟล์
         const userId = document.getElementById('userIdInput').value;
         const nameId = document.getElementById('nameIdInput').value;
         const keynumberId = document.getElementById('keynumberIdInput').value;
         const keynumber2Id = document.getElementById('keynumber2IdInput').value;
 
-        // Get additional data from modal inputs
+        // รับข้อมูลจาก input ของ modal
         const service = document.getElementById('serviceInput').value;
         const location = document.getElementById('locationInput').value;
         const date = document.getElementById('dateInput').value;
         const time = document.getElementById('timeInput').value;
         const status = document.getElementById('statusInput').value;
 
-        // Insert new row into the table
+        // เพิ่มแถวใหม่ในตาราง
         const newRow = `
           <tr>
-            <td class="hidden">${userId}</td> <!-- Hidden userlineid -->
+            <td class="hidden">${userId}</td> <!-- ซ่อน userlineid -->
             <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
             <td class="px-4 py-2 border">${service}</td> <!-- service -->
             <td class="px-4 py-2 border">${location}</td> <!-- location -->
@@ -552,22 +534,23 @@
         `;
         document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
 
-        // Hide the modal after submission
+        // ซ่อน modal หลังจากบันทึกข้อมูล
         document.getElementById('modal').classList.add('hidden');
 
-        // Save the data by calling the Google Script makeBooking function
+        // บันทึกข้อมูลการนัดหมายใหม่โดยเรียก Google Script makeBooking
         const saveUrl = `${DETAILS_SCRIPT_URL}?action=makeBooking&userlineid=${encodeURIComponent(userId)}&name=${encodeURIComponent(nameId)}&service=${encodeURIComponent(service)}&locationservice=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&phonenumber=${encodeURIComponent(keynumberId)}&note=${encodeURIComponent(keynumber2Id)}`;
         fetch(saveUrl, { method: 'POST' })
           .then(response => response.text())
           .then(data => {
             console.log('Booking saved successfully:', data);
-            fetchAndPopulateTable();  // Update the table
+            fetchAndPopulateTable();  // อัพเดทตาราง
           })
           .catch(error => {
             console.error('Error saving booking:', error);
           });
       });
 
+      // ฟังก์ชันแสดง/ซ่อน loading spinner
       function showLoadingSpinner(show) {
         const spinner = document.getElementById('loadingSpinner');
         if (show) {
@@ -577,6 +560,7 @@
         }
       }
 
+      // ฟังก์ชันกรองตารางตาม userlineid
       function filterTableByUserlineId(userid) {
         const tableRows = document.querySelectorAll('#tableBody tr');
         tableRows.forEach(row => {
@@ -589,7 +573,7 @@
         });
       }
 
-      // Apply filters on the table based on status and location
+      // ใช้ตัวกรองตามสถานะและสถานที่
       document.getElementById('applyFiltersButton').addEventListener('click', function () {
         const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
         const locationFilter = document.getElementById('locationFilter').value.toLowerCase();

@@ -8,37 +8,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    body {
-      font-family: "Noto Sans Thai", sans-serif;
-    }
-
-    .bg-main {
-      background-color: #513709;
-    }
-
-    .text-main {
-      color: #513709;
-    }
-
-    .bg-sub {
-      background-color: #FFFCF7;
-    }
-
-    .bg-sub2 {
-      background-color: #faebd7;
-    }
-
-    .border-main {
-      border: 2px solid #513709;
-    }
-
     .loader {
-      border: 8px solid rgba(255, 255, 255, 0.3);
-      border-top: 8px solid #ffffff;
+      border-top-color: #4a0890;
+      animation: spin 1s linear infinite;
+      border: 8px solid #fdefff;
       border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 2s linear infinite;
+      width: 60px;
+      height: 60px;
     }
 
     @keyframes spin {
@@ -49,85 +25,86 @@
   </style>
 </head>
 
-<body class="bg-slate-100 min-h-screen flex">
+<body class="bg-gray-100 min-h-screen flex">
 
   <!-- Sidebar -->
-  <aside class="w-64 bg-white text-slate-800 shadow-lg p-6">
-    <h2 class="text-md font-bold mb-4">ดอกเตอร์ชมคลีนิก</h2>
-    <p class="text-sm font-bold mb-4">รายชื่อสมาชิก</p>
-
+  <aside class="w-64 bg-white text-indigo-800 shadow-lg p-6">
+    <h2 class="text-md font-bold mb-4">รายชื่อสมาชิก</h2>
     <form id="fetchForm" class="space-y-4">
       <div>
-        <label for="nameId" class="block text-xs font-medium text-slate-700">ชื่อ</label>
+        <label for="nameId" class="block text-xs font-medium text-gray-700">ชื่อ</label>
         <input type="text" id="nameId" name="nameId" list="namesList"
-          class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
         <datalist id="namesList">
           <!-- Dynamically filled by JavaScript -->
         </datalist>
       </div>
       <div>
-        <label for="keynumberId" class="block text-xs font-medium text-slate-700">เบอร์โทร</label>
+        <label for="keynumberId" class="block text-xs font-medium text-gray-700">เบอร์โทร</label>
         <input type="text" id="keynumberId" name="keynumberId" list="keynumbersList"
-          class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
+          class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
         <datalist id="keynumbersList">
           <!-- Dynamically filled by JavaScript -->
         </datalist>
       </div>
       <button type="submit"
-        class="w-full py-2 px-4 bg-main text-white font-semibold rounded-2xl hover:bg-slate-600">ค้นหา</button>
+        class="w-full py-2 px-4 bg-indigo-800 text-white font-semibold rounded-md hover:bg-indigo-600">ค้นหา</button>
     </form>
     <div id="result" class="hidden">
-      <div class="space-y-4 p-4 bg-slate-50 rounded-2xl">
+      <div class="space-y-4 p-4 bg-indigo-50 rounded-md">
         <!-- Add Button to Insert Data into Table -->
         <button id="addDataButton"
-          class="w-full py-2 px-4 bg-main text-white font-semibold rounded-2xl hover:bg-slate-400">เพิ่มการนัดหมาย</button>
+          class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-400">เพิ่มการนัดหมาย</button>
 
-       
+        <!-- Profile Picture -->
+        <div class="flex justify-center">
+          <img id="fileLinkInput" class="border border-gray-300 rounded-md max-w-xs w-24 h-24" alt="Profile Image">
+        </div>
         <!-- Profile Information -->
         <div>
-          <input type="text" id="userIdInput" class="mt-1 block w-full text-xs p-2 border bg-slate-100 rounded-2xl"
+          <input type="text" id="userIdInput" class="mt-1 block w-full text-xs p-2 border bg-indigo-100 rounded-md"
             readonly>
         </div>
         <div>
-          <label for="keyIdInput" class="block text-xs font-medium text-slate-700">Key ID:</label>
-          <input type="text" id="keyIdInput" class="mt-1 block text-xs w-full p-2 border border-slate-300 rounded-2xl"
+          <label for="keyIdInput" class="block text-xs font-medium text-gray-700">Key ID:</label>
+          <input type="text" id="keyIdInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md"
             readonly>
         </div>
         <div>
-          <label for="nameIdInput" class="block text-xs font-medium text-slate-700">ชื่อ</label>
-          <input type="text" id="nameIdInput" class="mt-1 text-xs block w-full p-2 border border-slate-300 rounded-2xl"
+          <label for="nameIdInput" class="block text-xs font-medium text-gray-700">ชื่อ</label>
+          <input type="text" id="nameIdInput" class="mt-1 text-xs block w-full p-2 border border-gray-300 rounded-md"
             readonly>
         </div>
         <div>
-          <label for="keynumberIdInput" class="block text-xs font-medium text-slate-700">เบอร์ติดต่อ</label>
+          <label for="keynumberIdInput" class="block text-xs font-medium text-gray-700">เบอร์ติดต่อ</label>
           <input type="text" id="keynumberIdInput"
-            class="mt-1 block text-xs w-full p-2 border border-slate-300 rounded-2xl" readonly>
+            class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div>
-          <label for="keynumber2IdInput" class="block text-xs font-medium text-slate-700">ชื่อเล่น</label>
+          <label for="keynumber2IdInput" class="block text-xs font-medium text-gray-700">อีเมล</label>
           <input type="text" id="keynumber2IdInput"
-            class="mt-1 block text-xs w-full p-2 border border-slate-300 rounded-2xl" readonly>
+            class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div>
-          <label for="timestampInput" class="block text-xs font-medium text-slate-700">Timestamp:</label>
-          <input type="text" id="timestampInput"
-            class="mt-1 block text-xs w-full p-2 border border-slate-300 rounded-2xl" readonly>
+          <label for="timestampInput" class="block text-xs font-medium text-gray-700">Timestamp:</label>
+          <input type="text" id="timestampInput" class="mt-1 block text-xs w-full p-2 border border-gray-300 rounded-md"
+            readonly>
         </div>
 
       </div>
     </div>
-    <div id="noResult" class="hidden text-slate-700 text-center mt-10">
+    <div id="noResult" class="hidden text-gray-700 text-center mt-10">
       ไม่มีข้อมูลในระบบ
     </div>
   </aside>
 
   <!-- Main Content Area -->
-  <main class="flex-1 bg-slate-100 p-8">
+  <main class="flex-1 bg-gray-100 p-8">
     <!-- Filter Section -->
     <div class="flex space-x-4 mb-4">
       <div>
-        <label for="statusFilter" class="block text-xs font-medium text-slate-700">ค้นหาตามสถานะ</label>
-        <select id="statusFilter" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
+        <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
+        <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
           <option value="">All</option>
           <option value="รอการยืนยัน">รอการยืนยัน</option>
           <option value="ยืนยันแล้ว">ยืนยันแล้ว</option>
@@ -136,41 +113,29 @@
         </select>
       </div>
       <div>
-        <label for="locationFilter" class="block text-xs font-medium text-slate-700">กรองตามสถานที่</label>
-        <select id="locationFilter" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
-          <option value="">สถานที่</option>
-          <option value="ลพบุรี">ลพบุรี</option>
-          <option value="สิงห์บุรี">สิงห์บุรี</option>
-        </select>
+        <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
+        <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+          placeholder="พิมพ์สถานที่">
       </div>
-      <div>
-        <label for="dateSortFilter" class="block text-xs font-medium text-slate-700">กรองตามวันที่</label>
-        <select id="dateSortFilter" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
-          <option value="">ไม่เลือก</option>
-          <option value="latest">ล่าสุด</option>
-          <option value="oldest">เก่าสุด</option>
-        </select>
-      </div>
-
       <button id="applyFiltersButton"
-        class="mt-5 py-2 px-4 bg-main text-white rounded-2xl hover:bg-slate-600">คัดกรองข้อมูล</button>
+        class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">คัดกรองข้อมูล</button>
     </div>
 
     <!-- Table Section -->
     <div id="filteredData" class="overflow-x-auto">
-      <table class="min-w-full text-xs bg-white rounded-2xl">
+      <table class="min-w-full text-xs bg-white">
         <thead>
           <tr>
             <th class="hidden">Line ID</th> <!-- Hide the column header -->
-            <th class="px-4 py-2 border border-slate-100">ชื่อ</th>
-            <th class="px-4 py-2 border border-slate-100">บริการ</th>
-            <th class="px-4 py-2 border border-slate-100">สถานที่</th>
-            <th class="px-4 py-2 border border-slate-100">เบอร์โทร</th>
-            <th class="px-4 py-2 border border-slate-100">หมายเหตุ</th>
-            <th class="px-4 py-2 border border-slate-100">วันที่</th>
-            <th class="px-4 py-2 border border-slate-100">เวลา</th>
-            <th class="px-4 py-2 border border-slate-100">สถานะ</th>
-            <th class="px-4 py-2 border border-slate-100">Actions</th> <!-- Actions column -->
+            <th class="px-4 py-2 border">ชื่อ</th>
+            <th class="px-4 py-2 border">บริการ</th>
+            <th class="px-4 py-2 border">สถานที่</th>
+            <th class="px-4 py-2 border">เบอร์โทร</th>
+            <th class="px-4 py-2 border">อีเมล</th>
+            <th class="px-4 py-2 border">วันที่</th>
+            <th class="px-4 py-2 border">เวลา</th>
+            <th class="px-4 py-2 border">สถานะ</th>
+            <th class="px-4 py-2 border">Actions</th> <!-- Actions column -->
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -178,248 +143,130 @@
         </tbody>
       </table>
     </div>
-
-    <!-- Pagination Controls Section -->
-    <div id="paginationControls" class="mt-4 flex justify-center">
-      <!-- ปุ่มควบคุมการแบ่งหน้าจะถูกสร้างที่นี่ -->
-    </div>
   </main>
 
   <!-- Modal Popup -->
-  <div id="modal" class="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center hidden">
+  <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-lg p-6 w-1/3">
       <h2 class="text-md font-semibold mb-4">เพิ่มการนัดหมาย</h2>
       <form id="modalForm" class="space-y-4">
         <div>
-          <label for="serviceInput" class="block text-xs font-medium text-slate-700">บริการ</label>
-          <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl"
+          <label for="serviceInput" class="block text-xs font-medium text-gray-700">บริการ</label>
+          <input type="text" id="serviceInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label for="locationInput" class="block text-xs font-medium text-gray-700">สถานที่</label>
+          <input type="text" id="locationInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
             required>
         </div>
         <div>
-          <label for="locationInput" class="block text-xs font-medium text-slate-700">สถานที่</label>
-          <input type="text" id="locationInput" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl"
-            required>
+          <label for="dateInput" class="block text-xs font-medium text-gray-700">วันที่:</label>
+          <input type="date" id="dateInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
         </div>
         <div>
-          <label for="dateInput" class="block text-xs font-medium text-slate-700">วันที่:</label>
-          <input type="date" id="dateInput" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl" required>
+          <label for="timeInput" class="block text-xs font-medium text-gray-700">เวลา:</label>
+          <input type="time" id="timeInput" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
         </div>
         <div>
-          <label for="timeInput" class="block text-xs font-medium text-slate-700">เวลา:</label>
-          <input type="time" id="timeInput" class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl" required>
-        </div>
-        <div>
-          <label for="statusInput" class="block text-xs font-medium text-slate-700">สถานะ:</label>
+          <label for="statusInput" class="block text-xs font-medium text-gray-700">สถานะ:</label>
           <input type="text" id="statusInput" value="รอการยืนยัน"
-            class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl" readonly>
+            class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
         </div>
         <div class="flex justify-end space-x-2">
-          <button type="button" id="cancelButton" class="px-4 py-2 bg-slate-500 text-white rounded-2xl">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-2xl">Save</button>
+          <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-500 text-white rounded-md">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md">Save</button>
         </div>
       </form>
     </div>
   </div>
+
   <!-- Loading Spinner -->
-  <div id="loadingSpinner" class="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center hidden">
+  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
     <div class="loader"></div>
   </div>
 
   <script>
-
     const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
 
     document.addEventListener('DOMContentLoaded', function () {
-      let currentPage = 1;
-      const rowsPerPage = 15;
-      let filteredDetails = [];
 
+      // Function to fetch and populate the table
+      function fetchAndPopulateTable() {
+        fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+          .then(response => response.json())
+          .then(details => {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Clear old data
 
-        // เก็บค่าฟิลเตอร์
-        let filterSettings = {
-          statusFilter: '',
-          locationFilter: '',
-          dateSortFilter: ''
-        };
-    // ฟังก์ชันกรองและจัดเรียงข้อมูล
-    function applyFilters(details) {
-    // ใช้ค่าฟิลเตอร์จาก filterSettings
-    const { statusFilter, locationFilter, dateSortFilter } = filterSettings;
+            details.forEach(detail => {
+              // Assign keyid to detail.id
+              detail.id = detail.idKey;
 
-    filteredDetails = details.filter(detail => {
-      const statusMatches = statusFilter === '' || detail.status.toLowerCase() === statusFilter;
-      const locationMatches = locationFilter === '' || detail.locationservice.toLowerCase().includes(locationFilter);
-      return statusMatches && locationMatches;
-    });
+              // Determine button states based on status
+              let disableConfirm = false;
+              let disableComplete = false;
+              let disableCancel = false;
+              let disableReminder = false;
 
-    if (dateSortFilter === 'latest') {
-      filteredDetails.sort((a, b) => convertToSortableDate(b.date) - convertToSortableDate(a.date));
-    } else if (dateSortFilter === 'oldest') {
-      filteredDetails.sort((a, b) => convertToSortableDate(a.date) - convertToSortableDate(b.date));
-    }
+              switch (detail.status) {
+                case 'รอการยืนยัน':
+                  disableComplete = true;
+                  break;
+                case 'ยืนยันแล้ว':
+                  disableConfirm = true;
+                  disableReminder = true;
+                  break;
+                case 'ยกเลิก':
+                  disableCancel = true;
+                  disableConfirm = true;
+                  disableComplete = true;
+                  disableReminder = true;
+                  break;
+                case 'เสร็จสิ้น':
+                  disableConfirm = true;
+                  disableCancel = true;
+                  disableComplete = true;
+                  disableReminder = true;
+                  break;
+              }
 
-    paginateData();
-  }
+              // Create a new table row
+              const row = document.createElement('tr');
 
-  // ฟังก์ชันการแบ่งหน้า
-  function paginateData() {
-    const tableBody = document.getElementById('tableBody');
-    tableBody.innerHTML = '';
+              // Populate the row with data and disabled buttons as necessary
+              row.innerHTML = `
+            <td class="hidden">${detail.userlineid}</td> <!-- Hide the userlineid -->
+            <td class="px-4 py-2 border">${detail.name}</td>
+            <td class="px-4 py-2 border">${detail.service}</td>
+            <td class="px-4 py-2 border">${detail.locationservice}</td>
+            <td class="px-4 py-2 border">${detail.phonenumber}</td>
+            <td class="px-4 py-2 border">${detail.note}</td>
+            <td class="px-4 py-2 border">${detail.date}</td>
+            <td class="px-4 py-2 border">${detail.time}</td>
+            <td class="px-4 py-2 border">${detail.status}</td>
+            <td class="px-4 py-2 border">
+              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
+              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
+            </td>
+          `;
 
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedDetails = filteredDetails.slice(startIndex, endIndex);
+              // Append the new row to the table body
+              tableBody.appendChild(row);
+            });
 
-  paginatedDetails.forEach(detail => {
-    // Determine button states based on status
-    let disableConfirm = false;
-    let disableComplete = false;
-    let disableCancel = false;
-    let disableReminder = false;
-
-    switch (detail.status) {
-      case 'รอการยืนยัน':
-        disableComplete = true;
-        break;
-      case 'ยืนยันแล้ว':
-        disableConfirm = true;
-        disableReminder = true;
-        break;
-      case 'ยกเลิก':
-        disableCancel = true;
-        disableConfirm = true;
-        disableComplete = true;
-        disableReminder = true;
-        break;
-      case 'เสร็จสิ้น':
-        disableConfirm = true;
-        disableCancel = true;
-        disableComplete = true;
-        disableReminder = true;
-        break;
-    }
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td class="hidden">${detail.userlineid}</td>
-      <td class="px-4 py-2 border">${detail.name}</td>
-      <td class="px-4 py-2 border">${detail.service}</td>
-      <td class="px-4 py-2 border">${detail.locationservice}</td>
-      <td class="px-4 py-2 border">${detail.phonenumber}</td>
-      <td class="px-4 py-2 border">${detail.note}</td>
-      <td class="px-4 py-2 border">${convertToDisplayDate(detail.date)}</td>
-      <td class="px-4 py-2 border">${detail.time}</td>
-      <td class="px-4 py-2 border">${detail.status}</td>
-      <td class="px-4 py-2 border">
-        <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded-2xl ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
-        <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded-2xl ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
-        <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded-2xl ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-        <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded-2xl ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  });
-
-  renderPaginationControls();
-  attachEventListeners(); // Re-attach event listeners after paginating
-}
-
-
-      // ฟังก์ชันแปลงวันที่จาก DD-MM-YYYY เป็น YYYY-MM-DD เพื่อจัดเรียง
-      function convertToSortableDate(dateStr) {
-        const [day, month, year] = dateStr.split('-');
-        return new Date(`${year}-${month}-${day}`);
+            // Re-attach event listeners for the new buttons
+            attachEventListeners();
+          })
+          .catch(error => {
+            console.error('Error fetching user details:', error);
+          });
       }
-// ฟังก์ชันแปลงวันที่จาก YYYY-MM-DD เป็น DD-MM-YYYY เพื่อแสดงผล
-function convertToDisplayDate(dateStr) {
-    // Check if the date is in YYYY-MM-DD format
-    if (/\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-        const [year, month, day] = dateStr.split('-');
-        return `${day}-${month}-${year}`;
-    }
-    // If the date is already in DD-MM-YYYY format or another format, return it as is
-    return dateStr;
-}
 
-
-      // ฟังก์ชันแสดงปุ่มควบคุมการแบ่งหน้า
-  function renderPaginationControls() {
-    const paginationControls = document.getElementById('paginationControls');
-    paginationControls.innerHTML = '';
-
-    const totalPages = Math.ceil(filteredDetails.length / rowsPerPage);
-
-    // ปุ่มย้อนกลับ
-    const prevButton = document.createElement('button');
-    prevButton.textContent = 'ย้อนกลับ';
-    prevButton.disabled = currentPage === 1;
-    prevButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
-    prevButton.addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage--;
-        paginateData();
-      }
-    });
-    paginationControls.appendChild(prevButton);
-
-        // แสดงเลขหน้า
-    for (let i = 1; i <= totalPages; i++) {
-      const pageButton = document.createElement('button');
-      pageButton.textContent = i;
-      pageButton.disabled = i === currentPage;
-      pageButton.classList.add('mx-1', 'py-1', 'px-2', 'rounded-2xl', i === currentPage ? 'bg-gray-300' : 'bg-main', 'text-white');
-      pageButton.addEventListener('click', () => {
-        currentPage = i;
-        paginateData();
-      });
-      paginationControls.appendChild(pageButton);
-    }
-
-    // ปุ่มถัดไป
-    const nextButton = document.createElement('button');
-    nextButton.textContent = 'ถัดไป';
-    nextButton.disabled = currentPage === totalPages;
-    nextButton.classList.add('mx-1', 'py-1', 'px-2', 'bg-main', 'text-white', 'rounded-2xl');
-    nextButton.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        paginateData();
-      }
-    });
-    paginationControls.appendChild(nextButton);
-  }
-
-      // ดึงข้อมูลและแสดงตารางครั้งแรก
+      // Initial table population
       fetchAndPopulateTable();
-
-    // ฟังก์ชันหลักในการดึงข้อมูลและกรอง
-  function fetchAndPopulateTable() {
-    showLoadingSpinner(true); 
-
-    fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
-      .then(response => response.json())
-      .then(details => {
-        applyFilters(details);
-      })
-      .catch(error => {
-        console.error('Error fetching user details:', error);
-      })
-      .finally(() => {
-        showLoadingSpinner(false);
-      });
-  }
-
-    // เรียกใช้ฟังก์ชันเมื่อผู้ใช้คลิกปุ่มคัดกรองข้อมูล
-  document.getElementById('applyFiltersButton').addEventListener('click', function () {
-    filterSettings.statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-    filterSettings.locationFilter = document.getElementById('locationFilter').value.toLowerCase();
-    filterSettings.dateSortFilter = document.getElementById('dateSortFilter').value.toLowerCase();
-
-    fetchAndPopulateTable();
-  });
-
-
 
 
       // Fetch and populate the names list
@@ -484,6 +331,7 @@ function convertToDisplayDate(dateStr) {
       }
 
       // Action functions with table update
+
       function confirmBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -622,6 +470,7 @@ function convertToDisplayDate(dateStr) {
                 document.getElementById('nameIdInput').value = data.nameId || '';
                 document.getElementById('keynumberIdInput').value = data.keynumberId || '';
                 document.getElementById('keynumber2IdInput').value = data.keynumber2Id || '';
+                document.getElementById('fileLinkInput').src = data.fileLink || '';
 
                 // Format and set the timestamp
                 if (data.timestamp) {
@@ -694,10 +543,10 @@ function convertToDisplayDate(dateStr) {
             <td class="px-4 py-2 border">${time}</td> <!-- time -->
             <td class="px-4 py-2 border">${status}</td> <!-- status -->
             <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded-2xl" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded-2xl" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded-2xl" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded-2xl" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
+              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
+              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
+              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
+              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
             </td>
           </tr>
         `;
@@ -739,6 +588,27 @@ function convertToDisplayDate(dateStr) {
           }
         });
       }
+
+      // Apply filters on the table based on status and location
+      document.getElementById('applyFiltersButton').addEventListener('click', function () {
+        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+
+        const tableRows = document.querySelectorAll('#tableBody tr');
+        tableRows.forEach(row => {
+          const statusCell = row.querySelector('td:nth-child(9)').textContent.toLowerCase();
+          const locationCell = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+
+          const matchesStatus = statusFilter === '' || statusCell === statusFilter;
+          const matchesLocation = locationFilter === '' || locationCell.includes(locationFilter);
+
+          if (matchesStatus && matchesLocation) {
+            row.classList.remove('hidden');
+          } else {
+            row.classList.add('hidden');
+          }
+        });
+      });
 
     });
   </script>

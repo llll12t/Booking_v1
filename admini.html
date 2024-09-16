@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* สไตล์ของตัวหมุนเมื่อมีการโหลด */
     .loader {
       border-top-color: #4a0890;
       animation: spin 1s linear infinite;
@@ -27,10 +28,11 @@
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-  <!-- Main Content Area -->
+  <!-- เนื้อหาหลัก -->
   <main class="flex-1 bg-gray-100 p-4 md:p-8">
-    <!-- Filter Section -->
+    <!-- ส่วนฟิลเตอร์ -->
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4">
+      <!-- ฟิลเตอร์สถานะ -->
       <div>
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
         <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
@@ -41,10 +43,12 @@
           <option value="เสร็จสิ้น">เสร็จสิ้น</option>
         </select>
       </div>
+      <!-- ฟิลเตอร์สถานที่ -->
       <div>
         <label for="locationFilter" class="block text-xs font-medium text-gray-700">กรองตามสถานที่</label>
         <input type="text" id="locationFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="พิมพ์สถานที่">
       </div>
+      <!-- ฟิลเตอร์เรียงตามวันที่ -->
       <div>
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
         <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
@@ -52,33 +56,35 @@
           <option value="oldest">วันที่เก่าสุด</option>
         </select>
       </div>
+      <!-- ปุ่มคัดกรองข้อมูล -->
       <button id="applyFiltersButton" class="mt-6 py-2 px-4 bg-indigo-800 text-white rounded-md hover:bg-indigo-600">คัดกรองข้อมูล</button>
     </div>
 
-    <!-- Card Display Section -->
+    <!-- ส่วนแสดงข้อมูล -->
     <div id="filteredData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Cards will be inserted here -->
+      <!-- ข้อมูลจะแสดงที่นี่ -->
     </div>
 
-    <!-- Pagination Controls -->
+    <!-- ส่วนควบคุมการแบ่งหน้า -->
     <div id="paginationControls" class="mt-6 flex justify-center space-x-2">
-      <!-- Pagination buttons will be inserted here -->
+      <!-- ปุ่มควบคุมการแบ่งหน้าจะแสดงที่นี่ -->
     </div>
   </main>
 
-  <!-- Loading Spinner -->
+  <!-- ตัวหมุนโหลดข้อมูล -->
   <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
     <div class="loader"></div>
   </div>
 
   <script>
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
-    const CARDS_PER_PAGE = 5;
-    let currentPage = 1;
-    let totalPages = 1;
+    const CARDS_PER_PAGE = 5;  // จำนวนการ์ดต่อหน้า
+    let currentPage = 1;  // หน้าที่กำลังแสดง
+    let totalPages = 1;  // จำนวนหน้าทั้งหมด
 
     document.addEventListener('DOMContentLoaded', function () {
 
+      // ฟังก์ชันสำหรับดึงและแสดงการ์ด
       function fetchAndPopulateCards() {
         fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
           .then(response => response.json())
@@ -86,19 +92,19 @@
             const filteredData = document.getElementById('filteredData');
             filteredData.innerHTML = '';
 
-            // Parse date strings into Date objects using DD-MM-YYYY format
+            // แปลงวันที่เป็นรูปแบบ Date Object
             details.forEach(detail => {
               const [day, month, year] = detail.date.split('-');
               detail.parsedDate = new Date(`${year}-${month}-${day}`);
             });
 
-            // Sort by date based on the selected sorting option
+            // เรียงตามวันที่
             const dateSort = document.getElementById('dateSort').value;
             details.sort((a, b) => {
               return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
             });
 
-            // Apply filters
+            // การกรองข้อมูล
             const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
             const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
 
@@ -108,6 +114,7 @@
               return matchesStatus && matchesLocation;
             });
 
+            // คำนวณหน้าทั้งหมด
             totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
             displayCards(filteredDetails, currentPage);
             createPaginationControls();
@@ -117,6 +124,7 @@
           });
       }
 
+      // ฟังก์ชันสำหรับแสดงการ์ด
       function displayCards(details, page) {
         const filteredData = document.getElementById('filteredData');
         filteredData.innerHTML = '';
@@ -127,7 +135,8 @@
 
         detailsToDisplay.forEach(detail => {
           detail.id = detail.idKey;
-          
+
+          // ควบคุมการเปิดปิดปุ่มต่างๆ ขึ้นอยู่กับสถานะการจอง
           let disableConfirm = false;
           let disableCancel = false;
           let disableComplete = false;
@@ -150,6 +159,7 @@
               break;
           }
 
+          // การ์ดจะแสดงข้อมูลของแต่ละการจอง
           const card = document.createElement('div');
           card.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md');
 
@@ -176,16 +186,17 @@
         attachEventListeners();
       }
 
+      // ฟังก์ชันสร้างปุ่มควบคุมการแบ่งหน้า
       function createPaginationControls() {
         const paginationControls = document.getElementById('paginationControls');
         paginationControls.innerHTML = '';
 
-        // Define the range of page buttons to show
+        // การกำหนดขอบเขตของปุ่มหน้า
         const maxVisibleButtons = 3;
         const startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
         const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
 
-        // Previous button
+        // ปุ่ม "ก่อนหน้า"
         const prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
         prevButton.disabled = currentPage === 1;
@@ -198,7 +209,7 @@
         });
         paginationControls.appendChild(prevButton);
 
-        // Page number buttons
+        // ปุ่มตัวเลขหน้า
         for (let i = startPage; i <= endPage; i++) {
           const pageButton = document.createElement('button');
           pageButton.textContent = i;
@@ -213,7 +224,7 @@
           paginationControls.appendChild(pageButton);
         }
 
-        // Next button
+        // ปุ่ม "ถัดไป"
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
         nextButton.disabled = currentPage === totalPages;
@@ -227,6 +238,7 @@
         paginationControls.appendChild(nextButton);
       }
 
+      // ฟังก์ชันผูก Event Listener ให้กับปุ่มต่างๆ
       function attachEventListeners() {
         document.querySelectorAll('.confirm-btn').forEach(button => {
           button.addEventListener('click', function () {
@@ -257,6 +269,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับยืนยันการจอง
       function confirmBooking(id) {
         Swal.fire({
           title: 'Are you sure?',
@@ -285,6 +298,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับยกเลิกการจอง
       function cancelBooking(id) {
         Swal.fire({
           title: 'Are you sure?',
@@ -313,6 +327,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับทำให้การจองเสร็จสมบูรณ์
       function completeBooking(id) {
         Swal.fire({
           title: 'Are you sure?',
@@ -341,6 +356,7 @@
         });
       }
 
+      // ฟังก์ชันสำหรับส่งการแจ้งเตือน
       function sendReminder(id) {
         Swal.fire({
           title: 'Send reminder?',
@@ -369,6 +385,7 @@
         });
       }
 
+      // ฟังก์ชันแสดงตัวหมุนโหลดข้อมูล
       function showLoadingSpinner(show) {
         const spinner = document.getElementById('loadingSpinner');
         if (show) {
@@ -378,11 +395,13 @@
         }
       }
 
+      // ปุ่มสำหรับคัดกรองข้อมูล
       document.getElementById('applyFiltersButton').addEventListener('click', function () {
         currentPage = 1;
         fetchAndPopulateCards();
       });
 
+      // ดึงข้อมูลการ์ดเมื่อเริ่มต้น
       fetchAndPopulateCards();
     });
   </script>

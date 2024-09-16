@@ -5,19 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Sidebar</title>
+    <!-- นำเข้า TailwindCSS และ SweetAlert2 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* กำหนดสไตล์ต่าง ๆ ของหน้าเว็บ */
         body {  font-family: "Noto Sans Thai", sans-serif; }
         .bg-main { background-color: #513709;}
         .text-main { color: #513709; } 
         .text-sub { color: #faebd7; } 
         .bg-sub { background-color: #FFFCF7;} 
-        .bg-sub2 {background-color: #faebd7;}  
+        .bg-sub2 { background-color: #faebd7;}  
         .border-main { border: 2px solid #513709;}  
         .selected { background-color: #513709 !important;color: white;} 
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } 
-        .no-scrollbar::-webkit-scrollbar {  display: none; } 
+        .no-scrollbar::-webkit-scrollbar { display: none; } 
+        /* สไตล์สำหรับการโหลดข้อมูล */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -38,17 +41,11 @@
             height: 120px;
             animation: spin 2s linear infinite;
         }
-
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
+        /* สไตล์สำหรับ Popup */
         .popup {
             position: fixed;
             top: 0;
@@ -62,7 +59,6 @@
             z-index: 1000;
             display: none;
         }
-
         .popup-content {
             background: white;
             padding: 50px;
@@ -70,7 +66,6 @@
             text-align: left;
             width: 80%;
         }
-
         #loadingOverlay {
             display: none;
             position: absolute;
@@ -90,24 +85,27 @@
 
     <!-- Sidebar -->
     <aside class="w-64 bg-white text-slate-800 shadow-lg p-6">
+        <!-- แสดงหัวข้อและฟอร์มสำหรับค้นหาข้อมูล -->
         <h2 class="text-md font-bold mb-4">ดอกเตอร์ชมคลีนิก</h2>
         <p class="text-sm font-bold mb-4">รายชื่อสมาชิก</p>
 
         <form id="fetchForm" class="space-y-4">
             <div>
+                <!-- ช่องกรอกชื่อ -->
                 <label for="nameId" class="block text-xs font-medium text-slate-700">ชื่อ</label>
                 <input type="text" id="nameId" name="nameId" list="namesList"
                     class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
                 <datalist id="namesList">
-                    <!-- Dynamically filled by JavaScript -->
+                    <!-- รายชื่อที่จะแสดงผลด้วย JavaScript -->
                 </datalist>
             </div>
             <div>
+                <!-- ช่องกรอกเบอร์โทร -->
                 <label for="keynumberId" class="block text-xs font-medium text-slate-700">เบอร์โทร</label>
                 <input type="text" id="keynumberId" name="keynumberId" list="keynumbersList"
                     class="mt-1 block w-full p-2 border border-slate-300 rounded-2xl">
                 <datalist id="keynumbersList">
-                    <!-- Dynamically filled by JavaScript -->
+                    <!-- เบอร์โทรที่จะแสดงผลด้วย JavaScript -->
                 </datalist>
             </div>
             <button type="submit"
@@ -115,32 +113,38 @@
         </form>
         <div id="result" class="hidden">
         </div>
-     
     </aside>
+
+    <!-- Main Content -->
     <main class="w-full mx-auto ">
+        <!-- แสดงหัวข้อระบบจองคิว -->
         <div class="bg-main to-slate-700 text-center text-white p-10">
             <p class="text-xl">ระบบจองคิว</p>
             <h1 class="text-3xl font-bold">ดอกเตอร์ชมคลีนิก</h1>
             <p class="text-lg text-gray-200">สาขาสิงบุรี</p>
         </div>
 
+        <!-- แสดงการโหลดข้อมูล -->
         <div class="loading-overlay" id="loadingOverlay">
             <div class="loading-spinner"></div>
         </div>
+        <!-- Popup สำหรับแสดงข้อมูลเพิ่มเติม -->
         <div class="popup" id="popup">
             <div class="max-w-md popup-content mx-auto" id="popupContent"></div>
         </div>
 
+        <!-- ฟอร์มสำหรับการจอง -->
         <div class=" w-full mx-auto rounded py-4 px-4 mb-4">
             <form id="bookingForm" class="space-y-2 pt-2" novalidate>
                 <input type="hidden" name="action" value="makeBooking">
 
-                <!-- Step 0: Initial Selection -->
+                <!-- Step 0: เลือกบริการ -->
                 <div id="step0" class="grid gap-5 max-w-sm mx-auto">
                     <div class="text-center font-semibold mb-6">
                         <h2 class="text-3xl text-main">เลือกบริการ</h2>
                     </div>
                     <div class="flex justify-between">
+                        <!-- ปุ่มเลือกบริการ -->
                         <button type="button" onclick="selectOption(1)"
                             class="w-full h-48 mx-2 border-main text-main py-3 rounded-2xl">
                             <h1 class="text-2xl">พบแพทย์</h1></br>
@@ -148,20 +152,19 @@
                             <span>เลเซอร์ | เมโส</span></br>
                             <span>หัตถการโดยแพทย์</span>
                         </button>
+                        <!-- ปุ่มเลือกทรีทเมนท์ -->
                         <button type="button" onclick="selectOption(2)"
-                            class="w-full h-48 mx-2  border-main text-main py-3 rounded-2xl">
+                            class="w-full h-48 mx-2 border-main text-main py-3 rounded-2xl">
                             <h1 class="text-2xl">ทรีทเมนท์</h1></br>
                             <span>รักษาสิว | ปรึกษา</span></br>
                             <span>กำจัดขน | อื่นๆ </span></br>
-
                         </button>
                     </div>
                 </div>
 
-                <!-- Step 1: Booking Form -->
+                <!-- Step 1: ฟอร์มการจอง -->
                 <div id="step1" class="max-w-sm mx-auto" style="display:none;">
-
-                 
+                    <!-- แสดงรายการฟิลด์กรอกข้อมูล -->
                     <div class="flex mb-4">
                         <span class="bg-white flex items-center border rounded-2xl p-2 mr-2 w-32">
                             <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000"
@@ -183,6 +186,7 @@
                             placeholder="ตัวเลือกสถานที่"></select>
                     </div>
                     <div class="bg-sub2 px-4 py-4 my-4 rounded-2xl">
+                        <!-- กรอกข้อมูลผู้ใช้ -->
                         <input type="hidden" id="displayName" name="displayName">
                         <div class="loading-container">
                             <div id="loadingOverlay">
@@ -190,196 +194,187 @@
                             </div>
                             <div class="flex justify-center items-center">
                                 <div class="max-w-md">
-                                
                                     <div class="flex mb-6">
-                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span
-                                                class="text-white text-sm">ชื่อ สกุล</span></span>
+                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ สกุล</span></span>
                                         <input type="text" id="name" name="name"
                                             class="w-full p-2 shadow-sm rounded-2xl">
                                     </div>
-                                    <div class="flex  mb-6">
-                                        <span class="text-center  bg-main rounded-2xl mr-2 p-2 w-32"><span
-                                                class="text-white text-sm">ชื่อเล่น</span></span>
+                                    <div class="flex mb-6">
+                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อเล่น</span></span>
                                         <input type="text" id="nickname" name="nickname"
                                             class="w-full p-2 shadow-sm rounded-2xl">
                                     </div>
-                                    <div class="flex  mb-6">
-                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span
-                                                class="text-white text-sm">เบอร์ติดต่อ</span></span>
+                                    <div class="flex mb-6">
+                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
                                         <input type="tel" id="phonenumber" name="phonenumber"
                                             class="w-full p-2 shadow-sm rounded-2xl">
                                     </div>
                                     <div class="flex">
-                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span
-                                                class="text-white text-sm">หมายเหตุ</span></span>
+                                        <span class="text-center bg-main rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">หมายเหตุ</span></span>
                                         <input type="text" id="note" name="note"
                                             class="w-full p-2 shadow-sm rounded-2xl">
                                     </div>
-                                  
                                 </div>
                             </div>
                             <div class="mt-4"><input type="text" id="userlineid" name="userlineid"
-                                class="w-full p-1 text-sm text-main text-center rounded-2xl" readonly>
+                                class="w-full p-1 text-sm text-main text-center rounded-2xl" readonly></div>
                         </div>
-        
-                        </div>
-                        
                     </div>
                     <div id="buttons" class="flex my-5">
+                        <!-- ปุ่มย้อนกลับ -->
                         <button type="button" onclick="prevStep0()"
                             class="w-1/3 bg-white shadow-sm text-main py-3 rounded-2xl mr-2">กลับ</button>
+                        <!-- ปุ่มถัดไป -->
                         <button type="button" onclick="nextStep()"
                             class="w-2/3 bg-main text-white py-3 shadow-sm rounded-2xl">ถัดไป</button>
                     </div>
                 </div>
 
-                <!-- Step 2: Date and Time Selection -->
+                <!-- Step 2: เลือกวันและเวลา -->
                 <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                     <div class="text-center font-semibold mb-6">
                         <div class="flex justify-center space-x-2">
+                            <!-- เลือกเดือนและปี -->
                             <select id="monthSelect" aria-label="Month"
                                 class="text-center bg-white text-black w-1/2 border-2 border-main rounded-2xl px-2 py-4">
                                 <option value="0">มกราคม</option>
                                 <option value="1">กุมภาพันธ์</option>
                                 <option value="2">มีนาคม</option>
-                                <option value="3">เมษายน</option>
-                                <option value="4">พฤษภาคม</option>
-                                <option value="5">มิถุนายน</option>
-                                <option value="6">กรกฎาคม</option>
-                                <option value="7">สิงหาคม</option>
-                                <option value="8">กันยายน</option>
-                                <option value="9">ตุลาคม</option>
-                                <option value="10">พฤศจิกายน</option>
-                                <option value="11">ธันวาคม</option>
+                                <!-- ตัวเลือกเดือนอื่น ๆ -->
                             </select>
                             <select id="yearSelect" aria-label="Year"
                                 class="text-center bg-white text-black w-1/2 border-2 border-main rounded-2xl px-2 py-4"></select>
                         </div>
                     </div>
+                    <!-- ปฏิทิน -->
                     <div class="overflow-x-auto mb-4 no-scrollbar">
                         <div id="calendarDays" class="flex space-x-2"></div>
                     </div>
+                    <!-- แสดงเวลาที่สามารถจองได้ -->
                     <div id="availability" class="max-w-sm mx-auto space-y-2"></div>
 
+                    <!-- ช่องเลือกเวลา -->
                     <div class="hidden">
                         <label for="time" class="block text-sm">Time:</label>
                         <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3 border border-blue-900 rounded-2xl">
                     </div>
                     <div class="hidden text-center">
-                        <input type="submit" value="Submit"  class="px-6 py-4 bg-main text-black font-semibold rounded-2xl">
+                        <!-- ปุ่มส่งฟอร์ม -->
+                        <input type="submit" value="Submit" class="px-6 py-4 bg-main text-black font-semibold rounded-2xl">
                     </div>
                     <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-main py-3 rounded-2xl">กลับหน้าหลัก</button>
                 </div>
             </form>
         </div>
-
     </main>
 
-
     <script>
+        // URL ของ Google Script สำหรับดึงข้อมูล
         const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
 
         document.addEventListener('DOMContentLoaded', function () {
-    const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            document.getElementById('fetchForm').addEventListener('submit', function (event) {
+                event.preventDefault();
 
-    document.getElementById('fetchForm').addEventListener('submit', function (event) {
-        event.preventDefault();
+                // แสดง overlay ตอนโหลดข้อมูล
+                loadingOverlay.style.display = 'flex';
 
-        // Show the loading overlay
-        loadingOverlay.style.display = 'flex';
+                const nameId = document.getElementById('nameId').value;
+                const keynumberId = document.getElementById('keynumberId').value;
 
-        const nameId = document.getElementById('nameId').value;
-        const keynumberId = document.getElementById('keynumberId').value;
+                let fetchUrl = '';
+                // ตรวจสอบว่ากรอกข้อมูลชื่อหรือเบอร์โทร
+                if (nameId) {
+                    fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByNameId&nameId=${encodeURIComponent(nameId)}`;
+                } else if (keynumberId) {
+                    fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByKeyNumberId&keynumberId=${encodeURIComponent(keynumberId)}`;
+                }
 
-        let fetchUrl = '';
-        if (nameId) {
-            fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByNameId&nameId=${encodeURIComponent(nameId)}`;
-        } else if (keynumberId) {
-            fetchUrl = `${PROFILE_SCRIPT_URL}?action=fetchByKeyNumberId&keynumberId=${encodeURIComponent(keynumberId)}`;
-        }
+                if (fetchUrl) {
+                    // เรียกใช้งาน fetch API เพื่อดึงข้อมูล
+                    fetch(fetchUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && Object.keys(data).length > 0) {
+                                // กรอกข้อมูลที่ดึงมาแสดงในฟอร์ม
+                                document.getElementById('userlineid').value = data.userlineId || '';
+                                document.getElementById('name').value = data.nameId || '';
+                                document.getElementById('phonenumber').value = data.keynumberId || '';
+                                document.getElementById('nickname').value = data.keynumber2Id || '';
 
-        if (fetchUrl) {
-            fetch(fetchUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && Object.keys(data).length > 0) {
-                        document.getElementById('userlineid').value = data.userlineId || '';
-                        document.getElementById('name').value = data.nameId || '';
-                        document.getElementById('phonenumber').value = data.keynumberId || '';
-                        document.getElementById('nickname').value = data.keynumber2Id || '';
+                                if (data.timestamp) {
+                                    const timestamp = new Date(data.timestamp);
+                                    const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
+                                    document.getElementById('timestampInput').value = formattedTimestamp;
+                                } else {
+                                    document.getElementById('timestampInput').value = '';
+                                }
 
-                        if (data.timestamp) {
-                            const timestamp = new Date(data.timestamp);
-                            const formattedTimestamp = `${String(timestamp.getDate()).padStart(2, '0')}/${String(timestamp.getMonth() + 1).padStart(2, '0')}/${timestamp.getFullYear()} ${String(timestamp.getHours()).padStart(2, '0')}:${String(timestamp.getMinutes()).padStart(2, '0')}`;
-                            document.getElementById('timestampInput').value = formattedTimestamp;
-                        } else {
-                            document.getElementById('timestampInput').value = '';
-                        }
-
-                        document.getElementById('result').classList.remove('hidden');
-                        document.getElementById('noResult').classList.add('hidden');
-                    } else {
-                        document.getElementById('result').classList.add('hidden');
-                        document.getElementById('noResult').classList.remove('hidden');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
+                                document.getElementById('result').classList.remove('hidden');
+                                document.getElementById('noResult').classList.add('hidden');
+                            } else {
+                                document.getElementById('result').classList.add('hidden');
+                                document.getElementById('noResult').classList.remove('hidden');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching data:', error);
+                            document.getElementById('result').classList.add('hidden');
+                            document.getElementById('noResult').classList.remove('hidden');
+                        })
+                        .finally(() => {
+                            // ซ่อน overlay หลังดึงข้อมูลเสร็จ
+                            loadingOverlay.style.display = 'none';
+                        });
+                } else {
+                    // ถ้าไม่พบข้อมูล
+                    loadingOverlay.style.display = 'none';
                     document.getElementById('result').classList.add('hidden');
                     document.getElementById('noResult').classList.remove('hidden');
+                }
+            });
+
+            // ดึงรายชื่อทั้งหมดและแสดงใน namesList
+            fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
+                .then(response => response.json())
+                .then(data => {
+                    const namesList = document.getElementById('namesList');
+                    data.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        namesList.appendChild(option);
+                    });
                 })
-                .finally(() => {
-                    // Hide the loading overlay after data is fetched
-                    loadingOverlay.style.display = 'none';
+                .catch(error => {
+                    console.error('Error fetching names:', error);
                 });
-        } else {
-            // No URL was formed, hide the loading overlay immediately
-            loadingOverlay.style.display = 'none';
 
-            document.getElementById('result').classList.add('hidden');
-            document.getElementById('noResult').classList.remove('hidden');
-        }
-    });
-
-    // Fetch and populate the names list
-    fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
-        .then(response => response.json())
-        .then(data => {
-            const namesList = document.getElementById('namesList');
-            data.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                namesList.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching names:', error);
+            // ดึงเบอร์โทรทั้งหมดและแสดงใน keynumbersList
+            fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllKeyNumbers`)
+                .then(response => response.json())
+                .then(data => {
+                    const keynumbersList = document.getElementById('keynumbersList');
+                    data.forEach(keynumber => {
+                        const option = document.createElement('option');
+                        option.value = keynumber;
+                        keynumbersList.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching key numbers:', error);
+                });
         });
-
-    // Fetch and populate the key numbers list
-    fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllKeyNumbers`)
-        .then(response => response.json())
-        .then(data => {
-            const keynumbersList = document.getElementById('keynumbersList');
-            data.forEach(keynumber => {
-                const option = document.createElement('option');
-                option.value = keynumber;
-                keynumbersList.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching key numbers:', error);
-        });
-});
 
     </script>
 
     <script>
+        // URL ของ Google Script สำหรับการจอง
         let WEB_APP_URL = '';
         const WEB_APP_URL_1 = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
-        
         const WEB_APP_URL_2 = 'https://script.google.com/macros/s/AKfycbxBtNVAvRb6cfi-phw31rlOUEkPF8SqO_n83VRb-7Vyh0Ib7V8QOWY-L4V_3ptY5DCTGw/exec';
 
+        // ฟังก์ชันสำหรับเลือกบริการ
         async function selectOption(option) {
             if (option === 1) {
                 WEB_APP_URL = WEB_APP_URL_1;
@@ -390,12 +385,11 @@
             document.getElementById('step0').style.display = 'none';
             document.getElementById('step1').style.display = 'block';
             showLoading(true);
-            // Fetch the data and initialize LIFF simultaneously
-            await Promise.all([
-                fetchDropdownData(),
-            ]);
 
-            // Fetch availability data for the current date
+            // ดึงข้อมูลบริการและสาขา
+            await fetchDropdownData();
+
+            // กำหนดวันที่ปัจจุบัน
             const currentDate = new Date();
             selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
             populateYearSelect(currentDate.getFullYear());
@@ -407,8 +401,7 @@
             showLoading(false);
         }
 
-
-
+        // แสดงการโหลดข้อมูล
         function showLoading(isLoading) {
             const overlay = document.getElementById('loadingOverlay');
             const inputs = document.querySelectorAll('.input-field');
@@ -420,15 +413,15 @@
         let selectedDate = '';
         let isSubmitting = false;
 
+        // ฟังก์ชันเปลี่ยนไปยังขั้นตอนถัดไป
         function nextStep() {
             if (currentStep === 1) {
-                // ตรวจสอบชื่อและเบอร์โทร
                 const name = document.getElementById('name').value.trim();
                 const phonenumber = document.getElementById('phonenumber').value.trim();
 
                 if (name === '' || phonenumber === '') {
                     alert('กรุณากรอกชื่อและเบอร์โทรก่อนดำเนินการต่อ');
-                    return; // หยุดการทำงานถ้าไม่ได้กรอกข้อมูล
+                    return;
                 }
             }
 
@@ -442,6 +435,7 @@
             }
         }
 
+        // ฟังก์ชันย้อนกลับไปยังขั้นตอนแรก
         function prevStep0() {
             document.getElementById('step1').style.display = 'none';
             document.getElementById('step2').style.display = 'none';
@@ -449,7 +443,7 @@
             currentStep = 0;
         }
 
-
+        // ฟังก์ชันย้อนกลับไปยังขั้นตอนก่อนหน้า
         function prevStep() {
             if (currentStep > 1) {
                 document.getElementById(`step${currentStep}`).style.display = 'none';
@@ -461,6 +455,7 @@
             }
         }
 
+        // ดึงข้อมูลสำหรับ dropdown (บริการและสาขา)
         async function fetchDropdownData() {
             try {
                 const response = await fetch(`${WEB_APP_URL}?action=fetchServicesAndlocationservice`);
@@ -475,6 +470,7 @@
             }
         }
 
+        // เพิ่มตัวเลือกใน dropdown
         function populateDropdown(dropdownId, items) {
             const dropdown = document.getElementById(dropdownId);
             dropdown.innerHTML = '';
@@ -508,6 +504,7 @@
             }
         }
 
+        // อัพเดทปฏิทินเมื่อมีการเลือกเดือน/ปี
         async function updateCalendar(date) {
             const month = date.getMonth();
             const year = date.getFullYear();
@@ -603,14 +600,12 @@
             }
         }
 
-        function showLoading(isLoading = true) {
-            document.getElementById('loadingOverlay').style.display = isLoading ? 'flex' : 'none';
-        }
-
+        // ฟังก์ชันซ่อน popup
         function hidePopup() {
             document.getElementById('popup').style.display = 'none';
         }
 
+        // ฟังก์ชันส่งฟอร์มการจอง
         async function submitBooking() {
             if (isSubmitting) return;
             isSubmitting = true;
@@ -634,6 +629,7 @@
             }
         }
 
+        // เมื่อมีการส่งฟอร์ม
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!selectedDate) {
@@ -651,6 +647,7 @@
         `, 'confirm');
         });
 
+        // ฟังก์ชันแสดง popup
         function showPopup(title, content, type) {
             const popup = document.getElementById('popup');
             const popupContent = document.getElementById('popupContent');

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,7 +82,7 @@
     </style>
 </head>
 <body class="bg-slate-100 flex flex-col min-h-screen">
-    <!-- Header Section -->
+    <!-- ส่วนหัวของหน้า -->
     <div class="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-10">
         <h1 class="text-xl font-bold">นัดหมาย BOOKING APP</h1>
         <p class="text-sm">เปิด 10:00-17:00 น.</p>
@@ -100,8 +99,9 @@
         <form id="bookingForm" class="space-y-2 pt-2" novalidate>
             <input type="hidden" name="action" value="makeBooking">
 
-            <!-- Step 1: Booking Form (Now the default step) -->
+            <!-- ฟอร์มการจอง (Step 1) -->
             <div id="step1" class="max-w-sm mx-auto">
+                <!-- เลือกบริการ -->
                 <div class="flex mb-4">
                     <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
@@ -109,6 +109,7 @@
                     </span>
                     <select id="service" name="service" class="rounded-2xl bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
                 </div>
+                <!-- เลือกสถานที่ -->
                 <div class="flex mb-4">
                     <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
@@ -116,6 +117,7 @@
                     </span>
                     <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
+                <!-- ฟอร์มข้อมูลผู้ใช้ -->
                 <div class="bg-slate-300 px-4 py-4 my-4 rounded-2xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
@@ -125,18 +127,22 @@
                         <div class="pb-4">ฟอร์มข้อมูล</div>
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
+                                <!-- ฟิลด์ชื่อ-สกุล -->
                                 <div class="flex mb-6">
                                     <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ-สกุล</span></span>
                                     <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
+                                <!-- ฟิลด์ชื่อเล่น -->
                                 <div class="flex  mb-6">
                                     <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อเล่น</span></span>
                                     <input type="text" id="nickname" name="nickname" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
+                                <!-- ฟิลด์เบอร์ติดต่อ -->
                                 <div class="flex  mb-6">
                                     <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
                                     <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-2xl">
                                 </div>
+                                <!-- ฟิลด์หมายเหตุ -->
                                 <div class="flex">
                                     <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">หมายเหตุ</span></span>
                                     <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-2xl">
@@ -151,9 +157,10 @@
                 </div>
             </div>
 
-            <!-- Step 2: Date and Time Selection -->
+            <!-- ฟอร์มการเลือกวันที่และเวลา (Step 2) -->
             <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                 <div class="text-center font-semibold mb-6">
+                    <!-- ตัวเลือกเดือนและปี -->
                     <div class="flex justify-center space-x-2">
                         <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-2xl px-2 py-4">
                             <option value="0">มกราคม</option>
@@ -190,13 +197,16 @@
     </div>
 
     <script>
+        // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
         let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
         const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
-        const LIFF_ID = '2006029649-8GP41NAg';
+        const LIFF_ID = '2006029649-bj0ez4Og';
 
+        // แสดงฟอร์มการจอง (Step 1) เมื่อเปิดหน้า
         document.getElementById('step1').style.display = 'block';
         showLoading(true);
 
+        // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
         async function loadInitialData() {
             await Promise.all([fetchDropdownData(), initializeLiff()]);
 
@@ -212,6 +222,7 @@
 
         loadInitialData();
 
+        // ฟังก์ชันการเตรียมการเริ่มต้น LIFF
         async function initializeLiff() {
             try {
                 await liff.init({ liffId: LIFF_ID });
@@ -225,6 +236,7 @@
             }
         }
 
+        // ฟังก์ชันดึงข้อมูลโปรไฟล์ผู้ใช้จาก LIFF
         async function getUserProfile() {
             try {
                 const profile = await liff.getProfile();
@@ -236,6 +248,7 @@
             }
         }
 
+        // ฟังก์ชันดึงข้อมูลผู้ใช้จากเซิร์ฟเวอร์
         async function fetchData(userId) {
             showLoading(true);
             try {
@@ -258,6 +271,7 @@
             }
         }
 
+        // แสดงข้อมูลผู้ใช้ในฟอร์ม
         function displayData(row) {
             document.getElementById('userlineid').value = row[1] || '';
             document.getElementById('name').value = row[2] || '';
@@ -265,6 +279,7 @@
             document.getElementById('phonenumber').value = row[3] || '';
         }
 
+        // ฟังก์ชันแสดง/ซ่อนการโหลดข้อมูล
         function showLoading(isLoading) {
             const overlay = document.getElementById('loadingOverlay');
             const inputs = document.querySelectorAll('.input-field');
@@ -276,6 +291,7 @@
         let selectedDate = '';
         let isSubmitting = false;
 
+        // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
         function nextStep() {
             if (currentStep < 2) {
                 document.getElementById(`step${currentStep}`).style.display = 'none';
@@ -287,6 +303,7 @@
             }
         }
 
+        // ฟังก์ชันย้อนกลับไปยัง Step ก่อนหน้า
         function prevStep() {
             if (currentStep > 1) {
                 document.getElementById(`step${currentStep}`).style.display = 'none';
@@ -298,6 +315,7 @@
             }
         }
 
+        // ฟังก์ชันดึงข้อมูลตัวเลือกบริการและสถานที่จากเซิร์ฟเวอร์
         async function fetchDropdownData() {
             try {
                 const response = await fetch(`${WEB_APP_URL}?action=fetchServicesAndlocationservice`);
@@ -312,6 +330,7 @@
             }
         }
 
+        // ฟังก์ชันเพิ่มรายการบริการและสถานที่ลงใน Dropdown
         function populateDropdown(dropdownId, items) {
             const dropdown = document.getElementById(dropdownId);
             dropdown.innerHTML = '';
@@ -330,11 +349,13 @@
         const availabilityDiv = document.getElementById('availability');
         const timeInput = document.getElementById('time');
 
+        // อัปเดตปฏิทินเมื่อเลือกเดือนหรือปี
         monthSelect.addEventListener('change', () => updateCalendar(new Date(yearSelect.value, monthSelect.value)));
         yearSelect.addEventListener('change', () => updateCalendar(new Date(yearSelect.value, monthSelect.value)));
 
         const daysOfWeek = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
 
+        // ฟังก์ชันสร้างตัวเลือกปีใน Dropdown
         function populateYearSelect(currentYear) {
             yearSelect.innerHTML = '';
             for (let i = currentYear; i <= currentYear + 3; i++) {
@@ -345,12 +366,14 @@
             }
         }
 
+        // อัปเดตปฏิทินตามวันที่ปัจจุบัน
         async function updateCalendar(date) {
             const month = date.getMonth();
             const year = date.getFullYear();
             populateDays(month, year, date.getDate());
         }
 
+        // ฟังก์ชันเพิ่มวันในปฏิทิน
         function populateDays(month, year, currentDay) {
             calendarDays.innerHTML = '';
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -374,6 +397,7 @@
             scrollToCurrentDay();
         }
 
+        // เลื่อนหน้าจอไปยังวันปัจจุบันในปฏิทิน
         function scrollToCurrentDay() {
             setTimeout(() => {
                 const currentDayElement = document.getElementById('currentDay');
@@ -383,6 +407,7 @@
             }, 100);
         }
 
+        // ฟังก์ชันเลือกวันที่
         async function selectDate(year, month, day) {
             selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
             showLoading(true);
@@ -401,6 +426,7 @@
             }
         }
 
+        // อัปเดตการแสดงสถานะว่างของวันและเวลา
         function updateAvailability(availability) {
             availabilityDiv.innerHTML = '';
             for (const [time, info] of Object.entries(availability)) {
@@ -441,14 +467,17 @@
             }
         }
 
+        // แสดง/ซ่อนแถบโหลดข้อมูล
         function showLoading(isLoading = true) {
             document.getElementById('loadingOverlay').style.display = isLoading ? 'flex' : 'none';
         }
 
+        // ซ่อน Popup
         function hidePopup() {
             document.getElementById('popup').style.display = 'none';
         }
 
+        // ฟังก์ชันส่งข้อมูลการจอง
         async function submitBooking() {
             if (isSubmitting) return;
             isSubmitting = true;
@@ -473,6 +502,7 @@
             }
         }
 
+        // ตรวจสอบการส่งฟอร์ม
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!selectedDate) {
@@ -491,6 +521,7 @@
             `, 'confirm');
         });
 
+        // ฟังก์ชันแสดง Popup การยืนยันการนัดหมาย
         function showPopup(title, content, type) {
             const popup = document.getElementById('popup');
             const popupContent = document.getElementById('popupContent');

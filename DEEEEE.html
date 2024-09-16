@@ -27,9 +27,9 @@
 
 <body class="bg-slate-100 min-h-screen flex flex-col">
 
-  <!-- Main Content Area -->
+  <!-- พื้นที่แสดงเนื้อหาหลัก -->
   <main class="max-w-md m-auto p-2">
-    <!-- Filter Section -->
+    <!-- ส่วนกรองข้อมูล -->
     <div class="flex mb-4">
       <div class="p-2">
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
@@ -60,30 +60,31 @@
           class="mt-5 py-2 px-4 bg-slate-800 text-white rounded-2xl hover:bg-slate-800">กรองข้อมูล</button>
       </div>
     </div>
-    <!-- Card Display Section -->
+    <!-- ส่วนแสดงการ์ดข้อมูล -->
     <div id="filteredData" class="grid grid-cols-1">
-      <!-- Cards will be inserted here -->
+      <!-- การ์ดจะถูกแทรกที่นี่ -->
     </div>
 
-    <!-- Pagination Controls -->
+    <!-- ส่วนควบคุมการเปลี่ยนหน้า -->
     <div id="paginationControls" class="mt-6 flex justify-center space-x-2">
-      <!-- Pagination buttons will be inserted here -->
+      <!-- ปุ่มเปลี่ยนหน้าจะถูกแทรกที่นี่ -->
     </div>
   </main>
 
-  <!-- Loading Spinner -->
+  <!-- แสดงแถบโหลดข้อมูล -->
   <div id="loadingSpinner" class="fixed inset-0 bg-slate-800 bg-opacity-50 flex items-center justify-center hidden">
     <div class="loader"></div>
   </div>
 
   <script>
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
-    const CARDS_PER_PAGE = 5;
-    let currentPage = 1;
-    let totalPages = 1;
+    const CARDS_PER_PAGE = 5; // จำนวนการ์ดที่จะแสดงต่อหน้า
+    let currentPage = 1; // หน้าปัจจุบัน
+    let totalPages = 1; // จำนวนหน้าทั้งหมด
 
     document.addEventListener('DOMContentLoaded', function () {
 
+      // ฟังก์ชันดึงข้อมูลจาก API และแสดงการ์ดข้อมูล
       function fetchAndPopulateCards() {
         fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
           .then(response => response.json())
@@ -91,19 +92,19 @@
             const filteredData = document.getElementById('filteredData');
             filteredData.innerHTML = '';
 
-            // Parse date strings into Date objects using DD-MM-YYYY format
+            // แปลงวันที่จาก string เป็น Date object
             details.forEach(detail => {
               const [day, month, year] = detail.date.split('-');
               detail.parsedDate = new Date(`${year}-${month}-${day}`);
             });
 
-            // Sort by date based on the selected sorting option
+            // จัดเรียงข้อมูลตามวันที่
             const dateSort = document.getElementById('dateSort').value;
             details.sort((a, b) => {
               return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
             });
 
-            // Apply filters
+            // กรองข้อมูลตามสถานะและบริการที่ผู้ใช้เลือก
             const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
             const serviceFilter = document.getElementById('serviceFilter').value.toLowerCase();
 
@@ -113,15 +114,16 @@
               return matchesStatus && matchesService;
             });
 
-            totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
-            displayCards(filteredDetails, currentPage);
-            createPaginationControls();
+            totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE); // คำนวณจำนวนหน้า
+            displayCards(filteredDetails, currentPage); // แสดงการ์ด
+            createPaginationControls(); // สร้างปุ่มเปลี่ยนหน้า
           })
           .catch(error => {
             console.error('Error fetching user details:', error);
           });
       }
 
+      // ฟังก์ชันแสดงการ์ดในแต่ละหน้า
       function displayCards(details, page) {
         const filteredData = document.getElementById('filteredData');
         filteredData.innerHTML = '';
@@ -133,6 +135,7 @@
         detailsToDisplay.forEach(detail => {
           detail.id = detail.idKey;
 
+          // กำหนดสถานะปุ่มตามสถานะการนัดหมาย
           let disableConfirm = false;
           let disableCancel = false;
           let disableComplete = false;
@@ -155,6 +158,7 @@
               break;
           }
 
+          // สร้าง HTML สำหรับการ์ด
           const card = document.createElement('div');
           card.classList.add('w-full', 'bg-white', 'p-2', 'mb-2', 'rounded-2xl', 'shadow-md');
 
@@ -163,7 +167,6 @@
           <div class="flex justify-between p-2">
           <p class="text-sm text-gray-700"><strong>บริการ:</strong> ${detail.service}</p>
           <p class="text-sm text-gray-700"><strong>วันที่:</strong> ${detail.date}</p>
-          
           </div>
           <div class="flex justify-between p-2">
           <p class="text-sm text-gray-700"><strong>สถานที่:</strong> ${detail.locationservice}</p>
@@ -175,28 +178,27 @@
             <div class="mt-4 flex justify-between text-sm">
               <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded-2xl ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
               <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded-2xl ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
-  
               <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded-2xl ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
               <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-2xl ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
             </div>
           `;
 
-          filteredData.appendChild(card);
+          filteredData.appendChild(card); // เพิ่มการ์ดไปที่ DOM
         });
 
-        attachEventListeners();
+        attachEventListeners(); // เพิ่ม event listener ให้กับปุ่มต่างๆ
       }
 
+      // ฟังก์ชันสร้างปุ่มเปลี่ยนหน้า
       function createPaginationControls() {
         const paginationControls = document.getElementById('paginationControls');
         paginationControls.innerHTML = '';
 
-        // Define the range of page buttons to show
-        const maxVisibleButtons = 3;
+        const maxVisibleButtons = 3; // กำหนดจำนวนปุ่มที่แสดง
         const startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
         const endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
 
-        // Previous button
+        // ปุ่ม previous
         const prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
         prevButton.disabled = currentPage === 1;
@@ -209,7 +211,7 @@
         });
         paginationControls.appendChild(prevButton);
 
-        // Page number buttons
+        // ปุ่มแสดงเลขหน้า
         for (let i = startPage; i <= endPage; i++) {
           const pageButton = document.createElement('button');
           pageButton.textContent = i;
@@ -224,7 +226,7 @@
           paginationControls.appendChild(pageButton);
         }
 
-        // Next button
+        // ปุ่ม next
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
         nextButton.disabled = currentPage === totalPages;
@@ -238,6 +240,7 @@
         paginationControls.appendChild(nextButton);
       }
 
+      // ฟังก์ชันเพิ่ม event listener ให้กับปุ่มต่างๆ บนการ์ด
       function attachEventListeners() {
         document.querySelectorAll('.confirm-btn').forEach(button => {
           button.addEventListener('click', function () {
@@ -268,6 +271,7 @@
         });
       }
 
+      // ฟังก์ชันยืนยันการนัดหมาย
       function confirmBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -296,6 +300,7 @@
         });
       }
 
+      // ฟังก์ชันยกเลิกการนัดหมาย
       function cancelBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -324,6 +329,7 @@
         });
       }
 
+      // ฟังก์ชันเสร็จสิ้นการนัดหมาย
       function completeBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
@@ -352,6 +358,7 @@
         });
       }
 
+      // ฟังก์ชันส่งการแจ้งเตือน
       function sendReminder(id) {
         Swal.fire({
           title: 'ส่งการเตือนความจำ?',
@@ -381,6 +388,7 @@
         });
       }
 
+      // ฟังก์ชันแสดง/ซ่อนแถบโหลดข้อมูล
       function showLoadingSpinner(show) {
         const spinner = document.getElementById('loadingSpinner');
         if (show) {
@@ -390,11 +398,13 @@
         }
       }
 
+      // กดปุ่ม "กรองข้อมูล" เพื่อเริ่มการกรองใหม่
       document.getElementById('applyFiltersButton').addEventListener('click', function () {
         currentPage = 1;
         fetchAndPopulateCards();
       });
 
+      // โหลดข้อมูลการ์ดเมื่อเริ่มต้น
       fetchAndPopulateCards();
     });
   </script>

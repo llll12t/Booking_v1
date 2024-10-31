@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบนัดหมาย</title>
+    <title>ระบบนจองคิว</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
@@ -84,8 +84,8 @@
 <body class="bg-slate-100 flex flex-col min-h-screen">
     <!-- ส่วนหัวของหน้า -->
     <div class="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-10">
-        <h1 class="text-xl font-bold">นัดหมาย BOOKING APP</h1>
-        <p class="text-sm">เปิด 10:00-17:00 น.</p>
+        <h1 class="text-xl font-bold">จองคิว</h1>
+        <p class="text-sm">เวลาทำการเปิด 10:00-17:00 น.</p>
     </div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -113,7 +113,7 @@
                 <div class="flex mb-4">
                     <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
-                        <span class="text-black"> สถานที่ </span>
+                        <span class="text-black"> สาขา </span>
                     </span>
                     <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
@@ -124,7 +124,7 @@
                         <div id="loadingOverlay">
                             <div class="text-center text-white">ค้นหารายชื่อ..</div>
                         </div>
-                        <div class="pb-4">ฟอร์มข้อมูล</div>
+                        <div class="pb-4">ข้อมูลการนัดจองคิว</div>
                         <div class="flex justify-center items-center">
                             <div class="max-w-md">
                                 <!-- ฟิลด์ชื่อ-สกุล -->
@@ -197,9 +197,8 @@
     </div>
 
     <script>
-        // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
-
-          let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwK0dt%20OrVggZzM50sQJDc208pzx8Emx5com@zAbHp300ELRMyPB28NYYY2arwuA/exec';
+        
+        let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwK0dt%20OrVggZzM50sQJDc208pzx8Emx5com@zAbHp300ELRMyPB28NYYY2arwuA/exec';
       // let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
         const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
         const LIFF_ID = '2006029649-bj0ez4Og';
@@ -294,7 +293,19 @@
         let isSubmitting = false;
 
         // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
+        // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
         function nextStep() {
+            const name = document.getElementById('name').value.trim();
+            const phonenumber = document.getElementById('phonenumber').value.trim();
+
+            // ตรวจสอบว่าฟิลด์ไม่ว่าง
+            if (!name || !phonenumber) {
+                showPopup('ข้อผิดพลาด', 'กรุณากรอกข้อมูล ชื่อ-สกุล, เบอร์ติดต่อ ให้ครบถ้วนก่อนดำเนินการต่อ', 'error');
+                return;
+            }
+
+            // **ลบการตรวจสอบรูปแบบอีเมลออก**
+
             if (currentStep < 2) {
                 document.getElementById(`step${currentStep}`).style.display = 'none';
                 currentStep++;

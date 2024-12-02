@@ -33,11 +33,12 @@
             align-items: center;
         }
         .loading-spinner {
-            border: 16px solid #aaaaaa;
+            border: 10px solid #ffffff;
+            background-color: #ebebeb;
             border-radius: 50%;
-            border-top: 16px solid #1e293b;
-            width: 120px;
-            height: 120px;
+            border-top: 10px solid #1e293b;
+            width: 100px;
+            height: 100px;
             animation: spin 2s linear infinite;
         }
         @keyframes spin {
@@ -83,16 +84,18 @@
 </head>
 <body class="bg-slate-100 flex flex-col min-h-screen">
     <!-- ส่วนหัวของหน้า -->
+     
     <div class="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-10">
+        <div class="max-w-md mx-auto">
         <h1 class="text-xl font-bold">จองคิว</h1>
         <p class="text-sm">เวลาทำการเปิด 10:00-17:00 น.</p>
     </div>
-
+    </div>
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
     <div class="popup" id="popup">
-        <div class="max-w-md popup-content mx-auto" id="popupContent"></div>
+        <div class="w-full m-4 max-w-md popup-content mx-auto" id="popupContent"></div>
     </div>
     
     <div class=" w-full mx-auto rounded py-4 px-4 mb-4">
@@ -102,23 +105,23 @@
             <!-- ฟอร์มการจอง (Step 1) -->
             <div id="step1" class="max-w-sm mx-auto">
                 <!-- เลือกบริการ -->
-                <div class="flex mb-4">
-                    <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
+                <div class="flex space-x-4 mb-4">
+                    <span class="bg-white flex items-center border rounded-xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> บริการ </span>
                     </span>
-                    <select id="service" name="service" class="rounded-2xl bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
+                    <select id="service" name="service" class="rounded-xl px-2 text-center bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกบริการ"></select>
                 </div>
                 <!-- เลือกสถานที่ -->
-                <div class="flex mb-4">
-                    <span class="bg-white flex items-center border rounded-2xl p-2 w-24">
+                <div class="flex space-x-4 mb-4">
+                    <span class="bg-white flex items-center border rounded-xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> สาขา </span>
                     </span>
-                    <select id="locationservice" name="locationservice" class="rounded-2xl bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
+                    <select id="locationservice" name="locationservice" class="rounded-xl text-center bg-white border text-gray-900 block flex-1 min-w-0 w-full" placeholder="ตัวเลือกสถานที่"></select>
                 </div>
                 <!-- ฟอร์มข้อมูลผู้ใช้ -->
-                <div class="bg-slate-300 px-4 py-4 my-4 rounded-2xl">
+                <div class="bg-slate-200 px-4 py-4 my-4 rounded-xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
                         <div id="loadingOverlay">
@@ -126,34 +129,60 @@
                         </div>
                         <div class="pb-4">ข้อมูลการนัดจองคิว</div>
                         <div class="flex justify-center items-center">
-                            <div class="max-w-md">
+                            <div class="w-full p-2 space-y-6">
                                 <!-- ฟิลด์ชื่อ-สกุล -->
-                                <div class="flex mb-6">
-                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">ชื่อ-สกุล</span></span>
-                                    <input type="text" id="name" name="name" class="w-full p-2 shadow-sm rounded-2xl">
+                                <div class="relative">
+                                    <label for="name" class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">
+                                        ชื่อ-สกุล
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        placeholder="กรอกชื่อ-สกุล..."
+                                        class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800"
+                                    />
                                 </div>
+                            
                                 <!-- ฟิลด์เบอร์ติดต่อ -->
-                                <div class="flex  mb-6">
-                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">เบอร์ติดต่อ</span></span>
-                                    <input type="tel" id="phonenumber" name="phonenumber" class="w-full p-2 shadow-sm rounded-2xl">
+                                <div class="relative">
+                                    <label for="phonenumber" class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">
+                                        เบอร์ติดต่อ
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        id="phonenumber"
+                                        name="phonenumber"
+                                        placeholder="กรอกเบอร์ติดต่อ..."
+                                        class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800"
+                                    />
                                 </div>
-                                   <!-- ฟิลด์ชื่ออีเมล -->
-                                <div class="flex  mb-6">
-                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">อีเมล</span></span>
-                                    <input type="text" id="emailaddress" name="emailaddress" class="w-full p-2 shadow-sm rounded-2xl">
-                                </div>
+                            
                                 <!-- ฟิลด์หมายเหตุ -->
-                                <div class="flex">
-                                    <span class="text-center bg-slate-800 rounded-2xl mr-2 p-2 w-32"><span class="text-white text-sm">หมายเหตุ</span></span>
-                                    <input type="text" id="note" name="note" class="w-full p-2 shadow-sm rounded-2xl">
+                                <div class="relative">
+                                    <label for="note" class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">
+                                        หมายเหตุ
+                                    </label>
+                                    <textarea
+                                        type="text"
+                                        id="note"
+                                        name="note"
+                                        placeholder="กรอกหมายเหตุ..."
+                                        class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800"
+                                    >
+                                    </textarea>
                                 </div>
+                            
+                                <!-- ฟิลด์ซ่อนสำหรับ userlineid -->
                                 <input type="hidden" id="userlineid" name="userlineid">
                             </div>
+                            
+                            
                         </div>
                     </div>
                 </div>
                 <div id="buttons" class="">
-                    <button type="button" onclick="nextStep()" class="w-full bg-slate-800 text-white py-3 mt-4 rounded-2xl">ถัดไป</button>
+                    <button type="button" onclick="nextStep()" class="w-full bg-slate-800 text-white py-3 mt-4 rounded-xl">ถัดไป</button>
                 </div>
             </div>
 
@@ -162,7 +191,7 @@
                 <div class="text-center font-semibold mb-6">
                     <!-- ตัวเลือกเดือนและปี -->
                     <div class="flex justify-center space-x-2">
-                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-2xl px-2 py-4">
+                        <select id="monthSelect" aria-label="Month" class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-xl px-2 py-4">
                             <option value="0">มกราคม</option>
                             <option value="1">กุมภาพันธ์</option>
                             <option value="2">มีนาคม</option>
@@ -176,7 +205,7 @@
                             <option value="10">พฤศจิกายน</option>
                             <option value="11">ธันวาคม</option>
                         </select>
-                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-2xl px-2 py-4"></select>
+                        <select id="yearSelect" aria-label="Year" class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-xl px-2 py-4"></select>
                     </div>
                 </div>
                 <div class="overflow-x-auto mb-4 no-scrollbar">
@@ -186,21 +215,21 @@
               
                 <div class="hidden">
                     <label for="time" class="block text-sm">Time:</label>
-                    <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3 border border-blue-900 rounded-2xl">
+                    <input type="time" id="time" name="time" required readonly class="w-full px-3 py-3 border border-blue-900 rounded-xl">
                 </div>
                 <div class="hidden text-center">
-                    <input type="submit" value="Submit" class="px-6 py-4 bg-slate-800 text-black font-semibold rounded-2xl">
+                    <input type="submit" value="Submit" class="px-6 py-4 bg-slate-800 text-black font-semibold rounded-xl">
                 </div>
-                <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-slate-800 py-3 rounded-2xl">กลับหน้าหลัก</button>
+                <button type="button" onclick="prevStep()" class="w-32 p-2 mt-5 bg-white text-slate-800 py-3 rounded-xl">กลับหน้าหลัก</button>
             </div>
         </form>
     </div>
 
     <script>
         
-        let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec';
-      // let WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
-        const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
+        // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec'; // appscripts booking
+        const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec'; //appscripts members
         const LIFF_ID = '2006029649-bj0ez4Og';
 
         // แสดงฟอร์มการจอง (Step 1) เมื่อเปิดหน้า
@@ -209,9 +238,10 @@
 
         // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
         async function loadInitialData() {
-            await Promise.all([fetchDropdownData(), initializeLiff()]);
-
+            await Promise.all([fetchDropdownData(),initializeLiff()]);
             const currentDate = new Date();
+            currentDate.setDate(currentDate.getDate() + 1); // เพิ่มหนึ่งวัน
+
             selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
             populateYearSelect(currentDate.getFullYear());
             monthSelect.value = currentDate.getMonth();
@@ -220,6 +250,7 @@
             await updateCalendar(currentDate);
             showLoading(false);
         }
+
 
         loadInitialData();
 
@@ -276,7 +307,6 @@
         function displayData(row) {
             document.getElementById('userlineid').value = row[1] || '';
             document.getElementById('name').value = row[2] || '';
-            document.getElementById('emailaddress').value = row[4] || '';
             document.getElementById('phonenumber').value = row[3] || '';
         }
 
@@ -300,7 +330,7 @@
 
             // ตรวจสอบว่าฟิลด์ไม่ว่าง
             if (!name || !phonenumber) {
-                showPopup('ข้อผิดพลาด', 'กรุณากรอกข้อมูล ชื่อ-สกุล, เบอร์ติดต่อ ให้ครบถ้วนก่อนดำเนินการต่อ', 'error');
+                showPopup('ข้อผิดพลาด', 'กรุณากรอกข้อมูล ชื่อ-สกุล, เบอร์ติดต่อ  ให้ครบถ้วนก่อนดำเนินการต่อ', 'error');
                 return;
             }
 
@@ -393,7 +423,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const dayElement = document.createElement('div');
-                dayElement.classList.add('bg-slate-800', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-slate-800', 'text-center', 'rounded-2xl', 'cursor-pointer');
+                dayElement.classList.add('bg-slate-800', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-slate-800', 'text-center', 'rounded-xl', 'cursor-pointer');
                 dayElement.textContent = `${daysOfWeek[date.getDay()]} ${day}`;
                 if (day === currentDay) {
                     dayElement.id = 'currentDay';
@@ -447,16 +477,16 @@
                 slotDiv.className = 'flex justify-between items-center py-2';
 
                 const timeSpan = document.createElement('span');
-                timeSpan.className = 'px-6 py-2 rounded-2xl bg-white text-slate-800';
+                timeSpan.className = 'px-6 py-2 rounded-xl bg-white text-slate-800';
                 timeSpan.textContent = `${time} น.`;
 
                 const statusButton = document.createElement('button');
-                statusButton.className = `px-6 py-2 rounded-2xl ${info.status === 'Available' ? 'bg-green-200 text-green-600 cursor-not-allowed' : 'bg-red-200 text-red-600 cursor-not-allowed'}`;
+                statusButton.className = `px-6 py-2 rounded-xl ${info.status === 'Available' ? 'bg-green-200 text-green-600 cursor-not-allowed' : 'bg-red-200 text-red-600 cursor-not-allowed'}`;
                 statusButton.textContent = info.status === 'Available' ? `ว่าง (${info.remaining}/${info.total})` : `เต็ม (${info.remaining}/${info.total})`;
                 statusButton.disabled = true;
 
                 const bookButton = document.createElement('button');
-                bookButton.className = `custom-button px-4 py-2 rounded-2xl ${info.status === 'Available' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-400'}`;
+                bookButton.className = `custom-button px-4 py-2 rounded-xl ${info.status === 'Available' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-400'}`;
                 bookButton.innerHTML = `<i class="fas fa-calendar-alt"></i> นัดหมาย`;
                 bookButton.disabled = info.status !== 'Available';
                 bookButton.addEventListener('click', () => {
@@ -465,7 +495,6 @@
                         <p>บริการ: ${form.service.value}</p>
                         <p>สถานที่: ${form.locationservice.value}</p>
                         <p>ชื่อ-สกุล: ${form.name.value}</p>
-                        <p>อีเมล: ${form.emailaddress.value}</p>
                         <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
                         <p>หมายเหตุ: ${form.note.value}</p>
                         <p>วันที่: ${selectedDate}</p>
@@ -526,7 +555,6 @@
                 <p>บริการ: ${form.service.value}</p>
                 <p>สถานที่: ${form.locationservice.value}</p>
                 <p>ชื่อ-สกุล: ${form.name.value}</p>
-                <p>อีเมล: ${form.emailaddress.value}</p>
                 <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
                 <p>หมายเหตุ: ${form.note.value}</p>
                 <p>วันที่: ${selectedDate}</p>
@@ -541,9 +569,9 @@
             popupContent.innerHTML = `<h2 class="text-xl mb-4">${title}</h2><div>${content}</div>`;
             if (type === 'confirm') {
                 popupContent.innerHTML += `
-                    <div class="flex justify-between my-4">
-                        <button id="cancelButton" class="px-2 py-4 bg-gray-300 text-gray-700 rounded-2xl">ยกเลิก</button>
-                        <button id="confirmButton" class="px-2 py-4 bg-slate-800 text-white rounded-2xl mr-2">ยืนยันนัดหมาย</button>
+                    <div class="flex justify-between space-x-4 my-6">
+                        <button id="cancelButton" class="w-1/3 px-2 py-4 bg-gray-300 text-gray-700 rounded-xl">ยกเลิก</button>
+                        <button id="confirmButton" class="w-2/3 px-2 py-4 bg-slate-800 text-white rounded-xl mr-2">ยืนยันนัดหมาย</button>
                     </div>
                 `;
                 document.getElementById('confirmButton').addEventListener('click', () => {
@@ -552,7 +580,7 @@
                 });
                 document.getElementById('cancelButton').addEventListener('click', hidePopup);
             } else {
-                popupContent.innerHTML += `<div class="mt-4"><button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-2xl">ปิด</button></div>`;
+                popupContent.innerHTML += `<div class="mt-4"><button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-xl">ปิด</button></div>`;
             }
             popup.style.display = 'flex';
         }

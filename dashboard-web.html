@@ -197,7 +197,7 @@
   <script>
     /* URL สำหรับ Google Script */
     const PROFILE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec';
-    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwYNUuM_f7MjyGD56I_4B9O7MnY3MEV13o8hDkMmIcRjZfnH0EtbgTiG41POV1WUg01w/exec';
+    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec';
 
     /* เมื่อเอกสารพร้อมใช้งาน */
     document.addEventListener('DOMContentLoaded', function () {
@@ -247,22 +247,22 @@
 
               // เติมข้อมูลลงในแถว
               row.innerHTML = `
-            <td class="hidden">${detail.userlineid}</td> <!-- ซ่อน userlineid -->
-            <td class="px-4 py-2 border">${detail.name}</td>
-            <td class="px-4 py-2 border">${detail.service}</td>
-            <td class="px-4 py-2 border">${detail.locationservice}</td>
-            <td class="px-4 py-2 border">${detail.phonenumber}</td>
-            <td class="px-4 py-2 border">${detail.note}</td>
-            <td class="px-4 py-2 border">${detail.date}</td>
-            <td class="px-4 py-2 border">${detail.time}</td>
-            <td class="px-4 py-2 border">${detail.status}</td>
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
-            </td>
-          `;
+                <td class="hidden">${detail.userlineid}</td>
+                <td class="px-4 py-2 border">${detail.name}</td>
+                <td class="px-4 py-2 border">${detail.service}</td>
+                <td class="px-4 py-2 border">${detail.locationservice}</td>
+                <td class="px-4 py-2 border">${detail.phonenumber}</td>
+                <td class="px-4 py-2 border">${detail.note}</td>
+                <td class="px-4 py-2 border">${detail.date}</td>
+                <td class="px-4 py-2 border">${detail.time}</td>
+                <td class="px-4 py-2 border">${detail.status}</td>
+                <td class="px-4 py-2 border">
+                  <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
+                  <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+                  <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded ${disableComplete ? 'opacity-50 cursor-not-allowed' : ''}" ${disableComplete ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
+                  <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded ${disableReminder ? 'opacity-50 cursor-not-allowed' : ''}" ${disableReminder ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
+                </td>
+              `;
 
               // เพิ่มแถวใหม่ลงในตาราง
               tableBody.appendChild(row);
@@ -278,6 +278,33 @@
 
       // ดึงข้อมูลตารางในครั้งแรก
       fetchAndPopulateTable();
+
+      // ฟังก์ชันเพิ่ม event listeners ให้กับปุ่มต่างๆ
+      function attachEventListeners() {
+        document.querySelectorAll('.confirm-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            confirmBooking(this.dataset.id);
+          });
+        });
+
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            cancelBooking(this.dataset.id);
+          });
+        });
+
+        document.querySelectorAll('.complete-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            completeBooking(this.dataset.id);
+          });
+        });
+
+        document.querySelectorAll('.reminder-btn').forEach(button => {
+          button.addEventListener('click', function () {
+            sendReminder(this.dataset.id);
+          });
+        });
+      }
 
       // ดึงข้อมูลรายชื่อจาก Google Script และเติมลงใน Datalist
       fetch(`${PROFILE_SCRIPT_URL}?action=fetchAllNames`)
@@ -371,7 +398,7 @@
       function completeBooking(id) {
         Swal.fire({
           title: 'คุณแน่ใจหรือไม่?',
-          text: "คุณต้องการ เสร็จสิ้น การนัดหมายนี้หรือไม่!",
+          text: "คุณต้องการเสร็จสิ้นการนัดหมายนี้หรือไม่!",
           icon: 'warning',
           showCancelButton: true,
           confirmButtonColor: '#3085d6',
@@ -389,7 +416,7 @@
               })
               .catch(error => {
                 showLoadingSpinner(false);
-                Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการ การนัดหมายเสร็จสิ้น .', 'error');
+                Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการเสร็จสิ้นการนัดหมาย.', 'error');
                 console.error('Error completing booking:', error);
               });
           }
@@ -447,7 +474,7 @@
               showLoadingSpinner(false);
               if (data && Object.keys(data).length > 0) {
                 // กรอกข้อมูลลงใน input ต่างๆ
-                document.getElementById('userIdInput').value = data.userlineId || '';  
+                document.getElementById('userIdInput').value = data.userlineId || '';
                 document.getElementById('keyIdInput').value = data.keyid || '';
                 document.getElementById('nameIdInput').value = data.nameId || '';
                 document.getElementById('keynumberIdInput').value = data.keynumberId || '';
@@ -511,28 +538,6 @@
         const date = document.getElementById('dateInput').value;
         const time = document.getElementById('timeInput').value;
         const status = document.getElementById('statusInput').value;
-
-        // เพิ่มแถวใหม่ในตาราง
-        const newRow = `
-          <tr>
-            <td class="hidden">${userId}</td> <!-- ซ่อน userlineid -->
-            <td class="px-4 py-2 border">${nameId}</td> <!-- nameId -->
-            <td class="px-4 py-2 border">${service}</td> <!-- service -->
-            <td class="px-4 py-2 border">${location}</td> <!-- location -->
-            <td class="px-4 py-2 border">${keynumberId}</td> <!-- keynumberId -->
-            <td class="px-4 py-2 border">${keynumber2Id}</td> <!-- keynumber2Id -->
-            <td class="px-4 py-2 border">${date}</td> <!-- date -->
-            <td class="px-4 py-2 border">${time}</td> <!-- time -->
-            <td class="px-4 py-2 border">${status}</td> <!-- status -->
-            <td class="px-4 py-2 border">
-              <button class="confirm-btn bg-green-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Confirm</button>
-              <button class="cancel-btn bg-red-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Cancel</button>
-              <button class="complete-btn bg-blue-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Complete</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-2 py-1 rounded" data-id="${document.querySelectorAll('#tableBody tr').length}">Send Reminder</button>
-            </td>
-          </tr>
-        `;
-        document.getElementById('tableBody').insertAdjacentHTML('beforeend', newRow);
 
         // ซ่อน modal หลังจากบันทึกข้อมูล
         document.getElementById('modal').classList.add('hidden');

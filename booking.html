@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองคิว</title>
+    <title>ระบบนัดหมาย</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
@@ -280,12 +280,13 @@
         document.getElementById('step1').style.display = 'block';
         showLoading(true);
 
-        // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF 
+        // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
         async function loadInitialData() {
-            await Promise.all([fetchDropdownData(), initializeLiff()]);
+            await Promise.all([fetchDropdownData(),initializeLiff()]);
             const currentDate = new Date();
             currentDate.setDate(currentDate.getDate() + 1); // เพิ่มหนึ่งวัน
 
+            selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
             populateYearSelect(currentDate.getFullYear());
             monthSelect.value = currentDate.getMonth();
             yearSelect.value = currentDate.getFullYear();
@@ -293,6 +294,7 @@
             await updateCalendar(currentDate);
             showLoading(false);
         }
+
 
         loadInitialData();
 
@@ -328,16 +330,13 @@
             try {
                 const response = await fetch(WEB_APP_MEMBER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({ action: 'fetchData', userId: userId })
                 });
                 const data = await response.json();
                 data.sort((a, b) => new Date(b[6]) - new Date(a[6]));
                 const row = data.find(row => row[1] === userId);
                 if (row) {
-                    prefillFormData(row); // เรียกใช้ฟังก์ชันใหม่เพื่อเติมข้อมูล
+                    displayData(row);
                 } else {
                     console.log('No data found for userId:', userId);
                 }
@@ -348,22 +347,19 @@
             }
         }
 
-        // ฟังก์ชันเติมข้อมูลผู้ใช้ในฟอร์ม โดยไม่เปลี่ยนขั้นตอน
-        function prefillFormData(row) {
+        // แสดงข้อมูลผู้ใช้ในฟอร์ม
+        function displayData(row) {
             document.getElementById('userlineid').value = row[1] || '';
             document.getElementById('name').value = row[2] || '';
             document.getElementById('phonenumber').value = row[3] || '';
-            // หากคุณต้องการตั้งค่า Checkbox ตามข้อมูลที่บันทึกไว้ สามารถเพิ่มโค้ดที่นี่ได้
-            // เช่น:
-            // document.getElementById('saveInfo').checked = row[7] === 'true' || false;
         }
 
         // ฟังก์ชันแสดง/ซ่อนการโหลดข้อมูล
         function showLoading(isLoading) {
             const overlay = document.getElementById('loadingOverlay');
-            const popover = document.getElementById('popup');
+            const inputs = document.querySelectorAll('.input-field');
             overlay.style.display = isLoading ? 'flex' : 'none';
-            popover.style.display = 'none'; // ซ่อน Popup เมื่อกำลังโหลด
+            inputs.forEach(input => input.disabled = isLoading);
         }
 
         // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2

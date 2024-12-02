@@ -141,7 +141,7 @@
                     <span class="bg-white flex items-center border rounded-xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000"
                             class="w-6 h-6 mr-1">
-                        <span class="text-black"> บริการ </span>
+                        <span class="text-black"> เลือกบริการ </span>
                     </span>
                     <select id="service" name="service"
                         class="rounded-xl px-2 text-center bg-white border text-gray-900 block flex-1 min-w-0 w-full"
@@ -152,11 +152,11 @@
                     <span class="bg-white flex items-center border rounded-xl p-2 w-24">
                         <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000"
                             class="w-6 h-6 mr-1">
-                        <span class="text-black"> สาขา </span>
+                        <span class="text-black"> เลือกสาขา </span>
                     </span>
                     <select id="locationservice" name="locationservice"
                         class="rounded-xl text-center bg-white border text-gray-900 block flex-1 min-w-0 w-full"
-                        placeholder="ตัวเลือกสถานที่"></select>
+                        placeholder="ตัวฟเลือกสถานที่"></select>
                 </div>
                 <!-- ฟอร์มข้อมูลผู้ใช้ -->
                 <div class="bg-slate-200 px-4 py-4 my-4 rounded-xl">
@@ -213,11 +213,12 @@
                             </div>
                         </div>
                     </div>
-                    <div id="buttons" class="">
-                        <button type="button" onclick="nextStep()"
-                            class="w-full bg-slate-800 text-white py-3 mt-4 rounded-xl">ถัดไป</button>
-                    </div>
+                   
                 </div>
+            </div>
+            <div id="buttons" class="">
+                <button type="button" onclick="nextStep()"
+                    class="w-full bg-slate-800 text-white py-3 mt-4 rounded-xl">ถัดไป</button>
             </div>
             <!-- ฟอร์มการเลือกวันที่และเวลา (Step 2) -->
             <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
@@ -367,7 +368,6 @@
             popover.style.display = 'none'; // ซ่อน Popup เมื่อกำลังโหลด
         }
 
-        // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
         // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
         function nextStep() {
             const name = document.getElementById('name').value.trim();

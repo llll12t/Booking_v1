@@ -32,7 +32,7 @@
             height: 100%;
             background: rgb(30 41 59 / 0.8);
             z-index: 1000;
-            display: none; /* ซ่อนเมื่อเริ่มต้น */
+            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -77,6 +77,19 @@
             border-radius: 8px;
             text-align: left;
             width: 80%;
+        }
+
+        #loadingOverlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(30 41 59 / 0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
 
         .loading-container {
@@ -170,6 +183,9 @@
                 <div class="bg-slate-200 px-4 py-4 my-4 rounded-xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
+                        <div id="loadingOverlay">
+                            <div class="text-center text-white">ค้นหารายชื่อ..</div>
+                        </div>
                         <div class="pb-4">ข้อมูลการนัดจองคิว</div>
                         <div class="flex justify-center items-center">
                             <div class="w-full p-2 space-y-6">
@@ -271,7 +287,6 @@
 
         <script>
             // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
-            // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
             const WEB_APP_URL_1 = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec'; // appscripts booking 1
             const WEB_APP_URL_2 = 'https://script.google.com/macros/s/AKfycbwZTprBg1DHYZkGLGVRcMMEuRXGKoa4IDmd7KcLymGOhyPiY4lCGlmQLiHiarcEG0Su/exec'; // appscripts booking 2
             const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec'; // appscripts members
@@ -284,7 +299,7 @@
 
             // แสดงฟอร์มการเลือกบริการเมื่อเปิดหน้า
             document.getElementById('step0').style.display = 'block';
-            // ลบการเรียกใช้ showLoading(true) ออก เพื่อไม่ให้มีการโหลดตอนเริ่มต้น
+            showLoading(true);
 
             // ฟังก์ชันเลือกตัวเลือกบริการ
             async function selectOption(option) {
@@ -298,9 +313,6 @@
                 document.getElementById('step0').style.display = 'none';
                 currentStep = 1;
                 document.getElementById('step1').style.display = 'block';
-
-                // แสดง Loading Overlay ขณะโหลดข้อมูล
-                showLoading(true);
 
                 // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
                 await loadInitialData();

@@ -239,7 +239,7 @@
                         </div>
                     </div>
                 </div>
-
+              </div>
                 <!-- Step 2: ฟอร์มการเลือกวันที่และเวลา -->
                 <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
                     <!-- เนื้อหาของ Step 2 ตามเดิม -->
@@ -301,7 +301,6 @@
 
             // แสดงฟอร์ม Step 0 เมื่อเปิดหน้า
             document.getElementById('step0').style.display = 'block';
-            showLoading(true);
 
             // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
             async function loadInitialData() {

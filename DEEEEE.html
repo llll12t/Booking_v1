@@ -52,6 +52,7 @@
           <tr>
             <th class="py-2 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-700">ชื่อ</th>
             <th class="py-2 px-4 border-b border-gray-200 text-left text-sm font-semibold text-gray-700">วันที่นัดหมาย</th>
+            <th class="py-2 px-4 border-b border-gray-200 text-center text-sm font-semibold text-gray-700">สถานะ</th>
             <th class="py-2 px-4 border-b border-gray-200 text-center text-sm font-semibold text-gray-700">Action</th>
           </tr>
         </thead>
@@ -117,6 +118,20 @@
             displayCards(filteredDetails, currentPage);
             createPaginationControls();
 
+            // ตรวจสอบว่ามีการจองที่สถานะ "รอการยืนยัน" หรือไม่ แล้วแสดงการแจ้งเตือน
+            const pendingConfirmations = filteredDetails.filter(detail => detail.status === 'รอการยืนยัน');
+            if (pendingConfirmations.length > 0) {
+              Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: `มีการจองที่รอการยืนยัน ${pendingConfirmations.length} รายการ`,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+              });
+            }
+
             // ซ่อน SweetAlert2 loading หลังจากโหลดเสร็จ
             Swal.close();
           })
@@ -135,12 +150,35 @@
         const detailsToDisplay = details.slice(startIndex, endIndex);
 
         detailsToDisplay.forEach(detail => {
+          // แสดงสถานะในคอนโซลเพื่อดีบัก
+          console.log(`Processing booking ID: ${detail.idKey}, Status: ${detail.status}`);
+
           const row = document.createElement('tr');
 
-          // Row สำหรับข้อมูลหลัก (ชื่อและวันที่นัดหมาย)
+          // กำหนดไอคอนตามสถานะ
+          let statusIcon = '';
+          switch (detail.status) {
+            case 'รอการยืนยัน':
+              statusIcon = '⚠️';
+              break;
+            case 'ยืนยันแล้ว':
+              statusIcon = '📌';
+              break;
+            case 'ยกเลิก':
+              statusIcon = '❌';
+              break;
+            case 'เสร็จสิ้น':
+              statusIcon = '✅';
+              break;
+            default:
+              statusIcon = detail.status;
+          }
+
+          // Row สำหรับข้อมูลหลัก (ชื่อ, วันที่นัดหมาย, สถานะ และ Action)
           row.innerHTML = `
             <td class="py-2 px-4 border-b border-gray-200">${detail.name}</td>
             <td class="py-2 px-4 border-b border-gray-200">${detail.date}</td>
+            <td class="py-2 px-4 border-b border-gray-200 text-center">${statusIcon}</td>
             <td class="py-2 px-4 border-b border-gray-200 text-center">
               <button class="view-btn bg-indigo-900 text-white px-3 py-1 rounded-md hover:bg-indigo-700" data-id="${detail.idKey}">คำสั่ง</button>
             </td>
@@ -151,7 +189,7 @@
           const detailRow = document.createElement('tr');
           detailRow.classList.add('hidden');
           detailRow.innerHTML = `
-            <td colspan="3" class="py-2 px-4 border-b border-gray-200 bg-gray-50">
+            <td colspan="4" class="py-2 px-4 border-b border-gray-200 bg-gray-50">
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <p><strong>ชื่อ:</strong> ${detail.name}</p>
@@ -169,7 +207,7 @@
                 <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded-xl ${detail.status === 'ยืนยันแล้ว' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status === 'ยืนยันแล้ว' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
                 <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded-xl ${detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
                 <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded-xl ${detail.status === 'รอการยืนยัน' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status === 'รอการยืนยัน' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-                <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-xl ${detail.status !== 'ยกเลิก' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status !== 'รอการยืนยัน' ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
+                <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-xl ${detail.status !== 'รอการยืนยัน' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status !== 'รอการยืนยัน' ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
               </div>
             </td>
           `;

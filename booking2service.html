@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <style>
+        /* สไตล์ที่มีอยู่ */
         .selected {
             background-color: #283448 !important;
             color: white;
@@ -32,7 +33,7 @@
             height: 100%;
             background: rgb(30 41 59 / 0.8);
             z-index: 1000;
-            display: none; /* ซ่อนเมื่อเริ่มต้น */
+            display: flex;
             justify-content: center;
             align-items: center;
         }
@@ -79,12 +80,24 @@
             width: 80%;
         }
 
+        #loadingOverlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(30 41 59 / 0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
         .loading-container {
             position: relative;
         }
 
         @keyframes blink {
-
             0%,
             100% {
                 opacity: 1;
@@ -120,31 +133,32 @@
         <div class="w-full m-4 max-w-md popup-content mx-auto" id="popupContent"></div>
     </div>
 
-    <!-- Booking Form -->
+    <!-- ฟอร์มการจอง -->
     <div class="w-full mx-auto rounded py-4 px-4 mb-4">
         <form id="bookingForm" class="space-y-2 pt-2" novalidate>
             <input type="hidden" name="action" value="makeBooking">
 
-            <!-- Step 0: Initial Selection -->
-            <div id="step0" class="grid gap-5 max-w-sm mx-auto">
-                <div class="text-center font-semibold mb-6">
-                    <h2 class="text-xl">เลือกประเภทการนัดหมาย</h2>
+            <!-- Step 0: เลือกแหล่งข้อมูล -->
+            <div id="step0" class="max-w-sm mx-auto">
+                <div class="text-center mb-4">
+                    <h2 class="text-lg font-semibold">เลือกแหล่งข้อมูลการจอง</h2>
                 </div>
-                <div class="flex justify-between">
-                    <button type="button" onclick="selectOption(1)"
-                        class="w-full h-48 mx-2 bg-teal-100 text-black py-3 rounded-2xl">ทรีทเมนท์</button>
-                    <button type="button" onclick="selectOption(2)"
-                        class="w-full h-48 mx-2 bg-blue-200 text-black py-3 rounded-2xl">พบแพทย์</button>
+                <div class="flex flex-col space-y-4">
+                    <button type="button" onclick="selectWebApp(1)"
+                        class="w-full bg-blue-500 text-white py-3 rounded-xl">Booking 1</button>
+                    <button type="button" onclick="selectWebApp(2)"
+                        class="w-full bg-green-500 text-white py-3 rounded-xl">Booking 2</button>
                 </div>
             </div>
 
-            <!-- Step 1: Booking Details -->
+            <!-- Step 1: ฟอร์มการจอง -->
             <div id="step1" class="max-w-sm mx-auto" style="display:none;">
-                <!-- เลือกบริการ -->
+                <!-- เนื้อหาของ Step 1 ตามเดิม -->
+                <!-- ... (เนื้อหา Step 1 ไม่เปลี่ยนแปลง) -->
+                <!-- ตัวอย่าง: เลือกบริการ -->
                 <div class="flex space-x-4 mb-4">
                     <span class="bg-white flex items-center border rounded-xl p-2 w-32">
-                        <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000"
-                            class="w-6 h-6 mr-1">
+                        <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> บริการ </span>
                     </span>
                     <select id="service" name="service"
@@ -156,8 +170,7 @@
                 <!-- เลือกสถานที่ -->
                 <div class="flex space-x-4 mb-4">
                     <span class="bg-white flex items-center border rounded-xl p-2 w-32">
-                        <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000"
-                            class="w-6 h-6 mr-1">
+                        <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
                         <span class="text-black"> สาขา </span>
                     </span>
                     <select id="locationservice" name="locationservice"
@@ -170,6 +183,9 @@
                 <div class="bg-slate-200 px-4 py-4 my-4 rounded-xl">
                     <input type="hidden" id="displayName" name="displayName">
                     <div class="loading-container">
+                        <div id="loadingOverlay">
+                            <div class="text-center text-white">ค้นหารายชื่อ..</div>
+                        </div>
                         <div class="pb-4">ข้อมูลการนัดจองคิว</div>
                         <div class="flex justify-center items-center">
                             <div class="w-full p-2 space-y-6">
@@ -224,8 +240,10 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Date and Time Selection -->
+                <!-- Step 2: ฟอร์มการเลือกวันที่และเวลา -->
                 <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
+                    <!-- เนื้อหาของ Step 2 ตามเดิม -->
+                    <!-- ... (เนื้อหา Step 2 ไม่เปลี่ยนแปลง) -->
                     <div class="text-center font-semibold mb-6">
                         <!-- ตัวเลือกเดือนและปี -->
                         <div class="flex justify-center space-x-2">
@@ -276,53 +294,34 @@
             const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxIj95q_yQ2tt4NKP9dJVh2t3Ggo8xJsSlHlmpdVMP-CG2W31PHdIqLD-P14aIgc_80/exec'; // appscripts members
             const LIFF_ID = '2006029649-bj0ez4Og';
 
-            let WEB_APP_URL = '';
             let currentStep = 0; // เริ่มต้นที่ Step 0
             let selectedDate = '';
             let isSubmitting = false;
-            let liffInitialized = false; // ตัวแปรตรวจสอบการเริ่มต้น LIFF
+            let selectedWebAppUrl = ''; // ตัวแปรเก็บ URL ที่เลือก
 
-            // แสดงฟอร์มการเลือกประเภทการนัดหมาย (Step 0) เมื่อเปิดหน้า
+            // แสดงฟอร์ม Step 0 เมื่อเปิดหน้า
             document.getElementById('step0').style.display = 'block';
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'none';
+            showLoading(true);
 
-            // ฟังก์ชันเลือกตัวเลือกบริการ
-            async function selectOption(option) {
-                if (option === 1) {
-                    WEB_APP_URL = WEB_APP_URL_1;
-                } else if (option === 2) {
-                    WEB_APP_URL = WEB_APP_URL_2;
-                }
+            // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
+            async function loadInitialData() {
+                await Promise.all([fetchDropdownData(), initializeLiff()]);
+                const currentDate = new Date();
+                currentDate.setDate(currentDate.getDate() + 1); // เพิ่มหนึ่งวัน
 
-                // ซ่อน Step 0 และแสดง Step 1
-                document.getElementById('step0').style.display = 'none';
-                currentStep = 1;
-                document.getElementById('step1').style.display = 'block';
+                selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+                populateYearSelect(currentDate.getFullYear());
+                monthSelect.value = currentDate.getMonth();
+                yearSelect.value = currentDate.getFullYear();
 
-                // แสดง Loading Overlay ขณะโหลดข้อมูล
-                showLoading(true);
-
-                // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
-                await loadInitialData();
+                await updateCalendar(currentDate);
+                showLoading(false);
             }
 
             // ฟังก์ชันการเตรียมการเริ่มต้น LIFF
             async function initializeLiff() {
-                if (liffInitialized) {
-                    console.log('LIFF already initialized');
-                    return;
-                }
-
-                if (!liff) {
-                    console.error('LIFF SDK is not loaded.');
-                    showPopup('เกิดข้อผิดพลาด', 'ไม่พบ LIFF SDK กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณ', 'error');
-                    return;
-                }
-
                 try {
                     await liff.init({ liffId: LIFF_ID });
-                    liffInitialized = true;
                     if (liff.isLoggedIn()) {
                         getUserProfile();
                     } else {
@@ -330,7 +329,6 @@
                     }
                 } catch (error) {
                     console.error('Error initializing LIFF:', error);
-                    showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับ LIFF ได้ กรุณาลองใหม่อีกครั้ง', 'error');
                 }
             }
 
@@ -343,7 +341,6 @@
                     fetchData(profile.userId);
                 } catch (error) {
                     console.error('Error getting profile data:', error);
-                    showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง', 'error');
                 }
             }
 
@@ -353,9 +350,6 @@
                 try {
                     const response = await fetch(WEB_APP_MEMBER_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
                         body: JSON.stringify({ action: 'fetchData', userId: userId })
                     });
                     const data = await response.json();
@@ -368,7 +362,6 @@
                     }
                 } catch (error) {
                     console.error('Error fetching data:', error);
-                    showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง', 'error');
                 } finally {
                     showLoading(false);
                 }
@@ -379,36 +372,32 @@
                 document.getElementById('userlineid').value = row[1] || '';
                 document.getElementById('name').value = row[2] || '';
                 document.getElementById('phonenumber').value = row[3] || '';
-                // หากมีฟิลด์อื่น ๆ เพิ่มเติม สามารถเพิ่มได้ที่นี่
             }
 
             // ฟังก์ชันแสดง/ซ่อนการโหลดข้อมูล
             function showLoading(isLoading) {
                 const overlay = document.getElementById('loadingOverlay');
+                const inputs = document.querySelectorAll('.input-field');
                 overlay.style.display = isLoading ? 'flex' : 'none';
+                inputs.forEach(input => input.disabled = isLoading);
             }
 
-            // ฟังก์ชันโหลดข้อมูลเบื้องต้น
-            async function loadInitialData() {
-                try {
-                    await Promise.all([fetchDropdownData(), initializeLiff()]);
-                    const currentDate = new Date();
-                    currentDate.setDate(currentDate.getDate() + 1); // เพิ่มหนึ่งวัน
-
-                    populateYearSelect(currentDate.getFullYear());
-                    monthSelect.value = currentDate.getMonth();
-                    yearSelect.value = currentDate.getFullYear();
-
-                    await updateCalendar(currentDate);
-                } catch (error) {
-                    console.error('Error loading initial data:', error);
-                    showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
-                } finally {
-                    showLoading(false);
+            // ฟังก์ชันเลือก Web App จาก Step 0
+            function selectWebApp(option) {
+                if (option === 1) {
+                    selectedWebAppUrl = WEB_APP_URL_1;
+                } else if (option === 2) {
+                    selectedWebAppUrl = WEB_APP_URL_2;
                 }
+
+                // ย้ายไปยัง Step 1
+                document.getElementById('step0').style.display = 'none';
+                currentStep = 1;
+                document.getElementById('step1').style.display = 'block';
+                loadInitialData();
             }
 
-            // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
+            // ฟังก์ชันเปลี่ยนขั้นตอนไปยัง Step ถัดไป
             function nextStep() {
                 const name = document.getElementById('name').value.trim();
                 const phonenumber = document.getElementById('phonenumber').value.trim();
@@ -432,7 +421,7 @@
                     return;
                 }
 
-                if (currentStep === 1) {
+                if (currentStep < 2) {
                     document.getElementById(`step${currentStep}`).style.display = 'none';
                     currentStep++;
                     document.getElementById(`step${currentStep}`).style.display = 'block';
@@ -444,17 +433,21 @@
 
             // ฟังก์ชันย้อนกลับไปยัง Step ก่อนหน้า
             function prevStep() {
-                if (currentStep === 2) {
+                if (currentStep > 1) {
                     document.getElementById(`step${currentStep}`).style.display = 'none';
                     currentStep--;
                     document.getElementById(`step${currentStep}`).style.display = 'block';
+                    if (currentStep === 1) {
+                        // หากกลับไปยัง Step 1 จาก Step 2
+                        // คุณอาจต้องเพิ่มโค้ดเพิ่มเติมที่นี่ หากมีการปรับเปลี่ยนพิเศษ
+                    }
                 }
             }
 
             // ฟังก์ชันดึงข้อมูลตัวเลือกบริการและสถานที่จากเซิร์ฟเวอร์
             async function fetchDropdownData() {
                 try {
-                    const response = await fetch(`${WEB_APP_URL}?action=fetchServicesAndlocationservice`);
+                    const response = await fetch(`${selectedWebAppUrl}?action=fetchServicesAndlocationservice`);
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -463,7 +456,6 @@
                     populateDropdown('locationservice', data.locationservice, 'เลือกสาขา');
                 } catch (error) {
                     console.error('There was a problem with the fetch operation:', error);
-                    showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลบริการและสาขาได้ กรุณาลองใหม่อีกครั้ง', 'error');
                 }
             }
 
@@ -549,7 +541,7 @@
                 selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                 showLoading(true);
                 try {
-                    const response = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${selectedDate}`);
+                    const response = await fetch(`${selectedWebAppUrl}?action=checkAvailability&date=${selectedDate}`);
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
@@ -612,7 +604,7 @@
                 try {
                     const formData = new FormData(form);
                     formData.append('date', selectedDate);
-                    const response = await fetch(WEB_APP_URL, {
+                    const response = await fetch(selectedWebAppUrl, {
                         method: 'POST',
                         body: formData
                     });

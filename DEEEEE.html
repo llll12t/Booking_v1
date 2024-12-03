@@ -169,7 +169,7 @@
                 <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded-xl ${detail.status === 'ยืนยันแล้ว' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status === 'ยืนยันแล้ว' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
                 <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded-xl ${detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
                 <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded-xl ${detail.status === 'รอการยืนยัน' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status === 'รอการยืนยัน' || detail.status === 'ยกเลิก' || detail.status === 'เสร็จสิ้น' ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-                <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-xl ${detail.status !== 'รอการยืนยัน' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status !== 'ยืนยันแล้ว' ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
+                <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-xl ${detail.status !== 'ยกเลิก' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status !== 'รอการยืนยัน' ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
               </div>
             </td>
           `;

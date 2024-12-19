@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการบันทึก</title>
+    <!-- นำเข้า Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- นำเข้า SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- นำเข้า LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <style>
+        #loading {
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 max-w-md mx-auto overflow-auto">
+    <div class="container p-4">
+        <div class="bg-slate-800 text-white p-8 mb-2 rounded-lg shadow-xl w-full">
+            <h1 class="text-xl mb-2">📋 บันทึกย้อนหลัง</h1>
+            <div class="text-sm">🕔กำหนดการทานยา 📆นัดถัดไป</div>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <input type="hidden" id="userId" name="userId">
+            <input type="hidden" id="displayName" name="displayName">
+
+            <div id="main-info" class="flex p-2 mb-4">
+                <div class="w-1/2">
+                    <div class="mb-2"><strong>ชื่อ:</strong> <span id="name-info" class="font-medium text-md"></span></div>
+                    <div class="mb-2"><strong>เลขที:</strong> <span id="employee-id-info" class="font-medium text-md"></span></div>
+                    <div class="mb-2"><strong>🕔การทานยา:</strong> <span id="med-time-info" class="font-medium text-md"></span></div>
+                </div>
+                <div class="w-1/2">
+                    <div class="mb-2"><strong>เบอร์โทร:</strong> <span id="phone-info" class="font-medium text-md"></span></div>
+                    <div class="mb-2"><strong>สิทธิการรักษา:</strong> <span id="medical-rights-info" class="font-medium text-md"></span></div>
+                    <div><strong>นัดถัดไป:</strong> <span id="next-appointment-info" class="font-medium text-md"></span></div>
+                </div>
+            </div>
+
+            <table class="overflow-hidden w-full rounded-lg border border-slate-200 shadow-sm">
+                <thead>
+                    <tr class="bg-slate-800 text-slate-100 shadow-md text-left">
+                        <th class="py-2 text-md px-4">วันที่</th>
+                        <th class="py-2 text-md px-4">เวลา</th>
+                        <th class="py-2 text-md px-4">หมายเหตุ</th>
+                        <th class="py-2 text-md px-4">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table" class="text-sm text-slate-600">
+                    <!-- ข้อมูลจะถูกสร้างด้วย JS -->
+                </tbody>
+            </table>
+
+            <!-- ตัวควบคุมการแบ่งหน้า -->
+            <div id="pagination-controls" class="mt-4 flex justify-center"></div>
+
+            <div id="loading" class="text-center text-slate-800 mt-4">กำลังโหลด...</div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwzGYhr3zyiITrBtijZFAOUX97PWImQFFK7CeE5l8mYa3vFrKENM2pgjBXssQXUM_hz/exec'; // ใส่ URL ของ Web App
+        const LIFF_ID = '2005732932-gOr8yJdV'; // ใส่ LIFF ID ของคุณ
+        const itemsPerPage = 10; 
+        let currentPage = 1;
+        let allData = [];
+
+        window.onload = function () {
+            initializeLiff();
+        };
+
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                if (liff.isLoggedIn()) {
+                    getUserProfile();
+                } else {
+                    liff.login();
+                }
+            } catch (error) {
+                console.error('Error initializing LIFF:', error);
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเริ่มต้น LIFF ได้', 'error');
+            }
+        }
+
+        async function getUserProfile() {
+            try {
+                const profile = await liff.getProfile();
+                document.getElementById('userId').value = profile.userId;
+                document.getElementById('displayName').value = profile.displayName;
+                fetchData(profile.userId);
+            } catch (error) {
+                console.error('Error getting profile:', error);
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ได้', 'error');
+            }
+        }
+
+        async function fetchData(userId) {
+            document.getElementById('loading').style.display = 'block';
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=fetchData`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                const filteredData = data.filter(row => row['ไอดีไลน์'] === userId);
+
+                // เรียงข้อมูลตามวันที่ล่าสุดก่อน
+                filteredData.sort((a, b) => {
+                    const dateA = parseDate(a['วันที่']);
+                    const dateB = parseDate(b['วันที่']);
+                    return dateB - dateA; // ให้ date ใหม่อยู่ข้างบน
+                });
+
+                allData = filteredData;
+
+                if (filteredData.length > 0) {
+                    const lastRow = filteredData[0]; // เนื่องจากเรียงแล้ว แถวแรกคือข้อมูลล่าสุด
+                    document.getElementById('name-info').textContent = lastRow['ชื่อ-สกุล'] || 'N/A';
+                    document.getElementById('employee-id-info').textContent = lastRow['เลขประจำตัวผู้ป่วย'] || 'N/A';
+                    document.getElementById('phone-info').textContent = lastRow['เบอร์โทร'] || 'N/A';
+                    document.getElementById('medical-rights-info').textContent = lastRow['สิทธิการรักษา'] || 'N/A';
+                    document.getElementById('med-time-info').textContent = lastRow['กำหนดการทานยา'] || 'N/A';
+                    document.getElementById('next-appointment-info').textContent = lastRow['นัดถัดไป'] || 'N/A';
+                } else {
+                    document.getElementById('name-info').textContent = 'ไม่มีข้อมูล';
+                    document.getElementById('employee-id-info').textContent = 'ไม่มีข้อมูล';
+                    document.getElementById('phone-info').textContent = 'ไม่มีข้อมูล';
+                    document.getElementById('medical-rights-info').textContent = 'ไม่มีข้อมูล';
+                    document.getElementById('med-time-info').textContent = 'ไม่มีข้อมูล';
+                    document.getElementById('next-appointment-info').textContent = 'ไม่มีข้อมูล';
+                }
+
+                buildTable('data-table', getCurrentPageData());
+                updatePaginationControls(allData.length);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('data-table').innerHTML = '<tr><td colspan="5">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
+                Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function parseDate(dateStr) {
+            if (!dateStr) return new Date(0);
+            const [day, month, year] = dateStr.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const [day, month, year] = dateString.split('-').map(Number);
+            return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+        }
+
+        function formatTime(timeString) {
+            if (!timeString) return 'N/A';
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        function buildTable(tableId, values) {
+            const table = document.getElementById(tableId);
+            table.innerHTML = '';
+
+            if (values.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" class="py-2 px-4">ไม่มีข้อมูลที่จะแสดง</td></tr>';
+                return;
+            }
+
+            values.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.classList.add('border-b', 'hover:bg-slate-100');
+
+                let td = document.createElement('td');
+                td.textContent = formatDate(row['วันที่']) || 'N/A';
+                td.classList.add('py-2', 'px-4');
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                td.textContent = formatTime(row['เวลา']) || 'N/A';
+                td.classList.add('py-2', 'px-4');
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                td.textContent = row['หมายเหตุ'] || '-';
+                td.classList.add('py-2', 'px-4');
+                tr.appendChild(td);
+
+                td = document.createElement('td');
+                td.textContent = 
+                    row['สถานะ'] === 'ตรงเวลา' ? 'ตรงเวลา' :
+                    (row['สถานะ'] === 'ไม่ตรงเวลา' ? 'ไม่ตรงเวลา' :
+                    (row['สถานะ'] === 'ไม่ได้ทานยา' ? 'ไม่ได้ทานยา' : 'N/A'));
+                td.classList.add('py-2', 'px-4', getStatusClass(row['สถานะ']));
+                tr.appendChild(td);
+
+                table.appendChild(tr);
+            });
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'ตรงเวลา':
+                    return 'text-green-500';
+                case 'ไม่ตรงเวลา':
+                    return 'text-blue-500';
+                default:
+                    return 'text-red-500';
+            }
+        }
+
+        function updatePaginationControls(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const paginationControls = document.getElementById('pagination-controls');
+            paginationControls.innerHTML = '';
+
+            if (totalPages <= 1) return; 
+
+            let startPage = currentPage - 1;
+            let endPage = currentPage + 1;
+
+            if (startPage < 1) {
+                startPage = 1;
+                endPage = 3;
+            }
+
+            if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = endPage - 2 > 0 ? endPage - 2 : 1;
+            }
+
+            if (currentPage > 1) {
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'ย้อนกลับ';
+                prevButton.classList.add('py-1', 'px-3', 'm-1', 'border', 'rounded', 'bg-white', 'text-black');
+                prevButton.addEventListener('click', () => {
+                    currentPage = currentPage - 1;
+                    buildTable('data-table', getCurrentPageData());
+                    updatePaginationControls(totalItems);
+                });
+                paginationControls.appendChild(prevButton);
+            }
+
+            for (let i = startPage; i <= endPage && i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    buildTable('data-table', getCurrentPageData());
+                    updatePaginationControls(totalItems);
+                });
+                pageButton.classList.add('py-1', 'px-3', 'm-1', 'border', 'rounded');
+                if (i === currentPage) {
+                    pageButton.classList.add('bg-black', 'text-white'); 
+                } else {
+                    pageButton.classList.add('bg-white', 'text-black');
+                }
+                paginationControls.appendChild(pageButton);
+            }
+
+            if (currentPage < totalPages) {
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'หน้าถัดไป';
+                nextButton.classList.add('py-1', 'px-3', 'm-1', 'border', 'rounded', 'bg-white', 'text-black');
+                nextButton.addEventListener('click', () => {
+                    currentPage = currentPage + 1;
+                    buildTable('data-table', getCurrentPageData());
+                    updatePaginationControls(totalItems);
+                });
+                paginationControls.appendChild(nextButton);
+            }
+        }
+
+        function getCurrentPageData() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            // เนื่องจากเราจัดเรียง filteredData ไว้แล้วให้วันล่าสุดอยู่ด้านบนสุด จึงไม่ต้อง reverse อีก
+            return allData.slice(startIndex, endIndex);
+        }
+    </script>
+</body>
+</html>

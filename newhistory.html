@@ -4,10 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ข้อมูลการนัดหมาย</title>
+  <title>ข้อมูลการนัดหมายและข้อมูลสมาชิก</title>
+  <!-- นำเข้า Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- นำเข้า SweetAlert2 สำหรับแสดงกล่องข้อความ -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script> <!-- รวม LIFF SDK -->
+  <!-- นำเข้า LIFF SDK ของ LINE -->
+  <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script>
   <style>
     .loader {
       border-top-color: #1e293b;
@@ -23,14 +26,49 @@
         transform: rotate(360deg);
       }
     }
+
+    /* สไตล์สำหรับ overlay การโหลดข้อมูลสมาชิก */
+    #memberLoadingOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(30, 41, 59, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      display: none; /* ซ่อนเริ่มต้น */
+    }
   </style>
 </head>
 
 <body class="bg-slate-100 min-h-screen">
-
   <!-- Main Content Area -->
-  <main class="flex-1 flex-col max-w-5xl m-auto p-4">
-    <!-- Filter Section: ส่วนสำหรับเลือกกรองข้อมูล -->
+  <main class="max-w-5xl mx-auto p-4">
+    <!-- Member Information Section: ส่วนแสดงข้อมูลสมาชิก -->
+    <div class="bg-white relative p-6 shadow-xl rounded-lg mb-6">
+      <div id="memberLoadingOverlay">
+        <div class="loader"></div>
+      </div>
+      <div class="flex items-center mb-4">
+        <img class="w-24 h-24 object-cover rounded-lg mr-4" id="memberProfileImage"
+          src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Profile Image">
+        <div>
+          <input type="text"
+            class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full"
+            id="memberName" placeholder="ชื่อ" name="memberName" readonly>
+          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
+            id="memberEmployeeId" placeholder="รหัสพนักงาน" name="memberEmployeeId" readonly>
+          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 w-full"
+            id="memberPosition" placeholder="ตำแหน่ง" name="memberPosition" readonly>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Section: ส่วนสำหรับเลือกกรองข้อมูลการนัดหมาย -->
     <div class="flex flex-wrap gap-4 mb-4">
       <div class="flex-1 min-w-[200px]">
         <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
@@ -57,7 +95,7 @@
       </div>
     </div>
 
-    <!-- Table Display Section: ส่วนแสดงข้อมูลในตาราง -->
+    <!-- Table Display Section: ส่วนแสดงข้อมูลการนัดหมายในตาราง -->
     <div class="overflow-x-auto">
       <table class="min-w-full bg-white rounded-2xl shadow-md">
         <thead>
@@ -82,106 +120,153 @@
     </div>
   </main>
 
-  <!-- Loading Spinner: ส่วนแสดงตัวโหลดระหว่างรอข้อมูล -->
+  <!-- Loading Spinner: ส่วนแสดงตัวโหลดระหว่างรอข้อมูลการนัดหมาย -->
   <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
     <div class="loader"></div>
   </div>
 
   <script>
-
-    const LIFF_ID = '2006029649-kVZ9XqOV'; // ID สำหรับ LIFF
+    // ประกาศค่า URL ที่ใช้เชื่อมต่อกับ Web Apps
     const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec';
+    const WEB_MEMBER_APP_URL = 'https://script.google.com/macros/s/AKfycbzsQ7SkfqOfdRNDHghvuPeOuACGMfU6Fnk6ZfKj4QsSJV6qXUX2lJPY3BTdJBBzGoJA/exec';
+    const LIFF_ID = '2006029649-kVZ9XqOV'; // ID สำหรับ LIFF
 
-
-    const CARDS_PER_PAGE = 5;  // จำนวนแถวที่แสดงต่อหน้า
-    let currentPage = 1;  // หน้าปัจจุบัน
-    let totalPages = 1;   // จำนวนหน้าทั้งหมด
+    const CARDS_PER_PAGE = 5; // จำนวนแถวที่แสดงต่อหน้า
+    let currentPage = 1; // หน้าปัจจุบัน
+    let totalPages = 1; // จำนวนหน้าทั้งหมด
     let allFilteredDetails = []; // เก็บข้อมูลที่กรองแล้วทั้งหมด
 
     // ฟังก์ชันเริ่มต้น LIFF
     async function initializeLiff() {
       try {
-        await liff.init({ liffId: `${LIFF_ID}` });  // เริ่ม LIFF ด้วย ID
+        await liff.init({ liffId: LIFF_ID }); // ใช้ Liff ID ของคุณ
         if (liff.isLoggedIn()) {
-          getUserProfile();  // ถ้าล็อกอินแล้ว เรียกฟังก์ชัน getUserProfile
+          getUserProfile(); // ถ้าล็อกอินแล้ว เรียกฟังก์ชัน getUserProfile
         } else {
-          liff.login();  // ถ้ายังไม่ล็อกอิน ให้ทำการล็อกอิน
+          liff.login(); // ถ้ายังไม่ล็อกอิน ให้ทำการล็อกอิน
         }
       } catch (error) {
-        console.error('LIFF Initialization failed', error);  // แสดงข้อผิดพลาดถ้ามีปัญหาในการเริ่มต้น LIFF
+        console.error('Error initializing LIFF:', error);
       }
     }
 
-    // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้จาก LIFF
+    // ฟังก์ชันสำหรับดึงข้อมูลโปรไฟล์ผู้ใช้
     async function getUserProfile() {
       try {
-        const profile = await liff.getProfile();  // ดึงข้อมูลโปรไฟล์ของผู้ใช้
-        document.getElementById('useridlineFilter').value = profile.userId;  // ใส่ userId ลงในฟิลด์ซ่อน
-        applyFilter();  // เรียกฟังก์ชัน applyFilter เพื่อกรองข้อมูลตาม userId
+        const profile = await liff.getProfile();
+        const userId = profile.userId;
+        document.getElementById('useridlineFilter').value = userId;
+        document.getElementById('memberName').value = profile.displayName;
+        await fetchMemberData(userId);
+        await fetchAndPopulateTable(); // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
       } catch (error) {
-        console.error('Error getting profile data:', error);  // แสดงข้อผิดพลาดถ้าไม่สามารถดึงโปรไฟล์ได้
+        console.error('Error getting profile data:', error);
       }
     }
 
-    // ฟังก์ชันสำหรับการกรองข้อมูล
-    function applyFilter() {
-      currentPage = 1;  // ตั้งค่าหน้าเป็นหน้าที่ 1 ใหม่ทุกครั้งที่กรอง
-      fetchAndPopulateTable();  // เรียกฟังก์ชันเพื่อดึงข้อมูลและแสดงผล
-    }
-
-    // ฟังก์ชันสำหรับดึงข้อมูลและแสดงผลตาราง
-    function fetchAndPopulateTable() {
-      showLoadingSpinner(true); // แสดงตัวโหลด
-      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)  // ดึงข้อมูลการนัดหมายจาก URL
-        .then(response => response.json())  // แปลงข้อมูลเป็น JSON
-        .then(details => {
-          // แปลงวันที่ในรูปแบบ String ให้เป็น Date เพื่อใช้ในการจัดเรียง
-          details.forEach(detail => {
-            const [day, month, year] = detail.date.split('-');
-            detail.parsedDate = new Date(`${year}-${month}-${day}`);
-          });
-
-          // เรียงข้อมูลตามวันที่
-          const dateSort = document.getElementById('dateSort').value;
-          details.sort((a, b) => {
-            return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
-          });
-
-          // กรองข้อมูลตามสถานะและ userId
-          const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-          const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
-
-          allFilteredDetails = details.filter(detail => {
-            const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
-            const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
-            return matchesStatus && matchesUseridline;  // กรองข้อมูลที่ตรงกับเงื่อนไขทั้งสอง
-          });
-
-          totalPages = Math.ceil(allFilteredDetails.length / CARDS_PER_PAGE);  // คำนวณจำนวนหน้าทั้งหมด
-          displayTable(allFilteredDetails, currentPage);  // แสดงข้อมูลในตาราง
-          createPaginationControls();  // สร้างปุ่มควบคุมการเปลี่ยนหน้า
-          showLoadingSpinner(false); // ซ่อนตัวโหลด
-        })
-        .catch(error => {
-          showLoadingSpinner(false);  // ซ่อนตัวโหลด
-          console.error('Error fetching user details:', error);  // แสดงข้อผิดพลาดหากมีปัญหาในการดึงข้อมูล
-          Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการดึงข้อมูลการนัดหมาย.', 'error');
+    // ฟังก์ชันสำหรับดึงข้อมูลสมาชิกจาก Google Sheets
+    async function fetchMemberData(userId) {
+      showMemberLoading(true);
+      try {
+        const response = await fetch(`${WEB_MEMBER_APP_URL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action: 'fetchData', userId: userId })
         });
+        const data = await response.json();
+        if (data.length > 0) {
+          const row = data[0]; // สมมติว่าข้อมูลสมาชิกอยู่ในแถวแรก
+          displayMemberData(row);
+        } else {
+          console.log('No member data found for userId:', userId);
+        }
+      } catch (error) {
+        console.error('Error fetching member data:', error);
+      } finally {
+        showMemberLoading(false);
+      }
     }
 
-    // ฟังก์ชันสำหรับแสดงผลข้อมูลในตาราง
+    // ฟังก์ชันสำหรับแสดงข้อมูลสมาชิกบนหน้าเว็บ
+    function displayMemberData(row) {
+      document.getElementById('memberName').value = row.name || '';
+      document.getElementById('memberEmployeeId').value = row.employeeId || '';
+      document.getElementById('memberPosition').value = row.position || '';
+      document.getElementById('memberProfileImage').src = row.profileImage || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+    }
+
+    // ฟังก์ชันสำหรับแสดง/ซ่อนการโหลดข้อมูลสมาชิก
+    function showMemberLoading(isLoading) {
+      const overlay = document.getElementById('memberLoadingOverlay');
+      const inputs = document.querySelectorAll('#memberName, #memberEmployeeId, #memberPosition, #memberProfileImage');
+      if (isLoading) {
+        overlay.style.display = 'flex';
+        inputs.forEach(input => input.disabled = true);
+      } else {
+        overlay.style.display = 'none';
+        inputs.forEach(input => input.disabled = false);
+      }
+    }
+
+    // ฟังก์ชันสำหรับการกรองข้อมูลการนัดหมาย
+    function applyFilter() {
+      currentPage = 1; // ตั้งค่าหน้าเป็นหน้าที่ 1 ใหม่ทุกครั้งที่กรอง
+      fetchAndPopulateTable(); // เรียกฟังก์ชันเพื่อดึงข้อมูลและแสดงผล
+    }
+
+    // ฟังก์ชันสำหรับดึงข้อมูลและแสดงผลตารางการนัดหมาย
+    async function fetchAndPopulateTable() {
+      showLoadingSpinner(true); // แสดงตัวโหลด
+      try {
+        const response = await fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`);
+        const details = await response.json();
+
+        // แปลงวันที่ในรูปแบบ String ให้เป็น Date เพื่อใช้ในการจัดเรียง
+        details.forEach(detail => {
+          const [day, month, year] = detail.date.split('-');
+          detail.parsedDate = new Date(`${year}-${month}-${day}`);
+        });
+
+        // เรียงข้อมูลตามวันที่
+        const dateSort = document.getElementById('dateSort').value;
+        details.sort((a, b) => {
+          return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
+        });
+
+        // กรองข้อมูลตามสถานะและ userId
+        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+        const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
+
+        allFilteredDetails = details.filter(detail => {
+          const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
+          const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
+          return matchesStatus && matchesUseridline; // กรองข้อมูลที่ตรงกับเงื่อนไขทั้งสอง
+        });
+
+        totalPages = Math.ceil(allFilteredDetails.length / CARDS_PER_PAGE); // คำนวณจำนวนหน้าทั้งหมด
+        displayTable(allFilteredDetails, currentPage); // แสดงข้อมูลในตาราง
+        createPaginationControls(); // สร้างปุ่มควบคุมการเปลี่ยนหน้า
+      } catch (error) {
+        console.error('Error fetching appointment details:', error);
+        Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการดึงข้อมูลการนัดหมาย.', 'error');
+      } finally {
+        showLoadingSpinner(false); // ซ่อนตัวโหลด
+      }
+    }
+
+    // ฟังก์ชันสำหรับแสดงผลข้อมูลในตารางการนัดหมาย
     function displayTable(details, page) {
       const tbody = document.getElementById('filteredData');
-      tbody.innerHTML = '';  // ล้างข้อมูลเก่าออก
+      tbody.innerHTML = ''; // ล้างข้อมูลเก่าออก
 
-      const startIndex = (page - 1) * CARDS_PER_PAGE;  // คำนวณจุดเริ่มต้น
-      const endIndex = startIndex + CARDS_PER_PAGE;    // คำนวณจุดสิ้นสุด
-      const detailsToDisplay = details.slice(startIndex, endIndex);  // เลือกเฉพาะข้อมูลที่จะแสดงในหน้านั้น
+      const startIndex = (page - 1) * CARDS_PER_PAGE; // คำนวณจุดเริ่มต้น
+      const endIndex = startIndex + CARDS_PER_PAGE; // คำนวณจุดสิ้นสุด
+      const detailsToDisplay = details.slice(startIndex, endIndex); // เลือกเฉพาะข้อมูลที่จะแสดงในหน้านั้น
 
       // วนลูปเพื่อสร้างแถวสำหรับแต่ละรายการ
       detailsToDisplay.forEach(detail => {
-        detail.id = detail.idKey;
-
         let disableConfirm = false;
         let disableCancel = false;
 
@@ -219,17 +304,17 @@
         tbody.appendChild(tr);
       });
 
-      attachEventListeners();  // เพิ่ม Event Listeners สำหรับปุ่ม
+      attachEventListeners(); // เพิ่ม Event Listeners สำหรับปุ่ม
     }
 
     // ฟังก์ชันสร้างปุ่มควบคุมการเปลี่ยนหน้า
     function createPaginationControls() {
       const paginationControls = document.getElementById('paginationControls');
-      paginationControls.innerHTML = '';  // ล้างปุ่มควบคุมก่อนสร้างใหม่
+      paginationControls.innerHTML = ''; // ล้างปุ่มควบคุมก่อนสร้างใหม่
 
       if (totalPages <= 1) return; // ไม่ต้องสร้างปุ่มถ้ามีแค่หน้าเดียว
 
-      const maxVisibleButtons = 5;  // จำนวนปุ่มที่แสดงต่อครั้ง
+      const maxVisibleButtons = 5; // จำนวนปุ่มที่แสดงต่อครั้ง
       let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
       let endPage = startPage + maxVisibleButtons - 1;
 
@@ -289,7 +374,7 @@
       document.querySelectorAll('.confirm-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;
-          confirmBooking(id);  // เรียกฟังก์ชันยืนยันการนัดหมาย
+          confirmBooking(id); // เรียกฟังก์ชันยืนยันการนัดหมาย
         });
       });
 
@@ -297,7 +382,7 @@
       document.querySelectorAll('.cancel-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;
-          cancelBooking(id);  // เรียกฟังก์ชันยกเลิกการนัดหมาย
+          cancelBooking(id); // เรียกฟังก์ชันยกเลิกการนัดหมาย
         });
       });
 
@@ -305,7 +390,7 @@
       document.querySelectorAll('.view-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;
-          viewDetails(id);  // เรียกฟังก์ชันดูรายละเอียดการนัดหมาย
+          viewDetails(id); // เรียกฟังก์ชันดูรายละเอียดการนัดหมาย
         });
       });
     }
@@ -323,16 +408,16 @@
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
-          showLoadingSpinner(true);  // แสดงตัวโหลด
+          showLoadingSpinner(true); // แสดงตัวโหลด
           fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
             .then(response => response.text())
             .then(data => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false); // ซ่อนตัวโหลด
               Swal.fire('ยืนยันแล้ว!', 'การจองได้รับการยืนยันแล้ว.', 'success');
-              fetchAndPopulateTable();  // โหลดข้อมูลใหม่
+              fetchAndPopulateTable(); // โหลดข้อมูลใหม่
             })
             .catch(error => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false); // ซ่อนตัวโหลด
               Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยืนยันการนัดหมาย.', 'error');
               console.error('Error confirming booking:', error);
             });
@@ -353,16 +438,16 @@
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
-          showLoadingSpinner(true);  // แสดงตัวโหลด
+          showLoadingSpinner(true); // แสดงตัวโหลด
           fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
             .then(response => response.text())
             .then(data => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false); // ซ่อนตัวโหลด
               Swal.fire('ยกเลิกแล้ว!', 'การนัดหมายถูกยกเลิกแล้ว.', 'success');
-              fetchAndPopulateTable();  // โหลดข้อมูลใหม่
+              fetchAndPopulateTable(); // โหลดข้อมูลใหม่
             })
             .catch(error => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false); // ซ่อนตัวโหลด
               Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยกเลิกการนัดหมาย.', 'error');
               console.error('Error canceling booking:', error);
             });
@@ -395,27 +480,30 @@
       }
     }
 
-    // ฟังก์ชันแสดง/ซ่อนตัวโหลด
+    // ฟังก์ชันแสดง/ซ่อนตัวโหลดการนัดหมาย
     function showLoadingSpinner(show) {
       const spinner = document.getElementById('loadingSpinner');
       if (show) {
-        spinner.classList.remove('hidden');  // แสดงตัวโหลด
+        spinner.classList.remove('hidden'); // แสดงตัวโหลด
       } else {
-        spinner.classList.add('hidden');  // ซ่อนตัวโหลด
+        spinner.classList.add('hidden'); // ซ่อนตัวโหลด
       }
     }
 
     // Event Listener สำหรับปุ่ม "กรองข้อมูล"
     document.getElementById('applyFiltersButton').addEventListener('click', function () {
-      applyFilter();  // กรองข้อมูลใหม่
+      applyFilter(); // กรองข้อมูลใหม่
     });
 
     // Event Listener ที่จะทำงานเมื่อหน้าเว็บโหลดเสร็จ
     document.addEventListener('DOMContentLoaded', function () {
-      initializeLiff();  // เริ่มต้น LIFF
+      initializeLiff(); // เริ่มต้น LIFF
     });
   </script>
-
 </body>
 
 </html>
+
+
+    const LIFF_ID = '2006029649-kVZ9XqOV'; // ID สำหรับ LIFF
+    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec';

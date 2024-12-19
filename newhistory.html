@@ -59,11 +59,11 @@
         <div>
           <input type="text"
             class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full"
-            id="memberName" placeholder="ชื่อ" name="memberName" readonly>
+            id="columnAData" placeholder="ชื่อ" name="columnAData" readonly>
           <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
-            id="memberEmployeeId" placeholder="รหัสพนักงาน" name="memberEmployeeId" readonly>
+            id="columnBData" placeholder="รหัสพนักงาน" name="columnBData" readonly>
           <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 w-full"
-            id="memberPosition" placeholder="ตำแหน่ง" name="memberPosition" readonly>
+            id="columnCData" placeholder="ตำแหน่ง" name="columnCData" readonly>
         </div>
       </div>
     </div>
@@ -156,7 +156,7 @@
         const profile = await liff.getProfile();
         const userId = profile.userId;
         document.getElementById('useridlineFilter').value = userId;
-        document.getElementById('memberName').value = profile.displayName;
+        document.getElementById('columnAData').value = profile.displayName;
         await fetchMemberData(userId);
         await fetchAndPopulateTable(); // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
       } catch (error) {
@@ -189,18 +189,22 @@
       }
     }
 
-    // ฟังก์ชันสำหรับแสดงข้อมูลสมาชิกบนหน้าเว็บ
-    function displayMemberData(row) {
-      document.getElementById('memberName').value = row.name || '';
-      document.getElementById('memberEmployeeId').value = row.employeeId || '';
-      document.getElementById('memberPosition').value = row.position || '';
-      document.getElementById('memberProfileImage').src = row.profileImage || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-    }
+    function displayData(row) {
+            document.getElementById('columnAData').value = row[1] || '';
+            document.getElementById('columnBData').value = row[2] || '';
+            document.getElementById('columnCData').value = row[3] || '';
+            document.getElementById('columnDData').value = row[4] || '';
+            document.getElementById('columnEData').src = row[5] || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            document.getElementById('columnGData').value = row[7] || '';
+            document.getElementById('columnHData').value = row[8] || '';
+            document.getElementById('columnIData').value = row[9] || '';
+        }
+    
 
     // ฟังก์ชันสำหรับแสดง/ซ่อนการโหลดข้อมูลสมาชิก
     function showMemberLoading(isLoading) {
       const overlay = document.getElementById('memberLoadingOverlay');
-      const inputs = document.querySelectorAll('#memberName, #memberEmployeeId, #memberPosition, #memberProfileImage');
+      const inputs = document.querySelectorAll('#columnAData, #columnAData, #columnAData, #memberProfileImage');
       if (isLoading) {
         overlay.style.display = 'flex';
         inputs.forEach(input => input.disabled = true);
@@ -503,7 +507,3 @@
 </body>
 
 </html>
-
-
-    const LIFF_ID = '2006029649-kVZ9XqOV'; // ID สำหรับ LIFF
-    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec';

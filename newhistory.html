@@ -54,15 +54,14 @@
         <div class="loader"></div>
       </div>
       <div class="flex items-center mb-4">
-        <img class="w-24 h-24 object-cover rounded-lg mr-4" id="memberProfileImage"
-          src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Profile Image">
         <div>
           <input type="text" class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full"
-            id="memberName" placeholder="ชื่อ" name="memberName" readonly>
+            id="columnBData" placeholder="ชื่อ" name="columnBData" readonly>
           <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
-            id="memberPhone" placeholder="เบอร์ติดต่อ" name="memberPhone" readonly>
-          <input type="hidden" id="useridlineFilter">
-          <input type="hidden" id="columnAData" name="columnAData">
+            id="columnCData" placeholder="เบอร์ติดต่อ" name="columnCData" readonly>
+            <input type="hidden" id="useridlineFilter">
+            <input type="hidden" id="columnAData" name="columnAData">
+
         </div>
       </div>
     </div>
@@ -154,12 +153,9 @@
         const profile = await liff.getProfile();
         const userId = profile.userId;
         document.getElementById('useridlineFilter').value = userId;
-        // แสดงชื่อ displayName ของผู้ใช้เป็นข้อมูลเริ่มต้น
         document.getElementById('memberName').value = profile.displayName;
-        // ดึงข้อมูลสมาชิกจาก Google Sheets
         await fetchMemberData(userId);
-        // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
-        await fetchAndPopulateTable();
+        await fetchAndPopulateTable(); // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
       } catch (error) {
         console.error('Error getting profile data:', error);
       }
@@ -169,7 +165,7 @@
     async function fetchMemberData(userId) {
       showMemberLoading(true);
       try {
-        const response = await fetch(WEB_MEMBER_APP_URL, {
+        const response = await fetch(`${WEB_MEMBER_APP_URL}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -177,12 +173,7 @@
           body: JSON.stringify({ action: 'fetchData', userId: userId })
         });
         const data = await response.json();
-        // data เช่น:
-        // [
-        //   ["idkey","UserID","ชื่อพนักงาน","เบอร์โทร","ยอมรับบันทึก","Timestamp"],
-        //   ["ID705O","U6d75b8c962b77905280c7dd74dbbc035","test","0861983352",true,"2024-12-05T06:55:28.000Z"]
-        // ]
-        if (data.length > 1) { 
+        if (data.length > 1) { // ข้ามแถวหัวข้อ
           const row = data[1]; // ใช้แถวที่สองเป็นข้อมูลสมาชิก
           displayMemberData(row);
         } else {
@@ -197,12 +188,12 @@
 
     // ฟังก์ชันสำหรับแสดงข้อมูลสมาชิกบนหน้าเว็บ
     function displayMemberData(row) {
-      // row = ["ID705O","U6d75b8c962b77905280c7dd74dbbc035","test","0861983352",true,"2024-12-05T06:55:28.000Z"]
-      // ชื่อพนักงาน = row[2]
-      // เบอร์โทร = row[3]
-      document.getElementById('memberName').value = row[2] || '';
-      document.getElementById('memberPhone').value = row[3] || '';
-      // หากมีข้อมูลรูปภาพ ให้ปรับ index ตรงนี้ หากไม่มี ให้ใช้ภาพ default ด้านบน
+      // สมมติว่า row = ["ID705O","U6d75b8c962b77905280c7dd74dbbc035","test","0861983352",true,"2024-12-05T06:55:28.000Z"]
+      document.getElementById('columnBData').value = row[2] || ''; // ชื่อพนักงาน
+      document.getElementById('columnCData').value = row[3] || ''; // เบอร์ติดต่อ
+      // หากต้องการแสดงตำแหน่งหรือข้อมูลอื่น ๆ ให้เพิ่มใน Google Sheets และปรับฟิลด์ให้ตรงกัน
+      // ตั้งค่าแหล่งภาพโปรไฟล์ ถ้าไม่มีให้ใช้รูปเริ่มต้น
+      document.getElementById('memberProfileImage').src = row.profileImage || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
     }
 
     // ฟังก์ชันสำหรับแสดง/ซ่อนการโหลดข้อมูลสมาชิก
@@ -254,7 +245,7 @@
         });
 
         totalPages = Math.ceil(allFilteredDetails.length / CARDS_PER_PAGE); // คำนวณจำนวนหน้าทั้งหมด
-        displayTable(allFilteredDetails, currentPage); // แสดงข้อมูลการนัดหมายในตาราง
+        displayTable(allFilteredDetails, currentPage); // แสดงข้อมูลในตาราง
         createPaginationControls(); // สร้างปุ่มควบคุมการเปลี่ยนหน้า
       } catch (error) {
         console.error('Error fetching appointment details:', error);
@@ -394,7 +385,7 @@
         });
       });
 
-      // ปุ่มดูข้อมูล (แสดงรายละเอียดการนัดหมาย)
+      // ปุ่มดูข้อมูล
       document.querySelectorAll('.view-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;

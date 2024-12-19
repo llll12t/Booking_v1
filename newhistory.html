@@ -153,7 +153,7 @@
         const profile = await liff.getProfile();
         const userId = profile.userId;
         document.getElementById('useridlineFilter').value = userId;
-        document.getElementById('memberName').value = profile.displayName;
+        document.getElementById('columnAData').value = profile.displayName;
         await fetchMemberData(userId);
         await fetchAndPopulateTable(); // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
       } catch (error) {
@@ -193,7 +193,6 @@
       document.getElementById('columnCData').value = row[3] || ''; // เบอร์ติดต่อ
       // หากต้องการแสดงตำแหน่งหรือข้อมูลอื่น ๆ ให้เพิ่มใน Google Sheets และปรับฟิลด์ให้ตรงกัน
       // ตั้งค่าแหล่งภาพโปรไฟล์ ถ้าไม่มีให้ใช้รูปเริ่มต้น
-      document.getElementById('memberProfileImage').src = row.profileImage || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
     }
 
     // ฟังก์ชันสำหรับแสดง/ซ่อนการโหลดข้อมูลสมาชิก

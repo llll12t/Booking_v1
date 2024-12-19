@@ -54,16 +54,9 @@
         <div class="loader"></div>
       </div>
       <div class="flex items-center mb-4">
-        <img class="w-24 h-24 object-cover rounded-lg mr-4" id="memberProfileImage"
-          src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Profile Image">
         <div>
-          <input type="text"
-            class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full"
-            id="columnAData" placeholder="ชื่อ" name="columnAData" readonly>
-          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
-            id="columnBData" placeholder="รหัสพนักงาน" name="columnBData" readonly>
-          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 w-full"
-            id="columnCData" placeholder="ตำแหน่ง" name="columnCData" readonly>
+          <input type="text" class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full" id="columnBData" placeholder="ชื่อ" name="columnAData" readonly>
+          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full" id="columnCData" placeholder="เบอร์ติดต่อ" name="columnBData" readonly>
         </div>
       </div>
     </div>
@@ -194,10 +187,7 @@
             document.getElementById('columnBData').value = row[2] || '';
             document.getElementById('columnCData').value = row[3] || '';
             document.getElementById('columnDData').value = row[4] || '';
-            document.getElementById('columnEData').src = row[5] || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-            document.getElementById('columnGData').value = row[7] || '';
-            document.getElementById('columnHData').value = row[8] || '';
-            document.getElementById('columnIData').value = row[9] || '';
+
         }
     
 

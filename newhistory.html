@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
   <meta charset="UTF-8">
@@ -54,11 +54,13 @@
         <div class="loader"></div>
       </div>
       <div class="flex items-center mb-4">
+        <img class="w-24 h-24 object-cover rounded-lg mr-4" id="memberProfileImage"
+          src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" alt="Profile Image">
         <div>
-          <input type="text" class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full" id="columnBData" placeholder="ชื่อ" name="columnAData" readonly>
-          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full" id="columnCData" placeholder="เบอร์ติดต่อ" name="columnBData" readonly>
-          <input type="hidden" id="userId" name="userId">
-          <input type="hidden" id="columnAData">
+          <input type="text" class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full"
+            id="memberName" placeholder="ชื่อ" name="memberName" readonly>
+          <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
+            id="memberPhone" placeholder="เบอร์ติดต่อ" name="memberPhone" readonly>
         </div>
       </div>
     </div>
@@ -151,7 +153,7 @@
         const profile = await liff.getProfile();
         const userId = profile.userId;
         document.getElementById('useridlineFilter').value = userId;
-        document.getElementById('columnAData').value = profile.displayName;
+        document.getElementById('memberName').value = profile.displayName;
         await fetchMemberData(userId);
         await fetchAndPopulateTable(); // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
       } catch (error) {
@@ -171,8 +173,8 @@
           body: JSON.stringify({ action: 'fetchData', userId: userId })
         });
         const data = await response.json();
-        if (data.length > 0) {
-          const row = data[0]; // สมมติว่าข้อมูลสมาชิกอยู่ในแถวแรก
+        if (data.length > 1) { // ข้ามแถวหัวข้อ
+          const row = data[1]; // ใช้แถวที่สองเป็นข้อมูลสมาชิก
           displayMemberData(row);
         } else {
           console.log('No member data found for userId:', userId);
@@ -184,19 +186,20 @@
       }
     }
 
-    function displayData(row) {
-            document.getElementById('columnAData').value = row[1] || '';
-            document.getElementById('columnBData').value = row[2] || '';
-            document.getElementById('columnCData').value = row[3] || '';
-            document.getElementById('columnDData').value = row[4] || '';
-
-        }
-    
+    // ฟังก์ชันสำหรับแสดงข้อมูลสมาชิกบนหน้าเว็บ
+    function displayMemberData(row) {
+      // สมมติว่า row = ["ID705O","U6d75b8c962b77905280c7dd74dbbc035","test","0861983352",true,"2024-12-05T06:55:28.000Z"]
+      document.getElementById('memberName').value = row[2] || ''; // ชื่อพนักงาน
+      document.getElementById('memberPhone').value = row[3] || ''; // เบอร์ติดต่อ
+      // หากต้องการแสดงตำแหน่งหรือข้อมูลอื่น ๆ ให้เพิ่มใน Google Sheets และปรับฟิลด์ให้ตรงกัน
+      // ตั้งค่าแหล่งภาพโปรไฟล์ ถ้าไม่มีให้ใช้รูปเริ่มต้น
+      document.getElementById('memberProfileImage').src = row.profileImage || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+    }
 
     // ฟังก์ชันสำหรับแสดง/ซ่อนการโหลดข้อมูลสมาชิก
     function showMemberLoading(isLoading) {
       const overlay = document.getElementById('memberLoadingOverlay');
-      const inputs = document.querySelectorAll('#columnAData, #columnAData, #columnAData, #memberProfileImage');
+      const inputs = document.querySelectorAll('#memberName, #memberPhone, #memberProfileImage');
       if (isLoading) {
         overlay.style.display = 'flex';
         inputs.forEach(input => input.disabled = true);

@@ -1,289 +1,424 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ประวัติการบันทึก</title>
-    <!-- นำเข้า Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- นำเข้า SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- นำเข้า LIFF SDK -->
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <style>
-        #loading {
-            display: none;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ข้อมูลการนัดหมาย</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script> <!-- รวม LIFF SDK -->
+  <style>
+    .loader {
+      border-top-color: #1e293b;
+      animation: spin 1s linear infinite;
+      border: 8px solid #fdefff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-slate-100 max-w-md mx-auto overflow-auto">
-    <div class="container p-4">
-        <div class="bg-slate-800 text-white p-8 mb-2 rounded-lg shadow-xl w-full">
-            <h1 class="text-xl mb-2">📋 บันทึกย้อนหลัง</h1>
-            <div class="text-sm">🕔กำหนดการทานยา 📆นัดถัดไป</div>
-        </div>
-        <div class="bg-white rounded-lg shadow-md p-4">
-            <input type="hidden" id="userId" name="userId">
-            <input type="hidden" id="displayName" name="displayName">
+<body class="bg-slate-100 min-h-screen">
 
-            <div id="main-info" class="flex p-2 mb-4">
-                <div class="w-1/2">
-                    <div class="mb-2"><strong>ชื่อ:</strong> <span id="name-info" class="font-medium text-md"></span></div>
-                    <div class="mb-2"><strong>เลขที:</strong> <span id="employee-id-info" class="font-medium text-md"></span></div>
-                    <div class="mb-2"><strong>🕔การทานยา:</strong> <span id="med-time-info" class="font-medium text-md"></span></div>
-                </div>
-                <div class="w-1/2">
-                    <div class="mb-2"><strong>เบอร์โทร:</strong> <span id="phone-info" class="font-medium text-md"></span></div>
-                    <div class="mb-2"><strong>สิทธิการรักษา:</strong> <span id="medical-rights-info" class="font-medium text-md"></span></div>
-                    <div><strong>นัดถัดไป:</strong> <span id="next-appointment-info" class="font-medium text-md"></span></div>
-                </div>
-            </div>
-
-            <table class="overflow-hidden w-full rounded-lg border border-slate-200 shadow-sm">
-                <thead>
-                    <tr class="bg-slate-800 text-slate-100 shadow-md text-left">
-                        <th class="py-2 text-md px-4">วันที่</th>
-                        <th class="py-2 text-md px-4">เวลา</th>
-                        <th class="py-2 text-md px-4">หมายเหตุ</th>
-                        <th class="py-2 text-md px-4">สถานะ</th>
-                    </tr>
-                </thead>
-                <tbody id="data-table" class="text-sm text-slate-600">
-                    <!-- ข้อมูลจะถูกสร้างด้วย JS -->
-                </tbody>
-            </table>
-
-            <!-- ตัวควบคุมการแบ่งหน้า -->
-            <div id="pagination-controls" class="mt-4 flex justify-center"></div>
-
-            <div id="loading" class="text-center text-slate-800 mt-4">กำลังโหลด...</div>
-        </div>
+  <!-- Main Content Area -->
+  <main class="flex-1 flex-col max-w-5xl m-auto p-4">
+    <!-- Filter Section: ส่วนสำหรับเลือกกรองข้อมูล -->
+    <div class="flex flex-wrap gap-4 mb-4">
+      <div class="flex-1 min-w-[200px]">
+        <label for="statusFilter" class="block text-xs font-medium text-gray-700">ค้นหาตามสถานะ</label>
+        <select id="statusFilter" class="mt-1 block w-full p-2 border border-gray-300 rounded-2xl">
+          <option value="">ทั้งหมด</option>
+          <option value="รอการยืนยัน">รอการยืนยัน</option>
+          <option value="ยืนยันแล้ว">ยืนยันแล้ว</option>
+          <option value="ยกเลิก">ยกเลิก</option>
+          <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+        </select>
+      </div>
+      <!-- ซ่อนฟิลด์ User ID สำหรับใช้กรอง -->
+      <input type="hidden" id="useridlineFilter">
+      <div class="flex-1 min-w-[200px]">
+        <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
+        <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-2xl">
+          <option value="latest">วันที่ล่าสุด</option>
+          <option value="oldest">วันที่เก่าสุด</option>
+        </select>
+      </div>
+      <div class="flex items-end">
+        <button id="applyFiltersButton"
+          class="w-full px-4 py-2 bg-slate-800 text-white rounded-2xl hover:bg-slate-700">กรองข้อมูล</button>
+      </div>
     </div>
 
-    <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwzGYhr3zyiITrBtijZFAOUX97PWImQFFK7CeE5l8mYa3vFrKENM2pgjBXssQXUM_hz/exec'; // ใส่ URL ของ Web App
-        const LIFF_ID = '2005732932-gOr8yJdV'; // ใส่ LIFF ID ของคุณ
-        const itemsPerPage = 10; 
-        let currentPage = 1;
-        let allData = [];
+    <!-- Table Display Section: ส่วนแสดงข้อมูลในตาราง -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white rounded-2xl shadow-md">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-700">วันที่</th>
+            <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-700">เวลา</th>
+            <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-700">ชื่อ</th>
+            <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-700">บริการ</th>
+            <th class="px-4 py-2 border-b text-left text-sm font-medium text-gray-700">สถานะ</th>
+            <th class="px-4 py-2 border-b text-center text-sm font-medium text-gray-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="filteredData">
+          <!-- จะเพิ่มแถวข้อมูลที่นี่ -->
+        </tbody>
+      </table>
+    </div>
 
-        window.onload = function () {
-            initializeLiff();
-        };
+    <!-- Pagination Controls: ปุ่มสำหรับการควบคุมการเปลี่ยนหน้า -->
+    <div id="paginationControls" class="mt-6 flex justify-center space-x-2">
+      <!-- ปุ่มสำหรับควบคุมการเปลี่ยนหน้าจะถูกเพิ่มที่นี่ -->
+    </div>
+  </main>
 
-        async function initializeLiff() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-                if (liff.isLoggedIn()) {
-                    getUserProfile();
-                } else {
-                    liff.login();
-                }
-            } catch (error) {
-                console.error('Error initializing LIFF:', error);
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเริ่มต้น LIFF ได้', 'error');
-            }
+  <!-- Loading Spinner: ส่วนแสดงตัวโหลดระหว่างรอข้อมูล -->
+  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="loader"></div>
+  </div>
+
+  <script>
+
+    const LIFF_ID = '2006029649-kVZ9XqOV'; // ID สำหรับ LIFF
+    const DETAILS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec';
+
+
+    const CARDS_PER_PAGE = 5;  // จำนวนแถวที่แสดงต่อหน้า
+    let currentPage = 1;  // หน้าปัจจุบัน
+    let totalPages = 1;   // จำนวนหน้าทั้งหมด
+
+    // ฟังก์ชันเริ่มต้น LIFF
+    async function initializeLiff() {
+      try {
+        await liff.init({ liffId: `${LIFF_ID}` });  // เริ่ม LIFF ด้วย ID
+        if (liff.isLoggedIn()) {
+          getUserProfile();  // ถ้าล็อกอินแล้ว เรียกฟังก์ชัน getUserProfile
+        } else {
+          liff.login();  // ถ้ายังไม่ล็อกอิน ให้ทำการล็อกอิน
+        }
+      } catch (error) {
+        console.error('LIFF Initialization failed', error);  // แสดงข้อผิดพลาดถ้ามีปัญหาในการเริ่มต้น LIFF
+      }
+    }
+
+    // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้จาก LIFF
+    async function getUserProfile() {
+      try {
+        const profile = await liff.getProfile();  // ดึงข้อมูลโปรไฟล์ของผู้ใช้
+        document.getElementById('useridlineFilter').value = profile.userId;  // ใส่ userId ลงในฟิลด์ซ่อน
+        applyFilter();  // เรียกฟังก์ชัน applyFilter เพื่อกรองข้อมูลตาม userId
+      } catch (error) {
+        console.error('Error getting profile data:', error);  // แสดงข้อผิดพลาดถ้าไม่สามารถดึงโปรไฟล์ได้
+      }
+    }
+
+    // ฟังก์ชันสำหรับการกรองข้อมูล
+    function applyFilter() {
+      currentPage = 1;  // ตั้งค่าหน้าเป็นหน้าที่ 1 ใหม่ทุกครั้งที่กรอง
+      fetchAndPopulateTable();  // เรียกฟังก์ชันเพื่อดึงข้อมูลและแสดงผล
+    }
+
+    // ฟังก์ชันสำหรับดึงข้อมูลและแสดงผลตาราง
+    function fetchAndPopulateTable() {
+      showLoadingSpinner(true); // แสดงตัวโหลด
+      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)  // ดึงข้อมูลการนัดหมายจาก URL
+        .then(response => response.json())  // แปลงข้อมูลเป็น JSON
+        .then(details => {
+          const tbody = document.getElementById('filteredData');
+          tbody.innerHTML = '';  // ล้างข้อมูลตารางก่อนการแสดงผลใหม่
+
+          // แปลงวันที่ในรูปแบบ String ให้เป็น Date เพื่อใช้ในการจัดเรียง
+          details.forEach(detail => {
+            const [day, month, year] = detail.date.split('-');
+            detail.parsedDate = new Date(`${year}-${month}-${day}`);
+          });
+
+          // เรียงข้อมูลตามวันที่
+          const dateSort = document.getElementById('dateSort').value;
+          details.sort((a, b) => {
+            return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
+          });
+
+          // กรองข้อมูลตามสถานะและ userId
+          const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+          const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
+
+          let filteredDetails = details.filter(detail => {
+            const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
+            const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
+            return matchesStatus && matchesUseridline;  // กรองข้อมูลที่ตรงกับเงื่อนไขทั้งสอง
+          });
+
+          totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);  // คำนวณจำนวนหน้าทั้งหมด
+          displayTable(filteredDetails, currentPage);  // แสดงข้อมูลในตาราง
+          createPaginationControls();  // สร้างปุ่มควบคุมการเปลี่ยนหน้า
+          showLoadingSpinner(false); // ซ่อนตัวโหลด
+        })
+        .catch(error => {
+          showLoadingSpinner(false);  // ซ่อนตัวโหลด
+          console.error('Error fetching user details:', error);  // แสดงข้อผิดพลาดหากมีปัญหาในการดึงข้อมูล
+          Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการดึงข้อมูลการนัดหมาย.', 'error');
+        });
+    }
+
+    // ฟังก์ชันสำหรับแสดงผลข้อมูลในตาราง
+    function displayTable(details, page) {
+      const tbody = document.getElementById('filteredData');
+      tbody.innerHTML = '';  // ล้างข้อมูลเก่าออก
+
+      const startIndex = (page - 1) * CARDS_PER_PAGE;  // คำนวณจุดเริ่มต้น
+      const endIndex = startIndex + CARDS_PER_PAGE;    // คำนวณจุดสิ้นสุด
+      const detailsToDisplay = details.slice(startIndex, endIndex);  // เลือกเฉพาะข้อมูลที่จะแสดงในหน้านั้น
+
+      // วนลูปเพื่อสร้างแถวสำหรับแต่ละรายการ
+      detailsToDisplay.forEach(detail => {
+        detail.id = detail.idKey;
+
+        let disableConfirm = false;
+        let disableCancel = false;
+
+        // ตั้งค่าเปิด-ปิดปุ่มตามสถานะของแต่ละการนัดหมาย
+        switch (detail.status) {
+          case 'รอการยืนยัน':
+            break;
+          case 'ยืนยันแล้ว':
+            disableConfirm = true;
+            break;
+          case 'ยกเลิก':
+          case 'เสร็จสิ้น':
+            disableCancel = true;
+            disableConfirm = true;
+            break;
         }
 
-        async function getUserProfile() {
-            try {
-                const profile = await liff.getProfile();
-                document.getElementById('userId').value = profile.userId;
-                document.getElementById('displayName').value = profile.displayName;
-                fetchData(profile.userId);
-            } catch (error) {
-                console.error('Error getting profile:', error);
-                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถดึงข้อมูลโปรไฟล์ได้', 'error');
-            }
+        // สร้างแถวตาราง
+        const tr = document.createElement('tr');
+        tr.classList.add('hover:bg-gray-100');
+
+        tr.innerHTML = `
+          <td class="px-4 py-2 border-b text-sm text-gray-700">${detail.date}</td>
+          <td class="px-4 py-2 border-b text-sm text-gray-700">${detail.time}</td>
+          <td class="px-4 py-2 border-b text-sm text-gray-700">${detail.name}</td>
+          <td class="px-4 py-2 border-b text-sm text-gray-700">${detail.service}</td>
+          <td class="px-4 py-2 border-b text-sm text-gray-700">${detail.status}</td>
+          <td class="px-4 py-2 border-b text-center space-x-2">
+            <button class="view-btn bg-blue-500 text-white px-3 py-1 rounded-xl text-sm" data-id="${detail.idKey}">ดูข้อมูล</button>
+            <button class="confirm-btn bg-green-500 text-white px-3 py-1 rounded-xl text-sm ${disableConfirm ? 'opacity-50 cursor-not-allowed' : ''}" ${disableConfirm ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
+            <button class="cancel-btn bg-red-500 text-white px-3 py-1 rounded-xl text-sm ${disableCancel ? 'opacity-50 cursor-not-allowed' : ''}" ${disableCancel ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      attachEventListeners();  // เพิ่ม Event Listeners สำหรับปุ่ม
+    }
+
+    // ฟังก์ชันสร้างปุ่มควบคุมการเปลี่ยนหน้า
+    function createPaginationControls() {
+      const paginationControls = document.getElementById('paginationControls');
+      paginationControls.innerHTML = '';  // ล้างปุ่มควบคุมก่อนสร้างใหม่
+
+      if (totalPages <= 1) return; // ไม่ต้องสร้างปุ่มถ้ามีแค่หน้าเดียว
+
+      const maxVisibleButtons = 5;  // จำนวนปุ่มที่แสดงต่อครั้ง
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+      let endPage = startPage + maxVisibleButtons - 1;
+
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+      }
+
+      // สร้างปุ่ม "ย้อนกลับ"
+      const prevButton = document.createElement('button');
+      prevButton.textContent = '«';
+      prevButton.disabled = currentPage === 1;
+      prevButton.classList.add('px-3', 'py-1', 'bg-slate-800', 'text-white', 'rounded-xl', 'hover:bg-slate-600', 'disabled:opacity-50');
+      prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchAndPopulateTable();
         }
+      });
+      paginationControls.appendChild(prevButton);
 
-        async function fetchData(userId) {
-            document.getElementById('loading').style.display = 'block';
-            try {
-                const response = await fetch(`${WEB_APP_URL}?action=fetchData`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                const filteredData = data.filter(row => row['ไอดีไลน์'] === userId);
-
-                // เรียงข้อมูลตามวันที่ล่าสุดก่อน
-                filteredData.sort((a, b) => {
-                    const dateA = parseDate(a['วันที่']);
-                    const dateB = parseDate(b['วันที่']);
-                    return dateB - dateA; // ให้ date ใหม่อยู่ข้างบน
-                });
-
-                allData = filteredData;
-
-                if (filteredData.length > 0) {
-                    const lastRow = filteredData[0]; // เนื่องจากเรียงแล้ว แถวแรกคือข้อมูลล่าสุด
-                    document.getElementById('name-info').textContent = lastRow['ชื่อ-สกุล'] || 'N/A';
-                    document.getElementById('employee-id-info').textContent = lastRow['เลขประจำตัวผู้ป่วย'] || 'N/A';
-                    document.getElementById('phone-info').textContent = lastRow['เบอร์โทร'] || 'N/A';
-                    document.getElementById('medical-rights-info').textContent = lastRow['สิทธิการรักษา'] || 'N/A';
-                    document.getElementById('med-time-info').textContent = lastRow['กำหนดการทานยา'] || 'N/A';
-                    document.getElementById('next-appointment-info').textContent = lastRow['นัดถัดไป'] || 'N/A';
-                } else {
-                    document.getElementById('name-info').textContent = 'ไม่มีข้อมูล';
-                    document.getElementById('employee-id-info').textContent = 'ไม่มีข้อมูล';
-                    document.getElementById('phone-info').textContent = 'ไม่มีข้อมูล';
-                    document.getElementById('medical-rights-info').textContent = 'ไม่มีข้อมูล';
-                    document.getElementById('med-time-info').textContent = 'ไม่มีข้อมูล';
-                    document.getElementById('next-appointment-info').textContent = 'ไม่มีข้อมูล';
-                }
-
-                buildTable('data-table', getCurrentPageData());
-                updatePaginationControls(allData.length);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                document.getElementById('data-table').innerHTML = '<tr><td colspan="5">เกิดข้อผิดพลาดในการดึงข้อมูล</td></tr>';
-                Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการดึงข้อมูล', 'error');
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+      // สร้างปุ่มสำหรับหน้าต่างๆ
+      for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.classList.add('px-3', 'py-1', 'bg-slate-800', 'text-white', 'rounded-xl', 'hover:bg-slate-600');
+        if (i === currentPage) {
+          pageButton.classList.add('bg-slate-600');
         }
+        pageButton.addEventListener('click', () => {
+          currentPage = i;
+          fetchAndPopulateTable();
+        });
+        paginationControls.appendChild(pageButton);
+      }
 
-        function parseDate(dateStr) {
-            if (!dateStr) return new Date(0);
-            const [day, month, year] = dateStr.split('-').map(Number);
-            return new Date(year, month - 1, day);
+      // สร้างปุ่ม "ถัดไป"
+      const nextButton = document.createElement('button');
+      nextButton.textContent = '»';
+      nextButton.disabled = currentPage === totalPages;
+      nextButton.classList.add('px-3', 'py-1', 'bg-slate-800', 'text-white', 'rounded-xl', 'hover:bg-slate-600', 'disabled:opacity-50');
+      nextButton.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          fetchAndPopulateTable();
         }
+      });
+      paginationControls.appendChild(nextButton);
+    }
 
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const [day, month, year] = dateString.split('-').map(Number);
-            return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
-        }
+    // ฟังก์ชันเพิ่ม Event Listeners สำหรับปุ่มยืนยัน ยกเลิก และดูข้อมูล
+    function attachEventListeners() {
+      // ปุ่มยืนยัน
+      document.querySelectorAll('.confirm-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          confirmBooking(id);  // เรียกฟังก์ชันยืนยันการนัดหมาย
+        });
+      });
 
-        function formatTime(timeString) {
-            if (!timeString) return 'N/A';
-            const [hours, minutes] = timeString.split(':').map(Number);
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        }
+      // ปุ่มยกเลิก
+      document.querySelectorAll('.cancel-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          cancelBooking(id);  // เรียกฟังก์ชันยกเลิกการนัดหมาย
+        });
+      });
 
-        function buildTable(tableId, values) {
-            const table = document.getElementById(tableId);
-            table.innerHTML = '';
+      // ปุ่มดูข้อมูล
+      document.querySelectorAll('.view-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const id = this.dataset.id;
+          viewDetails(id);  // เรียกฟังก์ชันดูรายละเอียดการนัดหมาย
+        });
+      });
+    }
 
-            if (values.length === 0) {
-                table.innerHTML = '<tr><td colspan="5" class="py-2 px-4">ไม่มีข้อมูลที่จะแสดง</td></tr>';
-                return;
-            }
-
-            values.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.classList.add('border-b', 'hover:bg-slate-100');
-
-                let td = document.createElement('td');
-                td.textContent = formatDate(row['วันที่']) || 'N/A';
-                td.classList.add('py-2', 'px-4');
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.textContent = formatTime(row['เวลา']) || 'N/A';
-                td.classList.add('py-2', 'px-4');
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.textContent = row['หมายเหตุ'] || '-';
-                td.classList.add('py-2', 'px-4');
-                tr.appendChild(td);
-
-                td = document.createElement('td');
-                td.textContent = 
-                    row['สถานะ'] === 'ตรงเวลา' ? 'ตรงเวลา' :
-                    (row['สถานะ'] === 'ไม่ตรงเวลา' ? 'ไม่ตรงเวลา' :
-                    (row['สถานะ'] === 'ไม่ได้ทานยา' ? 'ไม่ได้ทานยา' : 'N/A'));
-                td.classList.add('py-2', 'px-4', getStatusClass(row['สถานะ']));
-                tr.appendChild(td);
-
-                table.appendChild(tr);
+    // ฟังก์ชันยืนยันการนัดหมาย
+    function confirmBooking(id) {
+      Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        text: "คุณต้องการยืนยันการนัดหมายนี้หรือไม่!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, ยืนยันเลย!',
+        cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);  // แสดงตัวโหลด
+          fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              Swal.fire('ยืนยันแล้ว!', 'การจองได้รับการยืนยันแล้ว.', 'success');
+              fetchAndPopulateTable();  // โหลดข้อมูลใหม่
+            })
+            .catch(error => {
+              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยืนยันการนัดหมาย.', 'error');
+              console.error('Error confirming booking:', error);
             });
         }
+      });
+    }
 
-        function getStatusClass(status) {
-            switch (status) {
-                case 'ตรงเวลา':
-                    return 'text-green-500';
-                case 'ไม่ตรงเวลา':
-                    return 'text-blue-500';
-                default:
-                    return 'text-red-500';
-            }
+    // ฟังก์ชันยกเลิกการนัดหมาย
+    function cancelBooking(id) {
+      Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        text: "คุณต้องการยกเลิกการนัดหมายนี้หรือไม่!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, ยกเลิกเลย!',
+        cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoadingSpinner(true);  // แสดงตัวโหลด
+          fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
+            .then(response => response.text())
+            .then(data => {
+              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              Swal.fire('ยกเลิกแล้ว!', 'การนัดหมายถูกยกเลิกแล้ว.', 'success');
+              fetchAndPopulateTable();  // โหลดข้อมูลใหม่
+            })
+            .catch(error => {
+              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยกเลิกการนัดหมาย.', 'error');
+              console.error('Error canceling booking:', error);
+            });
         }
+      });
+    }
 
-        function updatePaginationControls(totalItems) {
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            const paginationControls = document.getElementById('pagination-controls');
-            paginationControls.innerHTML = '';
+    // ฟังก์ชันดูรายละเอียดการนัดหมาย
+    function viewDetails(id) {
+      // คุณสามารถปรับแต่งฟังก์ชันนี้ให้แสดงรายละเอียดการนัดหมายตามที่ต้องการ
+      // ตัวอย่างเช่น เปิด modal หรือแสดงข้อมูลใน SweetAlert
+      fetch(`${DETAILS_SCRIPT_URL}?action=getBookingDetails&id=${encodeURIComponent(id)}`)
+        .then(response => response.json())
+        .then(detail => {
+          Swal.fire({
+            title: 'รายละเอียดการนัดหมาย',
+            html: `
+              <p><strong>ชื่อ:</strong> ${detail.name}</p>
+              <p><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
+              <p><strong>บริการ:</strong> ${detail.service}</p>
+              <p><strong>วันที่:</strong> ${detail.date}</p>
+              <p><strong>เวลา:</strong> ${detail.time}</p>
+              <p><strong>สถานที่:</strong> ${detail.locationservice}</p>
+              <p><strong>หมายเหตุ:</strong> ${detail.note}</p>
+              <p><strong>สถานะ:</strong> ${detail.status}</p>
+            `,
+            icon: 'info',
+            confirmButtonText: 'ปิด'
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching booking details:', error);
+          Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการดึงรายละเอียดการนัดหมาย.', 'error');
+        });
+    }
 
-            if (totalPages <= 1) return; 
+    // ฟังก์ชันแสดง/ซ่อนตัวโหลด
+    function showLoadingSpinner(show) {
+      const spinner = document.getElementById('loadingSpinner');
+      if (show) {
+        spinner.classList.remove('hidden');  // แสดงตัวโหลด
+      } else {
+        spinner.classList.add('hidden');  // ซ่อนตัวโหลด
+      }
+    }
 
-            let startPage = currentPage - 1;
-            let endPage = currentPage + 1;
+    // Event Listener สำหรับปุ่ม "กรองข้อมูล"
+    document.getElementById('applyFiltersButton').addEventListener('click', function () {
+      applyFilter();  // กรองข้อมูลใหม่
+    });
 
-            if (startPage < 1) {
-                startPage = 1;
-                endPage = 3;
-            }
+    // Event Listener ที่จะทำงานเมื่อหน้าเว็บโหลดเสร็จ
+    document.addEventListener('DOMContentLoaded', function () {
+      initializeLiff();  // เริ่มต้น LIFF
+    });
+  </script>
 
-            if (endPage > totalPages) {
-                endPage = totalPages;
-                startPage = endPage - 2 > 0 ? endPage - 2 : 1;
-            }
-
-            if (currentPage > 1) {
-                const prevButton = document.createElement('button');
-                prevButton.textContent = 'ย้อนกลับ';
-                prevButton.classList.add('py-1', 'px-3', 'm-1', 'border', 'rounded', 'bg-white', 'text-black');
-                prevButton.addEventListener('click', () => {
-                    currentPage = currentPage - 1;
-                    buildTable('data-table', getCurrentPageData());
-                    updatePaginationControls(totalItems);
-                });
-                paginationControls.appendChild(prevButton);
-            }
-
-            for (let i = startPage; i <= endPage && i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.textContent = i;
-                pageButton.addEventListener('click', () => {
-                    currentPage = i;
-                    buildTable('data-table', getCurrentPageData());
-                    updatePaginationControls(totalItems);
-                });
-                pageButton.classList.add('py-1', 'px-3', 'm-1', 'border', 'rounded');
-                if (i === currentPage) {
-                    pageButton.classList.add('bg-black', 'text-white'); 
-                } else {
-                    pageButton.classList.add('bg-white', 'text-black');
-                }
-                paginationControls.appendChild(pageButton);
-            }
-
-            if (currentPage < totalPages) {
-                const nextButton = document.createElement('button');
-                nextButton.textContent = 'หน้าถัดไป';
-                nextButton.classList.add('py-1', 'px-3', 'm-1', 'border', 'rounded', 'bg-white', 'text-black');
-                nextButton.addEventListener('click', () => {
-                    currentPage = currentPage + 1;
-                    buildTable('data-table', getCurrentPageData());
-                    updatePaginationControls(totalItems);
-                });
-                paginationControls.appendChild(nextButton);
-            }
-        }
-
-        function getCurrentPageData() {
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            // เนื่องจากเราจัดเรียง filteredData ไว้แล้วให้วันล่าสุดอยู่ด้านบนสุด จึงไม่ต้อง reverse อีก
-            return allData.slice(startIndex, endIndex);
-        }
-    </script>
 </body>
+
 </html>

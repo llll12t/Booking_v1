@@ -96,6 +96,7 @@
     const CARDS_PER_PAGE = 5;  // จำนวนแถวที่แสดงต่อหน้า
     let currentPage = 1;  // หน้าปัจจุบัน
     let totalPages = 1;   // จำนวนหน้าทั้งหมด
+    let allFilteredDetails = []; // เก็บข้อมูลที่กรองแล้วทั้งหมด
 
     // ฟังก์ชันเริ่มต้น LIFF
     async function initializeLiff() {
@@ -134,9 +135,6 @@
       fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)  // ดึงข้อมูลการนัดหมายจาก URL
         .then(response => response.json())  // แปลงข้อมูลเป็น JSON
         .then(details => {
-          const tbody = document.getElementById('filteredData');
-          tbody.innerHTML = '';  // ล้างข้อมูลตารางก่อนการแสดงผลใหม่
-
           // แปลงวันที่ในรูปแบบ String ให้เป็น Date เพื่อใช้ในการจัดเรียง
           details.forEach(detail => {
             const [day, month, year] = detail.date.split('-');
@@ -153,14 +151,14 @@
           const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
           const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
 
-          let filteredDetails = details.filter(detail => {
+          allFilteredDetails = details.filter(detail => {
             const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
             const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
             return matchesStatus && matchesUseridline;  // กรองข้อมูลที่ตรงกับเงื่อนไขทั้งสอง
           });
 
-          totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);  // คำนวณจำนวนหน้าทั้งหมด
-          displayTable(filteredDetails, currentPage);  // แสดงข้อมูลในตาราง
+          totalPages = Math.ceil(allFilteredDetails.length / CARDS_PER_PAGE);  // คำนวณจำนวนหน้าทั้งหมด
+          displayTable(allFilteredDetails, currentPage);  // แสดงข้อมูลในตาราง
           createPaginationControls();  // สร้างปุ่มควบคุมการเปลี่ยนหน้า
           showLoadingSpinner(false); // ซ่อนตัวโหลด
         })
@@ -248,7 +246,8 @@
       prevButton.addEventListener('click', () => {
         if (currentPage > 1) {
           currentPage--;
-          fetchAndPopulateTable();
+          displayTable(allFilteredDetails, currentPage);
+          createPaginationControls();
         }
       });
       paginationControls.appendChild(prevButton);
@@ -263,7 +262,8 @@
         }
         pageButton.addEventListener('click', () => {
           currentPage = i;
-          fetchAndPopulateTable();
+          displayTable(allFilteredDetails, currentPage);
+          createPaginationControls();
         });
         paginationControls.appendChild(pageButton);
       }
@@ -276,7 +276,8 @@
       nextButton.addEventListener('click', () => {
         if (currentPage < totalPages) {
           currentPage++;
-          fetchAndPopulateTable();
+          displayTable(allFilteredDetails, currentPage);
+          createPaginationControls();
         }
       });
       paginationControls.appendChild(nextButton);
@@ -371,31 +372,27 @@
 
     // ฟังก์ชันดูรายละเอียดการนัดหมาย
     function viewDetails(id) {
-      // คุณสามารถปรับแต่งฟังก์ชันนี้ให้แสดงรายละเอียดการนัดหมายตามที่ต้องการ
-      // ตัวอย่างเช่น เปิด modal หรือแสดงข้อมูลใน SweetAlert
-      fetch(`${DETAILS_SCRIPT_URL}?action=getBookingDetails&id=${encodeURIComponent(id)}`)
-        .then(response => response.json())
-        .then(detail => {
-          Swal.fire({
-            title: 'รายละเอียดการนัดหมาย',
-            html: `
-              <p><strong>ชื่อ:</strong> ${detail.name}</p>
-              <p><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
-              <p><strong>บริการ:</strong> ${detail.service}</p>
-              <p><strong>วันที่:</strong> ${detail.date}</p>
-              <p><strong>เวลา:</strong> ${detail.time}</p>
-              <p><strong>สถานที่:</strong> ${detail.locationservice}</p>
-              <p><strong>หมายเหตุ:</strong> ${detail.note}</p>
-              <p><strong>สถานะ:</strong> ${detail.status}</p>
-            `,
-            icon: 'info',
-            confirmButtonText: 'ปิด'
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching booking details:', error);
-          Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการดึงรายละเอียดการนัดหมาย.', 'error');
+      // ค้นหาข้อมูลการนัดหมายจาก allFilteredDetails ตาม id
+      const detail = allFilteredDetails.find(item => item.idKey === id);
+      if (detail) {
+        Swal.fire({
+          title: 'รายละเอียดการนัดหมาย',
+          html: `
+            <p><strong>ชื่อ:</strong> ${detail.name}</p>
+            <p><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
+            <p><strong>บริการ:</strong> ${detail.service}</p>
+            <p><strong>วันที่:</strong> ${detail.date}</p>
+            <p><strong>เวลา:</strong> ${detail.time}</p>
+            <p><strong>สถานที่:</strong> ${detail.locationservice}</p>
+            <p><strong>หมายเหตุ:</strong> ${detail.note}</p>
+            <p><strong>สถานะ:</strong> ${detail.status}</p>
+          `,
+          icon: 'info',
+          confirmButtonText: 'ปิด'
         });
+      } else {
+        Swal.fire('ข้อผิดพลาด!', 'ไม่พบรายละเอียดการนัดหมายที่ต้องการ.', 'error');
+      }
     }
 
     // ฟังก์ชันแสดง/ซ่อนตัวโหลด

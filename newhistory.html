@@ -41,28 +41,36 @@
       color: white;
       font-size: 1.2rem;
       display: none; /* ซ่อนเริ่มต้น */
+      z-index: 10;
     }
   </style>
 </head>
 
 <body class="bg-slate-100 min-h-screen">
   <!-- Main Content Area -->
-  <main class="max-w-5xl mx-auto p-4">
+  <main class="max-w-5xl mx-auto p-4 relative">
     <!-- Member Information Section: ส่วนแสดงข้อมูลสมาชิก -->
     <div class="bg-white relative p-6 shadow-xl rounded-lg mb-6">
       <div id="memberLoadingOverlay">
-        <div class="loader"></div>
+        <div class="flex flex-col items-center">
+          <div class="loader mb-4"></div>
+          <span>กำลังโหลดข้อมูลสมาชิก...</span>
+        </div>
       </div>
-      <div class="flex items-center mb-4"> 
+      <div class="flex items-center mb-4">
         <div>
-         <label  class="block text-xs font-medium text-gray-700">ชื่อ</label>
+          <label class="block text-xs font-medium text-gray-700">ชื่อ</label>
           <input type="text" class="input-field bg-slate-50 text-gray-900 text-md font-bold bg-opacity-0 mb-2 w-full"
             id="memberName" placeholder="ชื่อ" name="memberName" readonly>
-          <label   class="block text-xs font-medium text-gray-700">เบอร์ติดต่อ</label>
+          <label class="block text-xs font-medium text-gray-700">เบอร์ติดต่อ</label>
           <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
             id="memberPhone" placeholder="เบอร์ติดต่อ" name="memberPhone" readonly>
           <input type="hidden" id="useridlineFilter">
           <input type="hidden" id="columnAData" name="columnAData">
+          <!-- เพิ่มภาพโปรไฟล์สมาชิก -->
+          <label class="block text-xs font-medium text-gray-700">ภาพโปรไฟล์</label>
+          <img id="memberProfileImage" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+            alt="Profile Image" class="w-24 h-24 rounded-full mt-2">
         </div>
       </div>
     </div>
@@ -116,7 +124,7 @@
   </main>
 
   <!-- Loading Spinner: ส่วนแสดงตัวโหลดระหว่างรอข้อมูลการนัดหมาย -->
-  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-20">
     <div class="loader"></div>
   </div>
 
@@ -150,12 +158,22 @@
         document.getElementById('useridlineFilter').value = userId;
         // แสดงชื่อ displayName ของผู้ใช้เป็นข้อมูลเริ่มต้น
         document.getElementById('memberName').value = profile.displayName;
-        // ดึงข้อมูลสมาชิกจาก Google Sheets
-        await fetchMemberData(userId);
-        // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว
-        await fetchAndPopulateTable();
+
+        // แสดงตัวโหลดทั้งสอง
+        showMemberLoading(true);
+        showLoadingSpinner(true);
+
+        // เรียกใช้ fetchMemberData และ fetchAndPopulateTable พร้อมกัน
+        await Promise.all([
+          fetchMemberData(userId),
+          fetchAndPopulateTable()
+        ]);
       } catch (error) {
         console.error('Error getting profile data:', error);
+      } finally {
+        // ซ่อนตัวโหลดเมื่อทั้งสองเสร็จสิ้น
+        showMemberLoading(false);
+        showLoadingSpinner(false);
       }
     }
 
@@ -169,7 +187,7 @@
         }
         const data = await response.json();
         // ตรวจสอบว่ามีข้อมูลสมาชิกหรือไม่
-        if (data && Object.keys(data).length > 0) { 
+        if (data && Object.keys(data).length > 0) {
           displayMemberData(data);
         } else {
           console.log('No member data found for userId:', userId);
@@ -226,7 +244,7 @@
         const details = await response.json();
 
         // สมมติว่า 'details' เป็น array ของ object การนัดหมาย
-        // แต่ตรวจสอบให้แน่ใจว่า 'details' มีโครงสร้างที่ถูกต้อง
+        // ตรวจสอบและแปลงวันที่
         details.forEach(detail => {
           const [day, month, year] = detail.date.split('-');
           detail.parsedDate = new Date(`${year}-${month}-${day}`);
@@ -451,14 +469,14 @@
         Swal.fire({
           title: 'รายละเอียดการนัดหมาย',
           html: `
-            <p><strong>ชื่อ:</strong> ${detail.name}</p>
-            <p><strong>เบอร์โทร:</strong> ${detail.phonenumber}</p>
-            <p><strong>บริการ:</strong> ${detail.service}</p>
-            <p><strong>วันที่:</strong> ${detail.date}</p>
-            <p><strong>เวลา:</strong> ${detail.time}</p>
-            <p><strong>สถานที่:</strong> ${detail.locationservice}</p>
-            <p><strong>หมายเหตุ:</strong> ${detail.note}</p>
-            <p><strong>สถานะ:</strong> ${detail.status}</p>
+            <p><strong>ชื่อ:</strong> ${detail.name || 'ไม่ระบุ'}</p>
+            <p><strong>เบอร์โทร:</strong> ${detail.phonenumber || 'ไม่ระบุ'}</p>
+            <p><strong>บริการ:</strong> ${detail.service || 'ไม่ระบุ'}</p>
+            <p><strong>วันที่:</strong> ${detail.date || 'ไม่ระบุ'}</p>
+            <p><strong>เวลา:</strong> ${detail.time || 'ไม่ระบุ'}</p>
+            <p><strong>สถานที่:</strong> ${detail.locationservice || 'ไม่ระบุ'}</p>
+            <p><strong>หมายเหตุ:</strong> ${detail.note || 'ไม่ระบุ'}</p>
+            <p><strong>สถานะ:</strong> ${detail.status || 'ไม่ระบุ'}</p>
           `,
           icon: 'info',
           confirmButtonText: 'ปิด'

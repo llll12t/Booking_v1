@@ -79,7 +79,6 @@
           <option value="เสร็จสิ้น">เสร็จสิ้น</option>
         </select>
       </div>
-      <!-- ซ่อนฟิลด์ User ID สำหรับใช้กรอง -->
       <div class="flex-1 min-w-[200px]">
         <label for="dateSort" class="block text-xs font-medium text-gray-700">เรียงตามวันที่</label>
         <select id="dateSort" class="mt-1 block w-full p-2 border border-gray-300 rounded-2xl">
@@ -128,10 +127,10 @@
     const WEB_MEMBER_APP_URL = 'https://script.google.com/macros/s/AKfycbzsQ7SkfqOfdRNDHghvuPeOuACGMfU6Fnk6ZfKj4QsSJV6qXUX2lJPY3BTdJBBzGoJA/exec';
     const LIFF_ID = '2006029649-kVZ9XqOV';
 
-    const CARDS_PER_PAGE = 5; 
-    let currentPage = 1; 
-    let totalPages = 1; 
-    let allFilteredDetails = []; 
+    const CARDS_PER_PAGE = 5;
+    let currentPage = 1;
+    let totalPages = 1;
+    let allFilteredDetails = [];
 
     async function initializeLiff() {
       try {
@@ -165,24 +164,19 @@
     async function fetchMemberData(userId) {
       showMemberLoading(true);
       try {
-        const response = await fetch(WEB_MEMBER_APP_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ action: 'fetchData', userId: userId })
-        });
+        // ใช้ GET request กับพารามิเตอร์เพื่อหลีกเลี่ยงปัญหา CORS
+        const response = await fetch(`${WEB_MEMBER_APP_URL}?action=fetchData&userId=${encodeURIComponent(userId)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
-        // data เช่น:
-        // [
-        //   ["idkey","UserID","ชื่อพนักงาน","เบอร์โทร","ยอมรับบันทึก","Timestamp"],
-        //   ["ID705O","U6d75b8c962b77905280c7dd74dbbc035","test","0861983352",true,"2024-12-05T06:55:28.000Z"]
-        // ]
-        if (data.length > 1) {
-          const row = data[1]; 
-          displayMemberData(row);
+        // ตรวจสอบว่ามีข้อมูลสมาชิกหรือไม่
+        if (data && Object.keys(data).length > 0) { 
+          displayMemberData(data);
         } else {
           console.log('No member data found for userId:', userId);
+          document.getElementById('memberName').value = '';
+          document.getElementById('memberPhone').value = '';
         }
       } catch (error) {
         console.error('Error fetching member data:', error);
@@ -192,11 +186,19 @@
     }
 
     function displayMemberData(row) {
-      // row = ["ID705O","U6d75b8c962b77905280c7dd74dbbc035","test","0861983352",true,"2024-12-05T06:55:28.000Z"]
-      document.getElementById('memberName').value = row[2] || '';
-      document.getElementById('memberPhone').value = row[3] || '';
-      // ถ้ามีรูปภาพ โปรดเพิ่มคอลัมน์และอ้างถึงคอลัมน์นั้นแทน
-      // document.getElementById('memberProfileImage').src = row[<index รูปภาพ>] || 'default_url';
+      // row = {
+      //   keyId: "ID705O",
+      //   userlineId: "U6d75b8c962b77905280c7dd74dbbc035",
+      //   nameId: "test",
+      //   keynumberId: "0861983352",
+      //   keynumber2Id: true,
+      //   fileLink: "https://drive.google.com/uc?id=FILE_ID",
+      //   timestamp: "2024-12-05T06:55:28.000Z"
+      // }
+      document.getElementById('memberName').value = row.nameId || '';
+      document.getElementById('memberPhone').value = row.keynumberId || '';
+      // ถ้ามี fileLink ให้ใช้เป็นภาพโปรไฟล์ ถ้าไม่มีให้ใช้ default
+      document.getElementById('memberProfileImage').src = row.fileLink || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
     }
 
     function showMemberLoading(isLoading) {
@@ -220,24 +222,31 @@
       showLoadingSpinner(true);
       try {
         const response = await fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const details = await response.json();
 
+        // สมมติว่า 'details' เป็น array ของ object การนัดหมาย
+        // แต่ตรวจสอบให้แน่ใจว่า 'details' มีโครงสร้างที่ถูกต้อง
         details.forEach(detail => {
           const [day, month, year] = detail.date.split('-');
           detail.parsedDate = new Date(`${year}-${month}-${day}`);
         });
 
+        // เรียงข้อมูลตามวันที่
         const dateSort = document.getElementById('dateSort').value;
         details.sort((a, b) => {
           return dateSort === 'latest' ? b.parsedDate - a.parsedDate : a.parsedDate - b.parsedDate;
         });
 
+        // กรองข้อมูลตามสถานะและ userId
         const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
         const useridlineFilter = document.getElementById('useridlineFilter').value.toLowerCase();
 
         allFilteredDetails = details.filter(detail => {
-          const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
-          const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
+          const matchesStatus = statusFilter === '' || (detail.status && detail.status.toLowerCase().includes(statusFilter));
+          const matchesUseridline = useridlineFilter === '' || (detail.userlineid && detail.userlineid.toLowerCase().includes(useridlineFilter));
           return matchesStatus && matchesUseridline;
         });
 
@@ -314,6 +323,7 @@
         startPage = Math.max(1, endPage - maxVisibleButtons + 1);
       }
 
+      // สร้างปุ่ม "ย้อนกลับ"
       const prevButton = document.createElement('button');
       prevButton.textContent = '«';
       prevButton.disabled = currentPage === 1;
@@ -327,6 +337,7 @@
       });
       paginationControls.appendChild(prevButton);
 
+      // สร้างปุ่มสำหรับหน้าต่างๆ
       for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
         pageButton.textContent = i;
@@ -342,6 +353,7 @@
         paginationControls.appendChild(pageButton);
       }
 
+      // สร้างปุ่ม "ถัดไป"
       const nextButton = document.createElement('button');
       nextButton.textContent = '»';
       nextButton.disabled = currentPage === totalPages;

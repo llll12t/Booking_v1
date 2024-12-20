@@ -193,8 +193,8 @@
       //   fileLink: "https://drive.google.com/uc?id=FILE_ID",
       //   timestamp: "2024-12-05T06:55:28.000Z"
       // }
-      document.getElementById('memberName').value = row.nameId || '';
-      document.getElementById('memberPhone').value = row.keynumberId || '';
+      document.getElementById('memberName').value = row.keynumberId || '';
+      document.getElementById('memberPhone').value = row.keynumber2Id || '';
       // ถ้ามี fileLink ให้ใช้เป็นภาพโปรไฟล์ ถ้าไม่มีให้ใช้ default
       document.getElementById('memberProfileImage').src = row.fileLink || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
     }

@@ -67,10 +67,7 @@
             id="memberPhone" placeholder="เบอร์ติดต่อ" name="memberPhone" readonly>
           <input type="hidden" id="useridlineFilter">
           <input type="hidden" id="columnAData" name="columnAData">
-          <!-- เพิ่มภาพโปรไฟล์สมาชิก -->
-          <label class="block text-xs font-medium text-gray-700">ภาพโปรไฟล์</label>
-          <img id="memberProfileImage" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-            alt="Profile Image" class="w-24 h-24 rounded-full mt-2">
+        
         </div>
       </div>
     </div>
@@ -202,19 +199,10 @@
     }
 
     function displayMemberData(row) {
-      // row = {
-      //   keyId: "ID705O",
-      //   userlineId: "U6d75b8c962b77905280c7dd74dbbc035",
-      //   nameId: "test",
-      //   keynumberId: "0861983352",
-      //   keynumber2Id: true,
-      //   fileLink: "https://drive.google.com/uc?id=FILE_ID",
-      //   timestamp: "2024-12-05T06:55:28.000Z"
-      // }
+
       document.getElementById('memberName').value = row.nameId || '';
       document.getElementById('memberPhone').value = row.keynumberId || '';
-      // ถ้ามี fileLink ให้ใช้เป็นภาพโปรไฟล์ ถ้าไม่มีให้ใช้ default
-      document.getElementById('memberProfileImage').src = row.fileLink || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+ 
     }
 
     function showMemberLoading(isLoading) {

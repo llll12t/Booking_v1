@@ -59,7 +59,7 @@
             id="columnBData" placeholder="ชื่อ" name="columnBData" readonly>
           <input type="text" class="input-field text-gray-900 text-md bg-white bg-opacity-0 mb-2 w-full"
             id="columnCData" placeholder="เบอร์ติดต่อ" name="columnCData" readonly>
-            <input type="hidden" id="useridlineFilter">
+                    <input type="hidden" id="userId" name="userId">
             <input type="hidden" id="columnAData" name="columnAData">
 
         </div>
@@ -152,7 +152,7 @@
       try {
         const profile = await liff.getProfile();
         const userId = profile.userId;
-        document.getElementById('useridlineFilter').value = userId;
+        document.getElementById('userId').value = userId;
         document.getElementById('columnAData').value = profile.displayName;
         await fetchMemberData(userId);
         await fetchAndPopulateTable(); // ดึงข้อมูลการนัดหมายหลังจากดึงข้อมูลสมาชิกแล้ว

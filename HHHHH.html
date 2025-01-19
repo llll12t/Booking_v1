@@ -197,16 +197,16 @@
         let statusIcon = '';
         switch (detail.status) {
           case 'รอการยืนยัน':
-            statusIcon = '⚠️';
+            statusIcon = '⚠️ รอการยืนยัน';
             break;
           case 'ยืนยันแล้ว':
-            statusIcon = '📌';
+            statusIcon = '📌ยืนยีนแล้ว';
             break;
           case 'ยกเลิก':
-            statusIcon = '❌';
+            statusIcon = '❌ ยกเลิก';
             break;
           case 'เสร็จสิ้น':
-            statusIcon = '✅';
+            statusIcon = '✅ เสร็จสิ้น';
             break;
           default:
             statusIcon = detail.status;
@@ -245,8 +245,6 @@
             <div class="mt-4 flex flex-wrap gap-2">
               <button class="confirm-btn bg-green-500 text-white px-4 py-2 rounded-xl ${['ยืนยันแล้ว', 'ยกเลิก', 'เสร็จสิ้น'].includes(detail.status) ? 'opacity-50 cursor-not-allowed' : ''}" ${['ยืนยันแล้ว', 'ยกเลิก', 'เสร็จสิ้น'].includes(detail.status) ? 'disabled' : ''} data-id="${detail.idKey}">ยืนยัน</button>
               <button class="cancel-btn bg-red-500 text-white px-4 py-2 rounded-xl ${['ยกเลิก', 'เสร็จสิ้น'].includes(detail.status) ? 'opacity-50 cursor-not-allowed' : ''}" ${['ยกเลิก', 'เสร็จสิ้น'].includes(detail.status) ? 'disabled' : ''} data-id="${detail.idKey}">ยกเลิก</button>
-              <button class="complete-btn bg-blue-500 text-white px-4 py-2 rounded-xl ${['รอการยืนยัน', 'ยกเลิก', 'เสร็จสิ้น'].includes(detail.status) ? 'opacity-50 cursor-not-allowed' : ''}" ${['รอการยืนยัน', 'ยกเลิก', 'เสร็จสิ้น'].includes(detail.status) ? 'disabled' : ''} data-id="${detail.idKey}">เสร็จสิ้น</button>
-              <button class="reminder-btn bg-yellow-500 text-white px-4 py-2 rounded-xl ${detail.status !== 'รอการยืนยัน' ? 'opacity-50 cursor-not-allowed' : ''}" ${detail.status !== 'รอการยืนยัน' ? 'disabled' : ''} data-id="${detail.idKey}">ส่งการแจ้งเตือน</button>
             </div>
           </td>
         `;
@@ -272,7 +270,7 @@
 
       // สร้างปุ่ม "ย้อนกลับ"
       const prevButton = document.createElement('button');
-      prevButton.textContent = 'Previous';
+      prevButton.textContent = 'ย้อนกลับ';
       prevButton.disabled = currentPage === 1;
       prevButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded-2xl', 'hover:bg-slate-600', 'disabled:opacity-50');
       prevButton.addEventListener('click', () => {
@@ -300,7 +298,7 @@
 
       // สร้างปุ่ม "ถัดไป"
       const nextButton = document.createElement('button');
-      nextButton.textContent = 'Next';
+      nextButton.textContent = 'ถัดไป';
       nextButton.disabled = currentPage === totalPages;
       nextButton.classList.add('px-4', 'py-2', 'bg-slate-800', 'text-white', 'rounded-2xl', 'hover:bg-slate-600', 'disabled:opacity-50');
       nextButton.addEventListener('click', () => {
@@ -322,7 +320,7 @@
         });
       });
 
-      // ปุ่ม Action
+      // ปุ่ม Action: ยืนยันและยกเลิก
       document.querySelectorAll('.confirm-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;
@@ -334,20 +332,6 @@
         button.addEventListener('click', function () {
           const id = this.dataset.id;
           cancelBooking(id);
-        });
-      });
-
-      document.querySelectorAll('.complete-btn').forEach(button => {
-        button.addEventListener('click', function () {
-          const id = this.dataset.id;
-          completeBooking(id);
-        });
-      });
-
-      document.querySelectorAll('.reminder-btn').forEach(button => {
-        button.addEventListener('click', function () {
-          const id = this.dataset.id;
-          sendReminder(id);
         });
       });
     }
@@ -421,66 +405,6 @@
               showLoadingSpinner(false);  // ซ่อนตัวโหลด
               Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยกเลิกการนัดหมาย.', 'error');
               console.error('Error canceling booking:', error);
-            });
-        }
-      });
-    }
-
-    // ฟังก์ชันเสร็จสิ้นการนัดหมาย
-    function completeBooking(id) {
-      Swal.fire({
-        title: 'คุณแน่ใจหรือไม่?',
-        text: "คุณต้องการเสร็จสิ้นการนัดหมายนี้หรือไม่!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'ใช่, การนัดหมายเสร็จสิ้น!',
-        cancelButtonText: 'ยกเลิก'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          showLoadingSpinner(true);  // แสดงตัวโหลด
-          fetch(`${DETAILS_SCRIPT_URL}?action=completeBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
-              Swal.fire('เสร็จสิ้น!', 'การนัดหมายได้เสร็จสิ้นแล้ว.', 'success');
-              fetchAndPopulateCards();  // โหลดข้อมูลใหม่
-            })
-            .catch(error => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
-              Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการเสร็จสิ้นการนัดหมาย.', 'error');
-              console.error('Error completing booking:', error);
-            });
-        }
-      });
-    }
-
-    // ฟังก์ชันส่งการแจ้งเตือน
-    function sendReminder(id) {
-      Swal.fire({
-        title: 'ส่งการเตือนความจำ?',
-        text: "การเตือนความจำจะถูกส่งไปยังผู้ใช้.",
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'ใช่, ส่งเลย!',
-        cancelButtonText: 'ยกเลิก'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          showLoadingSpinner(true);  // แสดงตัวโหลด
-          fetch(`${DETAILS_SCRIPT_URL}?action=sendReminder&id=${encodeURIComponent(id)}`, { method: 'POST' })
-            .then(response => response.text())
-            .then(data => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
-              Swal.fire('ส่งการเตือนสำเร็จ!', 'การเตือนความจำถูกส่งเรียบร้อยแล้ว.', 'success');
-              fetchAndPopulateCards();  // โหลดข้อมูลใหม่
-            })
-            .catch(error => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
-              Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการส่งการเตือนความจำ.', 'error');
-              console.error('Error sending reminder:', error);
             });
         }
       });

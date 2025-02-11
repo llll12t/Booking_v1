@@ -5,80 +5,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบนัดหมาย</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>บันทึกการเข้าออกงาน</title>
+    <!-- นำเข้า Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- นำเข้า SweetAlert2 สำหรับแสดงกล่องข้อความแจ้งเตือน -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- นำเข้า LIFF SDK ของ LINE -->
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <style>
-        .selected {
-            background-color: #283448 !important;
-            color: white;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgb(30 41 59 / 0.8);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loading-spinner {
-            border: 10px solid #ffffff;
-            background-color: #ebebeb;
-            border-radius: 50%;
-            border-top: 10px solid #1e293b;
-            width: 100px;
-            height: 100px;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .popup {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgb(30 41 59 / 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            display: none;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 50px;
-            border-radius: 8px;
-            text-align: left;
-            width: 80%;
-        }
-
+        /* การตั้งค่าสำหรับ overlay ที่ใช้แสดงสถานะการโหลด */
         #loadingOverlay {
             display: none;
             position: absolute;
@@ -86,16 +21,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgb(30 41 59 / 0.8);
+            background-color: rgb(255 255 255 / 80%);
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
 
+        /* การตั้งค่าสำหรับ container ของการโหลด */
         .loading-container {
             position: relative;
         }
 
+        /* การตั้งค่าการกระพริบของข้อความ */
         @keyframes blink {
 
             0%,
@@ -114,524 +51,791 @@
     </style>
 </head>
 
-<body class="bg-slate-100 flex flex-col min-h-screen">
-    <!-- ส่วนหัวของหน้า -->
+<body class="bg-white h-screen">
+    <!-- กล่องใหญ่ที่เป็นกล่องสีขาวสำหรับเนื้อหาหลักของหน้า -->
+    <div class="max-w-md mx-auto p-6 m-2 ">
+        <!-- กล่องแสดงวันที่และเวลา -->
+        <div class="bg-slate-800 border rounded-lg text-white text-center mb-4 py-8 px-4">
+            <div class="daytime">
+                <div id="date"></div>
+                <div class="text-5xl text-bold" id="time"></div>
+                <!-- ฟิลด์ที่ซ่อนอยู่สำหรับรับค่า วันที่ และ เวลา -->
+                <input type="date" id="todayInput" name="todayInput" class="hidden">
+                <input type="time" id="currentTime" name="currentTime" class="hidden">
+            </div>
+        </div>
+        <!-- กล่องแสดงข้อมูลผู้ใช้ -->
+        <div id="step1">
+            <!-- หน้าต่างโหลดที่แสดงในขณะดึงข้อมูล -->
+            <div class="loading-container bg-slate-100 p-4 rounded-lg">
+                <div id="loadingOverlay">
+                    <div class="text-center text-gray-800">ค้นหารายชื่อ..</div>
+                </div>
+                <!-- ส่วนสำหรับกรอกข้อมูลชื่อ, รหัสพนักงาน, และตำแหน่ง -->
+                <div class="w-full p-2 space-y-6">
+                    <!-- ฟิลด์ชื่อ-สกุล -->
+                    <div class="relative">
+                        <label for="columnBData" class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">ชื่อ-สกุล</label>
+                        <input type="text" class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800" id="columnBData"
+                        placeholder="ชื่อ-สกุล" name="columnBData" required>
+                    </div>
+                </div>
+                <div class="w-full p-2 space-y-6">
 
-    <div class="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-10">
-        <div class="max-w-md mx-auto">
-            <h1 class="text-xl font-bold">จองคิว</h1>
-            <p class="text-sm">เวลาทำการเปิด 10:00-17:00 น.</p>
+                <div class="relative">
+                    <label for="columnCData" class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">รหัสพนักงาน</label>
+                <input type="text" class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800" id="columnCData"
+                        placeholder="รหัสพนักงาน" name="columnCData" required>
+                </div>
+            </div>
+                <div class="w-full p-2 space-y-6">
+
+                <div class="relative">
+                    <label for="columnDData" class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">ตำแหน่ง</label>
+                    <input type="text" class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800" id="columnDData"
+                        placeholder="ตำแหน่ง" name="columnDData" required>
+                </div>
+            </div>
+                <!-- ฟิลด์ที่ซ่อนอยู่สำหรับเก็บข้อมูลที่ไม่ต้องแสดงผล -->
+                <input type="hidden" id="userId" name="userId" />
+                <input type="hidden" id="columnAData" name="columnAData" />
+            </div>
+
+            <div class="switch-field mt-4 mb-4 space-y-2">
+                <!-- แถวบน: เข้างาน (ซ้าย) และ ออกงาน (ขวา) -->
+                <div class="flex space-x-2">
+                  <!-- ปุ่ม เข้างาน -->
+                  <div class="w-1/2 flex items-center">
+                    <input type="radio" id="radio-three" name="switch-job" value="เข้างาน" class="hidden" />
+                    <label for="radio-three" class="cursor-pointer border border-gray-300 px-4 py-3 rounded-lg w-full flex items-center justify-center">
+                      <!-- จุดสีเขียว -->
+                      <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                      เข้างาน
+                    </label>
+                  </div>
+                  <!-- ปุ่ม ออกงาน -->
+                  <div class="w-1/2 flex items-center">
+                    <input type="radio" id="radio-five" name="switch-job" value="ออกงาน" class="hidden" />
+                    <label for="radio-five" class="cursor-pointer border border-gray-300 px-4 py-3 rounded-lg w-full flex items-center justify-center">
+                      <!-- จุดสีแดง -->
+                      <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                      ออกงาน
+                    </label>
+                  </div>
+                </div>
+                <!-- แถวล่าง: ปุ่ม ระหว่างวัน -->
+                <div class="flex pt-2">
+                  <input type="radio" id="radio-four" name="switch-job" value="ระหว่างวัน" class="hidden" />
+                  <label for="radio-four" class="cursor-pointer border border-gray-300 py-3  rounded-lg w-full text-center">
+                    ระหว่างวัน
+                  </label>
+                </div>
+              </div>
+              
+            <input type="hidden" id="jobInput" name="jobInput" required>
+            <!-- หมายเหตุ -->
+            <textarea class="input-field w-full border border-gray-300 rounded-lg p-4 text-gray-700" placeholder="Note"
+                id="noteInput"></textarea>
+            <!-- ปุ่มสำหรับไปยังขั้นตอนถัดไป -->
+            <div class="bg-slate-800 text-white text-center rounded-lg my-4">
+                <button class="p-4 w-full" onclick="nextStep()">ถัดไป</button>
+            </div>
+        </div>
+
+        <!-- ขั้นตอนที่สอง: ถ่ายรูป -->
+        <div id="step2" class="hidden text-center">
+            <div class="photo" class="max-w-md w-[640px] h-[420px] p-[5px]">
+                <center>
+                    <video id="camera-preview" width="80%" height="auto" autoplay playsinline
+                        poster="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/330px-No-Image-Placeholder.svg.png"
+                        class="rounded-lg mt-2 "></video>
+                </center>
+                <center><img id="preview" width="80%" height="auto" alt="" required class="rounded-lg mt-2 "></center>
+                <div class="flex justify-center space-x-4 my-4 px-8">
+                    <button class="w-full text-center py-2 px-4 rounded-lg bg-yellow-500 text-white "
+                        id="start-camera-btn">เริ่มเปิดกล้อง</button>
+                    <button class="w-full text-center py-4 px-4 rounded-lg bg-green-500 text-white" id="capture-btn"
+                        disabled="">ถ่ายรูป</button>
+                    <button id="switch-camera-btn" class="py-2 px-4 rounded-lg bg-slate-100 text-black" disabled>
+                        สลับ 
+                    </button>
+                </div>
+            </div>
+            <div class="input-group my-4 py-4 flex justify-between">
+                <button class="w-full text-center p-4  m-2 rounded-lg bg-gray-300" onclick="prevStep()">กลับ</button>
+                <button class="w-full text-center p-4 m-2 rounded-lg bg-slate-800 text-white"
+                    onclick="checkPictureAndNextStep()">ถัดไป</button>
+            </div>
+        </div>
+
+        <!-- ขั้นตอนที่สาม: ยืนยันที่อยู่ -->
+        <div id="step3" class="hidden text-center">
+            <div class="submit">
+                <div class="w-full mb-4 rounded-lg bg-slate-800 text-white">
+                    <button type="button" onclick="getLocation()"
+                        class="w-full p-4 rounded-lg blink">กดเพื่อยืนยันที่อยู่ของคุณ</button>
+                </div>
+                <div id="locationInfo" name="locationInfo"
+                    class="bg-white p-4 rounded-lg shadow-sm max-w-sm mx-auto my-4">
+                    <div class="flex justify-between">
+                        <p id="latitude" class="text-gray-700 font-medium pb-2">Latitude: </p>
+                        <p id="longitude" class="text-gray-700 font-medium pb-2">Longitude: </p>
+                    </div>
+                    <p id="fullAddress">สถานที่</p>
+                </div>
+
+                <!-- ฟิลด์ที่ซ่อนอยู่สำหรับเก็บข้อมูลที่อยู่ -->
+                <input type="hidden" id="latitudeInput" name="latitudeInput">
+                <input type="hidden" id="longitudeInput" name="longitudeInput">
+                <input type="hidden" id="fullAddressInput" name="fullAddressInput" required>
+            </div>
+
+            <!-- แสดงแผนที่ Google Maps -->
+            <iframe id="mapIframe" class="p-2 rounded-lg shadow-md" width="100%" height="240" frameborder="0"
+                style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
+            <div class="input-group my-4 py-4 flex justify-between">
+                <button class="w-1/4 text-center p-4  m-2 rounded-lg bg-gray-300" onclick="prevStep()">กลับ</button>
+                <button id="submitButton" class="w-3/4 text-center p-4 m-2 rounded-lg bg-slate-800 text-white"
+                    onclick="submitForm()">บันทึกข้อมูล</button>
+            </div>
         </div>
     </div>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-    <div class="popup" id="popup">
-        <div class="w-full m-4 max-w-md popup-content mx-auto" id="popupContent"></div>
-    </div>
+</body>
+<script>
 
-    <div class="w-full mx-auto rounded py-4 px-4 mb-4">
-        <form id="bookingForm" class="space-y-2 pt-2" novalidate>
-            <input type="hidden" name="action" value="makeBooking">
+    // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec'; // appscripts booking
+    const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxRwGtFDlQFqMbxx9sZ-cxhOISBLmFUiBYE-uroDi6MRiGJ2Krte5lg0SplqKWU8VTJzw/exec'; //appscripts members
+    const LIFF_ID = '2006029649-bj0ez4Og';
 
-            <!-- ฟอร์มการจอง (Step 1) -->
-            <div id="step1" class="max-w-sm mx-auto">
-                <!-- เลือกบริการ -->
-                <div class="flex space-x-4 mb-4">
-                    <span class="bg-white flex items-center border rounded-xl p-2 w-32">
-                        <img src="https://img.icons8.com/?size=100&id=22128&format=png&color=000000" class="w-6 h-6 mr-1">
-                        <span class="text-black"> บริการ </span>
-                    </span>
-                    <select id="service" name="service"
-                        class="rounded-xl px-2 text-center bg-white border text-gray-900 block flex-1 min-w-0 w-full"
-                        placeholder="ตัวเลือกบริการ">
-                        <option value="" disabled selected>เลือกบริการ</option>
-                    </select>
-                </div>
-                <!-- เลือกสถานที่ -->
-                <div class="flex space-x-4 mb-4">
-                    <span class="bg-white flex items-center border rounded-xl p-2 w-32">
-                        <img src="https://img.icons8.com/?size=100&id=Ynh2i0jcHfB4&format=png&color=000000" class="w-6 h-6 mr-1">
-                        <span class="text-black"> สาขา </span>
-                    </span>
-                    <select id="locationservice" name="locationservice"
-                        class="rounded-xl text-center bg-white border text-gray-900 block flex-1 min-w-0 w-full"
-                        placeholder="ตัวเลือกสถานที่">
-                        <option value="" disabled selected>เลือกสาขา</option>
-                    </select>
-                </div>
-                <!-- ฟอร์มข้อมูลผู้ใช้ -->
-                <div class="bg-slate-200 px-4 py-4 my-4 rounded-xl">
-                    <input type="hidden" id="displayName" name="displayName">
-                    <div class="loading-container">
-                        <div id="loadingOverlay">
-                            <div class="text-center text-white">ค้นหารายชื่อ..</div>
-                        </div>
-                        <div class="pb-4">ข้อมูลการนัดจองคิว</div>
-                        <div class="flex justify-center items-center">
-                            <div class="w-full p-2 space-y-6">
-                                <!-- ฟิลด์ชื่อ-สกุล -->
-                                <div class="relative">
-                                    <label for="name"
-                                        class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">
-                                        ชื่อ-สกุล
-                                    </label>
-                                    <input type="text" id="name" name="name" placeholder="กรอกชื่อ-สกุล..."
-                                        class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800" />
-                                </div>
+    // ฟังก์ชันนี้จะถูกเรียกใช้เมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+    window.onload = async function () {
+        //await initializeLiff();
+    };
 
-                                <!-- ฟิลด์เบอร์ติดต่อ -->
-                                <div class="relative">
-                                    <label for="phonenumber"
-                                        class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">
-                                        เบอร์ติดต่อ
-                                    </label>
-                                    <input type="tel" id="phonenumber" name="phonenumber"
-                                        placeholder="กรอกเบอร์ติดต่อ..."
-                                        class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800" />
-                                </div>
-
-                                <!-- ฟิลด์หมายเหตุ -->
-                                <div class="relative">
-                                    <label for="note"
-                                        class="absolute -top-2 left-3 text-xs bg-slate-200 px-1 text-slate-800 font-semibold">
-                                        หมายเหตุ
-                                    </label>
-                                    <textarea id="note" name="note" placeholder="กรอกหมายเหตุ..."
-                                        class="w-full px-4 py-3 text-sm bg-slate-200 border-2 border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-800"></textarea>
-                                </div>
-
-                                <!-- Checkbox สำหรับยอมรับการบันทึกข้อมูล -->
-                                <div class="flex items-center">
-                                    <input type="checkbox" id="saveInfo" name="saveInfo"
-                                        class="h-4 w-4 text-slate-800 border-gray-300 rounded focus:ring-slate-800" />
-                                    <label for="saveInfo" class="ml-2 block text-sm text-slate-800">
-                                        ยอมรับการบันทึกชื่อและเบอร์ติดต่อสำหรับครั้งต่อไป
-                                    </label>
-                                </div>
-
-                                <!-- ฟิลด์ซ่อนสำหรับ userlineid -->
-                                <input type="hidden" id="userlineid" name="userlineid">
-                            </div>
-                        </div>
-                    </div>
-                    <div id="buttons" class="">
-                        <button type="button" onclick="nextStep()"
-                            class="w-full bg-slate-800 text-white py-3 mt-4 rounded-xl">ถัดไป</button>
-                    </div>
-                </div>
-            </div>
-            <!-- ฟอร์มการเลือกวันที่และเวลา (Step 2) -->
-            <div id="step2" class="grid gap-4 max-w-sm mx-auto" style="display:none;">
-                <div class="text-center font-semibold mb-6">
-                    <!-- ตัวเลือกเดือนและปี -->
-                    <div class="flex justify-center space-x-2">
-                        <select id="monthSelect" aria-label="Month"
-                            class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-xl px-2 py-4">
-                            <option value="0">มกราคม</option>
-                            <option value="1">กุมภาพันธ์</option>
-                            <option value="2">มีนาคม</option>
-                            <option value="3">เมษายน</option>
-                            <option value="4">พฤษภาคม</option>
-                            <option value="5">มิถุนายน</option>
-                            <option value="6">กรกฎาคม</option>
-                            <option value="7">สิงหาคม</option>
-                            <option value="8">กันยายน</option>
-                            <option value="9">ตุลาคม</option>
-                            <option value="10">พฤศจิกายน</option>
-                            <option value="11">ธันวาคม</option>
-                        </select>
-                        <select id="yearSelect" aria-label="Year"
-                            class="text-center bg-white text-black w-1/2 border-2 border-slate-800 rounded-xl px-2 py-4"></select>
-                    </div>
-                </div>
-                <div class="overflow-x-auto mb-4 no-scrollbar">
-                    <div id="calendarDays" class="flex space-x-2"></div>
-                </div>
-                <div id="availability" class="max-w-sm mx-auto space-y-2"></div>
-
-                <div class="hidden">
-                    <label for="time" class="block text-sm">Time:</label>
-                    <input type="time" id="time" name="time" required readonly
-                        class="w-full px-3 py-3 border border-blue-900 rounded-xl">
-                </div>
-                <div class="hidden text-center">
-                    <input type="submit" value="Submit"
-                        class="px-6 py-4 bg-slate-800 text-black font-semibold rounded-xl">
-                </div>
-                <button type="button" onclick="prevStep()"
-                    class="w-32 p-2 mt-5 bg-white text-slate-800 py-3 rounded-xl">กลับหน้าหลัก</button>
-            </div>
-
-        </form>
-    </div>
-
-    <script>
-        // ตัวแปรสำหรับใช้กับ URL ของ Web App และ LIFF
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxtAzRpV23iksItGZzVkwvrBWCv5lZ4YqJuousNuNa_M6c_zK-Lo8BOyhHH-5spTnwQ/exec'; // appscripts booking
-        const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbxRwGtFDlQFqMbxx9sZ-cxhOISBLmFUiBYE-uroDi6MRiGJ2Krte5lg0SplqKWU8VTJzw/exec'; //appscripts members
-        const LIFF_ID = '2006029649-bj0ez4Og';
-
-        let currentStep = 1; // เริ่มต้นที่ Step 1
-        let selectedDate = '';
-        let isSubmitting = false;
-
-        // แสดงฟอร์มการจอง (Step 1) เมื่อเปิดหน้า
-        document.getElementById('step1').style.display = 'block';
-        showLoading(true);
-
-        // โหลดข้อมูลเบื้องต้น เช่น รายการบริการ สถานที่ และ LIFF
-        async function loadInitialData() {
-            await Promise.all([fetchDropdownData(),initializeLiff()]);
-            const currentDate = new Date();
-            currentDate.setDate(currentDate.getDate() + 1); // เพิ่มหนึ่งวัน
-
-            selectDate(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-            populateYearSelect(currentDate.getFullYear());
-            monthSelect.value = currentDate.getMonth();
-            yearSelect.value = currentDate.getFullYear();
-
-            await updateCalendar(currentDate);
-            showLoading(false);
-        }
-
-
-        loadInitialData();
-
-        // ฟังก์ชันการเตรียมการเริ่มต้น LIFF
-        async function initializeLiff() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-                if (liff.isLoggedIn()) {
-                    getUserProfile();
-                } else {
-                    liff.login();
-                }
-            } catch (error) {
-                console.error('Error initializing LIFF:', error);
+    // ฟังก์ชันนี้ใช้ในการเริ่มต้น LIFF (LINE Front-end Framework)
+    async function initializeLiff() {
+        try {
+            // เริ่มต้น LIFF โดยใช้ LIFF ID ที่กำหนด
+            await liff.init({ liffId: `${LIFF_ID}` });
+            // ถ้าผู้ใช้ได้เข้าสู่ระบบแล้ว จะดึงข้อมูลโปรไฟล์
+            if (liff.isLoggedIn()) {
+                getUserProfile();
+            } else {
+                // ถ้ายังไม่ได้เข้าสู่ระบบ จะพาผู้ใช้ไปที่หน้าล็อกอิน
+                liff.login();
             }
+        } catch (error) {
+            // ถ้ามีข้อผิดพลาดในขณะเริ่มต้น LIFF จะทำการล็อกข้อผิดพลาดในคอนโซล
+            console.error('Error initializing LIFF:', error);
         }
+    }
 
-        // ฟังก์ชันดึงข้อมูลโปรไฟล์ผู้ใช้จาก LIFF
-        async function getUserProfile() {
-            try {
-                const profile = await liff.getProfile();
-                document.getElementById('userlineid').value = profile.userId;
-                document.getElementById('displayName').value = profile.displayName;
-                fetchData(profile.userId);
-            } catch (error) {
-                console.error('Error getting profile data:', error);
-            }
+    // ฟังก์ชันนี้ดึงข้อมูลโปรไฟล์ของผู้ใช้จาก LIFF
+    async function getUserProfile() {
+        try {
+            // รับข้อมูลโปรไฟล์ของผู้ใช้
+            const profile = await liff.getProfile();
+            const userId = profile.userId;
+            // กำหนดค่า userId และ displayName ในฟอร์ม
+            document.getElementById('userId').value = userId;
+            document.getElementById('displayName').value = profile.displayName;
+            // ดึงข้อมูลเพิ่มเติมโดยใช้ userId
+            await fetchData(userId);
+        } catch (error) {
+            // ถ้ามีข้อผิดพลาดในการดึงข้อมูลโปรไฟล์ จะทำการล็อกข้อผิดพลาดในคอนโซล
+            console.error('Error getting profile data:', error);
         }
+    }
 
-        // ฟังก์ชันดึงข้อมูลผู้ใช้จากเซิร์ฟเวอร์
-        async function fetchData(userId) {
-            showLoading(true);
-            try {
-                const response = await fetch(WEB_APP_MEMBER_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'fetchData', userId: userId })
-                });
-                const data = await response.json();
-                data.sort((a, b) => new Date(b[6]) - new Date(a[6]));
-                const row = data.find(row => row[1] === userId);
-                if (row) {
-                    displayData(row);
-                } else {
-                    console.log('No data found for userId:', userId);
-                }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // แสดงข้อมูลผู้ใช้ในฟอร์ม
-        function displayData(row) {
-            document.getElementById('userlineid').value = row[1] || '';
-            document.getElementById('name').value = row[2] || '';
-            document.getElementById('phonenumber').value = row[3] || '';
-        }
-
-        // ฟังก์ชันแสดง/ซ่อนการโหลดข้อมูล
-        function showLoading(isLoading) {
-            const overlay = document.getElementById('loadingOverlay');
-            const inputs = document.querySelectorAll('.input-field');
-            overlay.style.display = isLoading ? 'flex' : 'none';
-            inputs.forEach(input => input.disabled = isLoading);
-        }
-
-        // ฟังก์ชันเปลี่ยนขั้นตอนจาก Step 1 ไป Step 2
-        function nextStep() {
-            const name = document.getElementById('name').value.trim();
-            const phonenumber = document.getElementById('phonenumber').value.trim();
-            const service = document.getElementById('service').value;
-            const locationservice = document.getElementById('locationservice').value;
-
-            // ตรวจสอบว่าฟิลด์ไม่ว่าง
-            if (!name || !phonenumber) {
-                showPopup('ข้อผิดพลาด', 'กรุณากรอกข้อมูล ชื่อ-สกุล, เบอร์ติดต่อ ให้ครบถ้วนก่อนดำเนินการต่อ', 'error');
-                return;
-            }
-
-            // ตรวจสอบการเลือกบริการและสาขา
-            if (!service) {
-                showPopup('ข้อผิดพลาด', 'กรุณาเลือกบริการ ก่อนดำเนินการต่อ', 'error');
-                return;
-            }
-
-            if (!locationservice) {
-                showPopup('ข้อผิดพลาด', 'กรุณาเลือกสาขา ก่อนดำเนินการต่อ', 'error');
-                return;
-            }
-
-            if (currentStep < 2) {
-                document.getElementById(`step${currentStep}`).style.display = 'none';
-                currentStep++;
-                document.getElementById(`step${currentStep}`).style.display = 'block';
-                if (currentStep === 2) {
-                    scrollToCurrentDay();
-                }
-            }
-        }
-
-        // ฟังก์ชันย้อนกลับไปยัง Step ก่อนหน้า
-        function prevStep() {
-            if (currentStep > 1) {
-                document.getElementById(`step${currentStep}`).style.display = 'none';
-                currentStep--;
-                document.getElementById(`step${currentStep}`).style.display = 'grid';
-                if (currentStep === 2) {
-                    scrollToCurrentDay();
-                }
-            }
-        }
-
-        // ฟังก์ชันดึงข้อมูลตัวเลือกบริการและสถานที่จากเซิร์ฟเวอร์
-        async function fetchDropdownData() {
-            try {
-                const response = await fetch(`${WEB_APP_URL}?action=fetchServicesAndlocationservice`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                populateDropdown('service', data.services, 'เลือกบริการ');
-                populateDropdown('locationservice', data.locationservice, 'เลือกสาขา');
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
-            }
-        }
-
-        // ฟังก์ชันเพิ่มรายการบริการและสถานที่ลงใน Dropdown พร้อมกับตัวเลือกเริ่มต้น
-        function populateDropdown(dropdownId, items, defaultText) {
-            const dropdown = document.getElementById(dropdownId);
-            dropdown.innerHTML = `<option value="" disabled selected>${defaultText}</option>`;
-            items.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
-                dropdown.appendChild(option);
+    // ฟังก์ชันนี้ดึงข้อมูลเพิ่มเติมจาก Google Apps Script โดยใช้ userId
+    async function fetchData(userId) {
+        showLoading(true); // แสดงหน้าต่างโหลด
+        try {
+            // ส่งคำขอไปยัง Google Apps Script เพื่อดึงข้อมูล
+            const response = await fetch(`${WEB_APP_MEMBER_URL}`, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'fetchData', userId: userId })
             });
-        }
-
-        const form = document.getElementById('bookingForm');
-        const monthSelect = document.getElementById('monthSelect');
-        const yearSelect = document.getElementById('yearSelect');
-        const calendarDays = document.getElementById('calendarDays');
-        const availabilityDiv = document.getElementById('availability');
-        const timeInput = document.getElementById('time');
-
-        // อัปเดตปฏิทินเมื่อเลือกเดือนหรือปี
-        monthSelect.addEventListener('change', () => updateCalendar(new Date(yearSelect.value, monthSelect.value)));
-        yearSelect.addEventListener('change', () => updateCalendar(new Date(yearSelect.value, monthSelect.value)));
-
-        const daysOfWeek = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
-
-        // ฟังก์ชันสร้างตัวเลือกปีใน Dropdown
-        function populateYearSelect(currentYear) {
-            yearSelect.innerHTML = '';
-            for (let i = currentYear; i <= currentYear + 3; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                yearSelect.appendChild(option);
+            const data = await response.json();
+            // กรองแถวที่มี userId ตรงกับที่ต้องการ
+            const userRows = data.filter(row => row[1] === userId);
+            if (userRows.length > 0) {
+                // เรียงลำดับข้อมูลตามวันที่ (สมมติว่าอยู่ในคอลัมน์ที่ 5) จากล่าสุดไปเก่าสุด
+                userRows.sort((a, b) => new Date(b[6]) - new Date(a[6]));
+                displayData(userRows[0]);  // แสดงข้อมูลล่าสุด
+            } else {
+                // ถ้าไม่มีข้อมูลที่ตรงกับ userId จะแสดงข้อความในคอนโซล
+                console.log('No data found for userId:', userId);
             }
+        } catch (error) {
+            // ถ้ามีข้อผิดพลาดในการดึงข้อมูล จะทำการล็อกข้อผิดพลาดในคอนโซล
+            console.error('Error fetching data:', error);
+        } finally {
+            showLoading(false); // ซ่อนหน้าต่างโหลด
         }
+    }
 
-        // อัปเดตปฏิทินตามวันที่ปัจจุบัน
-        async function updateCalendar(date) {
-            const month = date.getMonth();
-            const year = date.getFullYear();
-            populateDays(month, year, date.getDate());
+    // ฟังก์ชันนี้ใช้ในการแสดงข้อมูลที่ได้จาก fetchData ลงในฟอร์ม
+    function displayData(row) {
+        document.getElementById('columnAData').value = row[1] || '';
+        document.getElementById('columnBData').value = row[2] || '';
+        document.getElementById('columnCData').value = row[3] || '';
+        document.getElementById('columnDData').value = row[4] || '';
+        document.getElementById('columnEData').value = row[5] || '';
+        document.getElementById('columnFData').value = row[6] || '';
+    }
+
+    // ฟังก์ชันนี้ใช้ในการแสดงหรือซ่อนหน้าต่างโหลด
+    function showLoading(isLoading) {
+        const overlay = document.getElementById('loadingOverlay');
+        const inputs = document.querySelectorAll('.input-field');
+        if (isLoading) {
+            // แสดงหน้าต่างโหลดและปิดการใช้งานฟิลด์ input
+            overlay.style.display = 'flex';
+            inputs.forEach(input => input.disabled = true);
+        } else {
+            // ซ่อนหน้าต่างโหลดและเปิดการใช้งานฟิลด์ input
+            overlay.style.display = 'none';
+            inputs.forEach(input => input.disabled = false);
         }
+    }
 
-        // ฟังก์ชันเพิ่มวันในปฏิทิน
-        function populateDays(month, year, currentDay) {
-            calendarDays.innerHTML = '';
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dayElement = document.createElement('div');
-                dayElement.classList.add('bg-slate-800', 'px-6', 'py-3', 'mx-2', 'bg-white', 'border', 'border-slate-800', 'text-center', 'rounded-xl', 'cursor-pointer');
-                dayElement.textContent = `${daysOfWeek[date.getDay()]} ${day}`;
-                if (day === currentDay) {
-                    dayElement.id = 'currentDay';
-                    dayElement.classList.add('selected');
-                    selectDate(year, month, day);
-                }
-                dayElement.addEventListener('click', () => {
-                    document.querySelectorAll('#calendarDays > div').forEach(el => el.classList.remove('selected'));
-                    dayElement.classList.add('selected');
-                    selectDate(year, month, day);
+    // การตั้งค่าตัวแปรสำหรับการทำงานกับกล้องและการส่งข้อมูล
+    const url = `${WEB_APP_URL}`;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const columnBData = document.querySelector("#columnBData");
+    const columnCData = document.querySelector("#columnCData");
+    const jobInput = document.querySelector("#jobInput");
+    const noteInput = document.querySelector("#noteInput");
+    const todayInput = document.querySelector("#todayInput");
+    const currentTime = document.querySelector("#currentTime");
+    const latitudeInput = document.querySelector("#latitudeInput");
+    const longitudeInput = document.querySelector("#longitudeInput");
+    const fullAddressInput = document.querySelector("#fullAddressInput");
+    const userId = document.querySelector("#userId");
+    const preview = document.getElementById('preview');
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const video = document.getElementById("camera-preview");
+        const startCameraBtn = document.getElementById("start-camera-btn");
+        const captureBtn = document.getElementById("capture-btn");
+        const switchCameraBtn = document.getElementById("switch-camera-btn");
+        const previewImage = document.getElementById("preview");
+        let stream;
+        let currentFacingMode = "environment"; // เริ่มต้นที่กล้องหลัง
+        // let currentFacingMode = "user"; // เริ่มต้นที่กล้องหน้า
+
+
+        // ฟังก์ชันเปิดกล้อง
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({
+                video: { facingMode: currentFacingMode } // ใช้ค่าที่ตั้งใน currentFacingMode
+            })
+                .then(function (videoStream) {
+                    stream = videoStream;
+                    video.srcObject = videoStream; // ตั้งค่ากล้องให้ video element
+                    captureBtn.disabled = false; // ปลดล็อกปุ่มถ่ายรูป
+                    switchCameraBtn.disabled = false; // ปลดล็อกปุ่มสลับกล้อง
+                    video.style.display = "block"; // แสดงกล้อง
+                    previewImage.style.display = "none"; // ซ่อนภาพถ่ายก่อนหน้า
+                })
+                .catch(function (error) {
+                    console.error("Error accessing the camera: ", error);
+                    alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาตรวจสอบการอนุญาต.");
                 });
-                calendarDays.appendChild(dayElement);
-            }
-            scrollToCurrentDay();
         }
 
-        // เลื่อนหน้าจอไปยังวันปัจจุบันในปฏิทิน
-        function scrollToCurrentDay() {
-            setTimeout(() => {
-                const currentDayElement = document.getElementById('currentDay');
-                if (currentDayElement) {
-                    currentDayElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
-            }, 100);
+        // ฟังก์ชันถ่ายรูป
+        function capturePhoto() {
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            // กำหนดขนาดของ canvas เท่ากับ video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // ถ่ายภาพจาก video และนำมาแสดงใน preview
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            previewImage.src = canvas.toDataURL("image/png");
+            previewImage.style.display = "block"; // แสดงภาพที่ถ่าย
+            video.style.display = "none"; // ซ่อนกล้อง
         }
 
-        // ฟังก์ชันเลือกวันที่
-        async function selectDate(year, month, day) {
-            selectedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-            showLoading(true);
-            try {
-                const response = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${selectedDate}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const availability = await response.json();
-                updateAvailability(availability);
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
-                showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ โปรดลองใหม่อีกครั้ง', 'error');
-            } finally {
-                showLoading(false);
+        // ฟังก์ชันสลับกล้อง
+        function switchCamera() {
+            // หยุดสตรีมปัจจุบัน
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
             }
+
+            // สลับค่าของ currentFacingMode
+            currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+
+            // เรียก startCamera อีกครั้งด้วยค่าใหม่
+            startCamera();
         }
 
-        // อัปเดตการแสดงสถานะว่างของวันและเวลา
-        function updateAvailability(availability) {
-            availabilityDiv.innerHTML = '';
-            for (const [time, info] of Object.entries(availability)) {
-                const slotDiv = document.createElement('div');
-                slotDiv.className = 'flex justify-between items-center py-2';
-
-                const timeSpan = document.createElement('span');
-                timeSpan.className = 'px-6 py-2 rounded-xl bg-white text-slate-800';
-                timeSpan.textContent = `${time} น.`;
-
-                const statusButton = document.createElement('button');
-                statusButton.className = `px-6 py-2 rounded-xl ${info.status === 'Available' ? 'bg-green-200 text-green-600 cursor-not-allowed' : 'bg-red-200 text-red-600 cursor-not-allowed'}`;
-                statusButton.textContent = info.status === 'Available' ? `ว่าง (${info.remaining}/${info.total})` : `เต็ม (${info.remaining}/${info.total})`;
-                statusButton.disabled = true;
-
-                const bookButton = document.createElement('button');
-                bookButton.className = `custom-button px-4 py-2 rounded-xl ${info.status === 'Available' ? 'bg-slate-800 text-white' : 'bg-gray-100 text-gray-400'}`;
-                bookButton.innerHTML = `<i class="fas fa-calendar-alt"></i> นัดหมาย`;
-                bookButton.disabled = info.status !== 'Available';
-                bookButton.addEventListener('click', () => {
-                    timeInput.value = time.padStart(5, '0');
-                    showPopup('ยืนยันการนัดหมาย', `
-                            <p>บริการ: ${form.service.value}</p>
-                            <p>สถานที่: ${form.locationservice.value}</p>
-                            <p>ชื่อ-สกุล: ${form.name.value}</p>
-                            <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
-                            <p>หมายเหตุ: ${form.note.value}</p>
-                            <p>ยอมรับการบันทึกข้อมูล: ${form.saveInfo.checked ? 'ใช่' : 'ไม่ใช่'}</p>
-                            <p>วันที่: ${selectedDate}</p>
-                            <p>เวลา: ${timeInput.value}</p>
-                        `, 'confirm');
-                });
-
-                slotDiv.appendChild(timeSpan);
-                slotDiv.appendChild(statusButton);
-                slotDiv.appendChild(bookButton);
-                availabilityDiv.appendChild(slotDiv);
-            }
-        }
-
-        // ฟังก์ชันส่งข้อมูลการจอง
-        async function submitBooking() {
-            if (isSubmitting) return;
-            isSubmitting = true;
-            showLoading(true);
-            try {
-                const formData = new FormData(form);
-                formData.append('date', selectedDate);
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                hidePopup();
-                const result = await response.text();
-                showPopup('สำเร็จ!', 'การนัดหมายเสร็จสมบูรณ์', 'success');
-                liff.closeWindow();
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
-                showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อมูลได้ โปรดลองใหม่อีกครั้ง', 'error');
-            } finally {
-                showLoading(false);
-                isSubmitting = false;
-            }
-        }
-
-        // ตรวจสอบการส่งฟอร์ม
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (!selectedDate) {
-                showPopup('เกิดข้อผิดพลาด', 'กรุณาเลือกวันที่', 'error');
-                return;
-            }
-            showPopup('<p class="text-blue-900">📆 ยืนยันการนัดหมาย</p>', `
-                    <p>บริการ: ${form.service.value}</p>
-                    <p>สถานที่: ${form.locationservice.value}</p>
-                    <p>ชื่อ-สกุล: ${form.name.value}</p>
-                    <p>เบอร์ติดต่อ: ${form.phonenumber.value}</p>
-                    <p>หมายเหตุ: ${form.note.value}</p>
-                    <p>ยอมรับการบันทึกข้อมูล: ${form.saveInfo.checked ? 'ใช่' : 'ไม่ใช่'}</p>
-                    <p>วันที่: ${selectedDate}</p>
-                    <p>เวลา: ${timeInput.value}</p>
-                `, 'confirm');
+        // เริ่มเปิดกล้องเมื่อคลิกปุ่ม
+        startCameraBtn.addEventListener("click", function () {
+            startCamera();
         });
 
-        // ฟังก์ชันแสดง Popup การยืนยันการนัดหมาย
-        function showPopup(title, content, type) {
-            const popup = document.getElementById('popup');
-            const popupContent = document.getElementById('popupContent');
-            popupContent.innerHTML = `<h2 class="text-xl mb-4">${title}</h2><div>${content}</div>`;
-            if (type === 'confirm') {
-                popupContent.innerHTML += `
-                        <div class="flex justify-between space-x-4 my-6">
-                            <button id="cancelButton" class="w-1/3 px-2 py-4 bg-gray-300 text-gray-700 rounded-xl">ยกเลิก</button>
-                            <button id="confirmButton" class="w-2/3 px-2 py-4 bg-slate-800 text-white rounded-xl mr-2">ยืนยันนัดหมาย</button>
-                        </div>
-                    `;
-                document.getElementById('confirmButton').addEventListener('click', () => {
-                    document.getElementById('confirmButton').innerText = 'กำลังบันทึก...';
-                    submitBooking();
-                });
-                document.getElementById('cancelButton').addEventListener('click', hidePopup);
-            } else {
-                popupContent.innerHTML += `<div class="mt-4"><button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-xl">ปิด</button></div>`;
-            }
-            popup.style.display = 'flex';
-        }
+        // ถ่ายรูปเมื่อคลิกปุ่ม
+        captureBtn.addEventListener("click", function () {
+            capturePhoto();
+        });
 
-        // ซ่อน Popup
-        function hidePopup() {
-            document.getElementById('popup').style.display = 'none';
+        // สลับกล้องเมื่อคลิกปุ่ม
+        switchCameraBtn.addEventListener("click", function () {
+            switchCamera();
+        });
+    });
+    // ตรวจสอบว่าถ่ายรูปแล้วหรือยัง ก่อนที่จะไปยังขั้นตอนถัดไป
+    function checkPictureAndNextStep() {
+        const capturedImage = document.getElementById('preview').src;
+        if (!capturedImage || capturedImage.includes('No-Image-Placeholder')) {
+            // แสดงแจ้งเตือนหากยังไม่ได้ถ่ายรูป
+            Swal.fire({
+                title: 'แจ้งเตือน!',
+                text: 'กรุณาถ่ายรูปก่อนที่จะไปยังขั้นตอนถัดไป',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+            });
+        } else {
+            // ดำเนินการไปยังขั้นตอนถัดไปหากถ่ายรูปแล้ว
+            nextStep();
         }
-    </script>
-</body>
+    }
+
+    // ฟังก์ชันสำหรับส่งข้อมูลในฟอร์ม
+    function submitForm() {
+        // ตรวจสอบว่ากรอกข้อมูลที่จำเป็นครบถ้วนหรือไม่
+        if (!columnBData.value || !columnCData.value || !jobInput.value || !latitudeInput.value || !longitudeInput.value) {
+            Swal.fire({
+                title: 'แจ้งเตือน!',
+                text: 'กรุณากรอกข้อมูลที่จำเป็น (*) ให้ครบถ้วน',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+            });
+            return; // หยุดการส่งข้อมูลหากข้อมูลที่จำเป็นไม่ครบถ้วน
+        }
+        // ยืนยันการส่งข้อมูล
+        Swal.fire({
+            title: 'ยืนยันการส่งข้อมูล',
+            text: 'คุณแน่ใจหรือไม่ที่ต้องการส่งข้อมูล?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // ปิดปุ่มส่งข้อมูลเพื่อป้องกันการส่งซ้ำ
+                document.getElementById('submitButton').disabled = true;
+                // แสดงข้อความกำลังบันทึกข้อมูล
+                Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล',
+                    text: 'กรุณารอสักครู่...',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    onBeforeOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                let spt = preview.src.split("base64,")[1];
+                let obj = {
+                    base64: spt,
+                    name: columnBData.value,
+                    role: columnCData.value,
+                    job: jobInput.value,
+                    note: noteInput.value,
+                    today: todayInput.value,
+                    time: currentTime.value,
+                    lat: latitudeInput.value,
+                    long: longitudeInput.value,
+                    address: fullAddressInput.value,
+                    user: userId.value
+                };
+                fetch(url, {
+                    method: "POST",
+                    body: JSON.stringify(obj),
+                })
+                    .then(response => response.text())
+                    .then(data => {
+                        // ปิดข้อความกำลังบันทึกข้อมูล
+                        Swal.close();
+                        // แสดงข้อความสำเร็จ
+                        Swal.fire({
+                            title: 'สำเร็จ!',
+                            text: 'บันทึกข้อมูลของคุณเรียบร้อย!',
+                            icon: 'success',
+                            confirmButtonText: 'ปิด',
+                        }).then(() => {
+                            // ปิด LIFF (Line Front-end Framework)
+                            sendFlexMessage();
+                            console.log(data);
+                        });
+                    })
+                    .catch(error => {
+                        // ปิดข้อความกำลังบันทึกข้อมูล
+                        Swal.close();
+                        // แสดงข้อความผิดพลาด
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Form submission failed. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                        }).then(() => {
+                            // เปิดปุ่มส่งข้อมูลอีกครั้งในกรณีที่เกิดข้อผิดพลาด
+                            document.getElementById('submitButton').disabled = false;
+                        });
+                        console.error(error);
+                    });
+            }
+        });
+    }
+
+    // เริ่มการทำงานของ LIFF (Line Front-end Framework)
+    async function initializeLiff() {
+        await liff.init({ liffId: `${LIFF_ID}` });
+
+        if (liff.isLoggedIn()) {
+            getUserProfile();
+        } else {
+            liff.login();
+        }
+    }
+
+    // ฟังก์ชันสำหรับส่งข้อความ Flex Message ผ่าน LIFF
+    async function sendFlexMessage() {
+        let jobColor = '';
+        if (jobInput.value === 'เข้างาน') {
+            jobColor = '#0D9608FF'; // Green color
+        } else if (jobInput.value === 'ออกงาน') {
+            jobColor = '#EF2F14FF'; // Red color
+        } else {
+            jobColor = '#000000FF'; // Default color if neither "เข้างาน" nor "ออกงาน"
+        }
+        const flexMessage = {
+            type: 'flex',
+            altText: 'จดบันทึกเวลางาน',
+            contents: {
+                type: 'bubble',
+                direction: 'ltr',
+                body: {
+                    type: 'box',
+                    layout: 'vertical',
+                    spacing: 'md',
+                    contents: [
+                        {
+                            type: 'box',
+                            layout: 'horizontal',
+                            contents: [
+                                {
+                                    type: 'text',
+                                    text: 'บันทึกเวลางาน',
+                                    weight: 'bold',
+                                    size: 'md',
+                                    align: 'start',
+                                    margin: 'sm',
+                                    contents: [],
+                                },
+                                {
+                                    type: 'text',
+                                    text: ` ${jobInput.value}`,
+                                    weight: 'bold',
+                                    size: 'md',
+                                    color: jobColor, // Dynamic color
+                                    align: 'end',
+                                    contents: [],
+                                },
+                            ],
+                        },
+                        {
+                            type: 'separator',
+                        },
+                        {
+                            type: 'box',
+                            layout: 'vertical',
+                            spacing: 'sm',
+                            contents: [
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    contents: [
+                                        {
+                                            type: 'text',
+                                            text: 'ชื่อพนักงาน',
+                                            weight: 'bold',
+                                            size: 'sm',
+                                            margin: 'sm',
+                                            contents: [],
+                                        },
+                                        {
+                                            type: 'text',
+                                            text: `${columnBData.value}`,
+                                            size: 'sm',
+                                            color: '#000000FF',
+                                            align: 'end',
+                                            contents: [],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    contents: [
+                                        {
+                                            type: 'text',
+                                            text: 'รหัสพนักงาน',
+                                            weight: 'bold',
+                                            size: 'sm',
+                                            flex: 0,
+                                            margin: 'sm',
+                                            contents: [],
+                                        },
+                                        {
+                                            type: 'text',
+                                            text: `${columnCData.value}`,
+                                            size: 'sm',
+                                            color: '#000000FF',
+                                            align: 'end',
+                                            contents: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: 'separator',
+                        },
+                        {
+                            type: 'box',
+                            layout: 'vertical',
+                            contents: [
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    contents: [
+                                        {
+                                            type: 'text',
+                                            text: 'วันที่',
+                                            weight: 'bold',
+                                            contents: [],
+                                        },
+                                        {
+                                            type: 'text',
+                                            text: `${getFormattedDate(todayInput.value)}`,
+                                            weight: 'bold',
+                                            align: 'end',
+                                            contents: [],
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'box',
+                                    layout: 'baseline',
+                                    contents: [
+                                        {
+                                            type: 'text',
+                                            text: 'เวลา',
+                                            weight: 'bold',
+                                            contents: [],
+                                        },
+                                        {
+                                            type: 'text',
+                                            text: `${currentTime.value}`,
+                                            weight: 'bold',
+                                            size: 'xl',
+                                            color: '#EF2F14FF',
+                                            align: 'end',
+                                            contents: [],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            type: 'separator',
+                        },
+                        {
+                            type: 'box',
+                            layout: 'vertical',
+                            spacing: 'xs',
+                            margin: 'sm',
+                            contents: [
+                                {
+                                    type: 'text',
+                                    text: 'สถานที่',
+                                    weight: 'bold',
+                                    size: 'sm',
+                                    margin: 'md',
+                                    contents: [],
+                                },
+                                {
+                                    type: 'text',
+                                    text: fullAddressInput.value ? `${fullAddressInput.value}` : 'ข้อมูลไม่พร้อมแสดง แต่เราเก็บพิกัดของคุณเรียบร้อย',
+                                    wrap: true,
+                                    contents: [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+        };
+
+        await liff.sendMessages([flexMessage]);
+        liff.closeWindow(); // Close the LIFF window
+    }
+
+
+    // ฟังก์ชันสำหรับอัปเดตวันที่และเวลาในหน้าเว็บ
+    function updateDateTime() {
+        // ดึงอีลิเมนต์ HTML สำหรับแสดงวันที่และเวลา
+        const dateElement = document.getElementById('date');
+        const timeElement = document.getElementById('time');
+        const now = new Date();
+
+        // กำหนดรูปแบบการแสดงผลวันที่
+        const dateOptions = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        };
+
+        // กำหนดรูปแบบการแสดงผลเวลา
+        const timeOptions = {
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: false,
+            timeZone: 'Asia/Bangkok'
+        };
+
+        // แปลงวันที่และเวลาให้อยู่ในรูปแบบที่ต้องการ และแสดงในอีลิเมนต์ที่กำหนด
+        const formattedDate = now.toLocaleDateString('th-TH', dateOptions);
+        const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
+        dateElement.textContent = formattedDate;
+        timeElement.textContent = formattedTime;
+    }
+
+    // อัพเดตวันที่และเวลาทุก 1 วินาที
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // ฟังก์ชันสำหรับเปลี่ยนค่าของงานเมื่อเลือกประเภทงาน
+    document.querySelectorAll('input[name="switch-job"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            // อัปเดตค่าของ input ที่ชื่อว่า jobInput ด้วยค่าที่เลือก
+            document.getElementById('jobInput').value = this.value;
+
+            // เปลี่ยนสไตล์ของ label ที่เกี่ยวข้องกับตัวเลือกงาน
+            document.querySelectorAll('.switch-field label').forEach(function (label) {
+                label.classList.remove('bg-slate-800', 'text-white');
+            });
+            document.querySelector(`label[for="${this.id}"]`).classList.add('bg-slate-800', 'text-white');
+        });
+    });
+
+    // ฟังก์ชันสำหรับดึงตำแหน่งที่ตั้งปัจจุบันของผู้ใช้
+    function getLocation() {
+        // ตรวจสอบว่าบราวเซอร์รองรับ Geolocation หรือไม่
+        if (navigator.geolocation) {
+            // ดึงข้อมูลตำแหน่งที่ตั้งปัจจุบัน
+            navigator.geolocation.getCurrentPosition(displayLocation);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // ฟังก์ชันสำหรับแสดงตำแหน่งที่ตั้งในหน้าเว็บ
+    function displayLocation(position) {
+        // ดึงข้อมูลละติจูดและลองจิจูดจากตำแหน่งที่ตั้ง
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        // แสดงข้อมูลละติจูดและลองจิจูดใน HTML
+        document.getElementById("latitude").innerText = `Latitude: ${latitude}`;
+        document.getElementById("longitude").innerText = `Longitude: ${longitude}`;
+
+        // อัปเดตค่าของ input ที่เกี่ยวข้องกับละติจูดและลองจิจูด
+        document.getElementById("latitudeInput").value = latitude;
+        document.getElementById("longitudeInput").value = longitude;
+
+        // ดึงที่อยู่จากบริการ reverse geocoding โดยใช้ละติจูดและลองจิจูด
+        const reverseGeocodingUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+        fetch(reverseGeocodingUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.display_name) {
+                    // แสดงที่อยู่แบบเต็มใน HTML และอัปเดตค่า input
+                    const fullAddress = data.display_name;
+                    document.getElementById("fullAddress").innerText = `ที่อยู่ของคุณ: ${fullAddress}`;
+                    document.getElementById("fullAddressInput").value = fullAddress;
+                } else {
+                    document.getElementById("fullAddress").innerText = "Unable to retrieve full address.";
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching reverse geocoding data:", error);
+                document.getElementById("fullAddress").innerText = "Error fetching reverse geocoding data.";
+            });
+
+        // แสดงแผนที่จาก Google Maps โดยใช้ละติจูดและลองจิจูด
+        const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}&output=embed`;
+        document.getElementById("mapIframe").src = mapsUrl;
+    }
+
+    // ฟังก์ชันสำหรับดึงเวลาปัจจุบันในกรุงเทพ
+    function getCurrentTimeInBangkok() {
+        const now = new Date();
+        const bangkokTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+
+        // แปลงเวลาเป็นรูปแบบ HH:MM
+        const hours = String(bangkokTime.getHours()).padStart(2, '0');
+        const minutes = String(bangkokTime.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+    // ตั้งค่าเวลาปัจจุบันของกรุงเทพใน input ที่ชื่อว่า currentTime
+    document.getElementById('currentTime').value = getCurrentTimeInBangkok();
+
+    // ฟังก์ชันสำหรับดึงวันที่ในรูปแบบที่กำหนด
+    function getFormattedDate() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+
+        return `${day}/${month}/${year}`;
+    }
+
+    // ตั้งค่าวันที่ปัจจุบันใน input ที่ชื่อว่า todayInput
+    document.getElementById('todayInput').value = getFormattedDate();
+
+    // ฟังก์ชันสำหรับจัดการขั้นตอนการทำงาน
+    let currentStep = 1;
+    function nextStep() {
+        // ไปยังขั้นตอนถัดไป
+        if (currentStep < 3) {
+            document.getElementById(`step${currentStep}`).style.display = 'none';
+            currentStep++;
+            document.getElementById(`step${currentStep}`).style.display = 'block';
+        }
+    }
+
+    function prevStep() {
+        // ย้อนกลับไปยังขั้นตอนก่อนหน้า
+        if (currentStep > 1) {
+            document.getElementById(`step${currentStep}`).style.display = 'none';
+            currentStep--;
+            document.getElementById(`step${currentStep}`).style.display = 'block';
+        }
+    }
+
+</script>
 
 </html>

@@ -8,26 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://static.line-scdn.net/liff/edge/2.1/liff.js"></script> <!-- รวม LIFF SDK -->
-  <style>
-    .loader {
-      border-top-color: #c3d4f0;
-      animation: spin 1s linear infinite;
-      border: 8px solid #05002c;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
 </head>
-
 <body class="bg-slate-100 min-h-screen">
-
   <!-- Main Content Area -->
   <main class="flex-1 flex-col max-w-4xl m-auto text-sm p-4">
     <!-- Filter Section: ส่วนสำหรับเลือกกรองข้อมูล -->
@@ -80,10 +62,7 @@
     </div>
   </main>
 
-  <!-- Loading Spinner: ส่วนแสดงตัวโหลดระหว่างรอข้อมูล -->
-  <div id="loadingSpinner" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
-    <div class="loader"></div>
-  </div>
+  <!-- ลบส่วนของ Loading Spinner แบบ custom ออกไปแล้ว -->
 
   <script>
     const LIFF_ID = '2006029649-kVZ9XqOV'; // ID สำหรับ LIFF
@@ -96,42 +75,42 @@
     // ฟังก์ชันเริ่มต้น LIFF
     async function initializeLiff() {
       try {
-        await liff.init({ liffId: `${LIFF_ID}` });  // เริ่ม LIFF ด้วย ID
+        await liff.init({ liffId: `${LIFF_ID}` });
         if (liff.isLoggedIn()) {
-          getUserProfile();  // ถ้าล็อกอินแล้ว เรียกฟังก์ชัน getUserProfile
+          getUserProfile();
         } else {
-          liff.login();  // ถ้ายังไม่ล็อกอิน ให้ทำการล็อกอิน
+          liff.login();
         }
       } catch (error) {
-        console.error('LIFF Initialization failed', error);  // แสดงข้อผิดพลาดถ้ามีปัญหาในการเริ่มต้น LIFF
+        console.error('LIFF Initialization failed', error);
       }
     }
 
     // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้จาก LIFF
     async function getUserProfile() {
       try {
-        const profile = await liff.getProfile();  // ดึงข้อมูลโปรไฟล์ของผู้ใช้
-        document.getElementById('useridlineFilter').value = profile.userId;  // ใส่ userId ลงในฟิลด์ซ่อน
-        applyFilter();  // เรียกฟังก์ชัน applyFilter เพื่อกรองข้อมูลตาม userId
+        const profile = await liff.getProfile();
+        document.getElementById('useridlineFilter').value = profile.userId;
+        applyFilter();
       } catch (error) {
-        console.error('Error getting profile data:', error);  // แสดงข้อผิดพลาดถ้าไม่สามารถดึงโปรไฟล์ได้
+        console.error('Error getting profile data:', error);
       }
     }
 
     // ฟังก์ชันสำหรับการกรองข้อมูล
     function applyFilter() {
-      currentPage = 1;  // ตั้งค่าหน้าเป็นหน้าที่ 1 ใหม่ทุกครั้งที่กรอง
-      fetchAndPopulateCards();  // เรียกฟังก์ชันเพื่อดึงข้อมูลและแสดงผล
+      currentPage = 1;
+      fetchAndPopulateCards();
     }
 
     // ฟังก์ชันสำหรับดึงข้อมูลและแสดงผลตาราง
     function fetchAndPopulateCards() {
-      showLoadingSpinner(true); // แสดงตัวโหลด
-      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)  // ดึงข้อมูลการนัดหมายจาก URL
-        .then(response => response.json())  // แปลงข้อมูลเป็น JSON
+      showLoadingSpinner(true);
+      fetch(`${DETAILS_SCRIPT_URL}?action=fetchBookings`)
+        .then(response => response.json())
         .then(details => {
           const filteredData = document.getElementById('filteredData');
-          filteredData.innerHTML = '';  // ล้างข้อมูลตารางก่อนการแสดงผลใหม่
+          filteredData.innerHTML = '';
 
           // แปลงวันที่ในรูปแบบ String ให้เป็น Date เพื่อใช้ในการจัดเรียง
           details.forEach(detail => {
@@ -152,14 +131,14 @@
           let filteredDetails = details.filter(detail => {
             const matchesStatus = statusFilter === '' || detail.status.toLowerCase().includes(statusFilter);
             const matchesUseridline = useridlineFilter === '' || detail.userlineid.toLowerCase().includes(useridlineFilter);
-            return matchesStatus && matchesUseridline;  // กรองข้อมูลที่ตรงกับเงื่อนไขทั้งสอง
+            return matchesStatus && matchesUseridline;
           });
 
-          totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);  // คำนวณจำนวนหน้าทั้งหมด
-          displayCards(filteredDetails, currentPage);  // แสดงตารางข้อมูล
-          createPaginationControls();  // สร้างปุ่มควบคุมการเปลี่ยนหน้า
+          totalPages = Math.ceil(filteredDetails.length / CARDS_PER_PAGE);
+          displayCards(filteredDetails, currentPage);
+          createPaginationControls();
 
-          // ตรวจสอบว่ามีการจองที่สถานะ "รอการยืนยัน" หรือไม่ แล้วแสดงการแจ้งเตือน
+          // แจ้งเตือนหากมีการจองในสถานะ "รอการยืนยัน"
           const pendingConfirmations = filteredDetails.filter(detail => detail.status === 'รอการยืนยัน');
           if (pendingConfirmations.length > 0) {
             Swal.fire({
@@ -173,48 +152,44 @@
             });
           }
 
-          showLoadingSpinner(false); // ซ่อนตัวโหลด
+          showLoadingSpinner(false);
         })
         .catch(error => {
-          console.error('Error fetching user details:', error);  // แสดงข้อผิดพลาดหากมีปัญหาในการดึงข้อมูล
+          console.error('Error fetching user details:', error);
           Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการโหลดข้อมูล.', 'error');
-          showLoadingSpinner(false); // ซ่อนตัวโหลด
+          showLoadingSpinner(false);
         });
     }
 
     // ฟังก์ชันสำหรับแสดงผลตารางข้อมูล
     function displayCards(details, page) {
       const filteredData = document.getElementById('filteredData');
-      filteredData.innerHTML = '';  // ล้างข้อมูลเก่าออก
+      filteredData.innerHTML = '';
 
-      const startIndex = (page - 1) * CARDS_PER_PAGE;  // คำนวณจุดเริ่มต้น
-      const endIndex = startIndex + CARDS_PER_PAGE;    // คำนวณจุดสิ้นสุด
-      const detailsToDisplay = details.slice(startIndex, endIndex);  // เลือกเฉพาะข้อมูลที่จะแสดงในหน้านั้น
+      const startIndex = (page - 1) * CARDS_PER_PAGE;
+      const endIndex = startIndex + CARDS_PER_PAGE;
+      const detailsToDisplay = details.slice(startIndex, endIndex);
 
-      // วนลูปเพื่อสร้างแถวตารางสำหรับแต่ละรายการ
       detailsToDisplay.forEach(detail => {
-        // กำหนดไอคอนตามสถานะ
         let statusIcon = '';
         switch (detail.status) {
           case 'รอการยืนยัน':
-            statusIcon = '⚠️';
+            statusIcon = '⚠️ รอการยืนยัน';
             break;
           case 'ยืนยันแล้ว':
-            statusIcon = '📌';
+            statusIcon = '📌 ยืนยันแล้ว';
             break;
           case 'ยกเลิก':
-            statusIcon = '❌';
+            statusIcon = '❌ ยกเลิก';
             break;
           case 'เสร็จสิ้น':
-            statusIcon = '✅';
+            statusIcon = '✅ เสร็จสิ้น';
             break;
           default:
             statusIcon = detail.status;
         }
 
-        // สร้างแถวตาราง
         const row = document.createElement('tr');
-
         row.innerHTML = `
           <td class="py-2 px-4 border-b border-gray-200">${detail.name}</td>
           <td class="py-2 px-4 border-b border-gray-200">${detail.date}</td>
@@ -225,7 +200,6 @@
         `;
         filteredData.appendChild(row);
 
-        // แถวสำหรับรายละเอียดและ Action (ซ่อนเริ่มแรก)
         const detailRow = document.createElement('tr');
         detailRow.classList.add('hidden');
         detailRow.innerHTML = `
@@ -251,24 +225,23 @@
         filteredData.appendChild(detailRow);
       });
 
-      attachEventListeners();  // เพิ่ม Event Listeners สำหรับปุ่ม
+      attachEventListeners();
     }
 
     // ฟังก์ชันสร้างปุ่มควบคุมการเปลี่ยนหน้า
     function createPaginationControls() {
       const paginationControls = document.getElementById('paginationControls');
-      paginationControls.innerHTML = '';  // ล้างปุ่มควบคุมก่อนสร้างใหม่
+      paginationControls.innerHTML = '';
 
-      const maxVisibleButtons = 5;  // จำนวนปุ่มที่แสดงต่อครั้ง
-      let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));  // หน้าเริ่มต้น
-      let endPage = startPage + maxVisibleButtons - 1;  // หน้าสุดท้ายที่จะแสดง
+      const maxVisibleButtons = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+      let endPage = startPage + maxVisibleButtons - 1;
 
       if (endPage > totalPages) {
         endPage = totalPages;
         startPage = Math.max(1, endPage - maxVisibleButtons + 1);
       }
 
-      // สร้างปุ่ม "ย้อนกลับ"
       const prevButton = document.createElement('button');
       prevButton.textContent = 'ย้อนกลับ';
       prevButton.disabled = currentPage === 1;
@@ -281,7 +254,6 @@
       });
       paginationControls.appendChild(prevButton);
 
-      // สร้างปุ่มสำหรับหน้าต่างๆ
       for (let i = startPage; i <= endPage; i++) {
         const pageButton = document.createElement('button');
         pageButton.textContent = i;
@@ -296,7 +268,6 @@
         paginationControls.appendChild(pageButton);
       }
 
-      // สร้างปุ่ม "ถัดไป"
       const nextButton = document.createElement('button');
       nextButton.textContent = 'ถัดไป';
       nextButton.disabled = currentPage === totalPages;
@@ -312,7 +283,6 @@
 
     // ฟังก์ชันเพิ่ม Event Listeners สำหรับปุ่มยืนยันและยกเลิก
     function attachEventListeners() {
-      // ปุ่ม View
       document.querySelectorAll('.view-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;
@@ -320,7 +290,6 @@
         });
       });
 
-      // ปุ่ม Action: ยืนยันและยกเลิก
       document.querySelectorAll('.confirm-btn').forEach(button => {
         button.addEventListener('click', function () {
           const id = this.dataset.id;
@@ -363,16 +332,16 @@
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
-          showLoadingSpinner(true);  // แสดงตัวโหลด
+          showLoadingSpinner(true);
           fetch(`${DETAILS_SCRIPT_URL}?action=confirmBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
             .then(response => response.text())
             .then(data => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false);
               Swal.fire('ยืนยันแล้ว!', 'การจองได้รับการยืนยันแล้ว.', 'success');
-              fetchAndPopulateCards();  // โหลดข้อมูลใหม่
+              fetchAndPopulateCards();
             })
             .catch(error => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false);
               Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยืนยันการนัดหมาย.', 'error');
               console.error('Error confirming booking:', error);
             });
@@ -393,16 +362,16 @@
         cancelButtonText: 'ยกเลิก'
       }).then((result) => {
         if (result.isConfirmed) {
-          showLoadingSpinner(true);  // แสดงตัวโหลด
+          showLoadingSpinner(true);
           fetch(`${DETAILS_SCRIPT_URL}?action=cancelBooking&id=${encodeURIComponent(id)}`, { method: 'POST' })
             .then(response => response.text())
             .then(data => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false);
               Swal.fire('ยกเลิกแล้ว!', 'การนัดหมายถูกยกเลิกแล้ว.', 'success');
-              fetchAndPopulateCards();  // โหลดข้อมูลใหม่
+              fetchAndPopulateCards();
             })
             .catch(error => {
-              showLoadingSpinner(false);  // ซ่อนตัวโหลด
+              showLoadingSpinner(false);
               Swal.fire('ข้อผิดพลาด!', 'เกิดข้อผิดพลาดในการยกเลิกการนัดหมาย.', 'error');
               console.error('Error canceling booking:', error);
             });
@@ -410,24 +379,29 @@
       });
     }
 
-    // ฟังก์ชันแสดง/ซ่อนตัวโหลด
+    // === ปรับปรุงฟังก์ชันแสดง/ซ่อนตัวโหลดให้ใช้ SweetAlert2 ===
     function showLoadingSpinner(show) {
-      const spinner = document.getElementById('loadingSpinner');
       if (show) {
-        spinner.classList.remove('hidden');  // แสดงตัวโหลด
+        Swal.fire({
+          title: 'กำลังโหลด...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
       } else {
-        spinner.classList.add('hidden');  // ซ่อนตัวโหลด
+        Swal.close();
       }
     }
 
     // Event Listener สำหรับปุ่ม "กรองข้อมูล"
     document.getElementById('applyFiltersButton').addEventListener('click', function () {
-      applyFilter();  // เรียกฟังก์ชัน applyFilter
+      applyFilter();
     });
 
-    // Event Listener ที่จะทำงานเมื่อหน้าเว็บโหลดเสร็จ
+    // Event Listener เมื่อหน้าเว็บโหลดเสร็จ
     document.addEventListener('DOMContentLoaded', function () {
-      initializeLiff();  // เริ่มต้น LIFF
+      initializeLiff();
     });
   </script>
 

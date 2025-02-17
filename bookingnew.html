@@ -29,7 +29,7 @@
         return "(UNKNOWN)";
       }
     }
-    document.addEventListener('DOMContentLoaded', function(){
+ document.addEventListener('DOMContentLoaded', async () => {
       // ตรวจสอบว่าเปิดผ่าน LINE (มือถือ) หรือไม่
       if (!navigator.userAgent.includes('Line')) {
         const deviceType = getDeviceType();
@@ -39,15 +39,17 @@
             <p class="text-lg">คุณกำลังใช้งานผ่าน: ${deviceType}</p>
           </div>
         `;
-            } else {
-        showLoading(true);
-        await Promise.all([
-          fetchDropdownData(),   // โหลดรายการบริการ-สาขา
-          initializeLiff()       // โหลด LIFF
-        ]);
-        initDatePicker();
-        showLoading(false);
+        return;
       }
+      
+      // หากอยู่ใน LINE ให้โหลดฟังก์ชันต่างๆ
+      showLoading(true);
+      await Promise.all([
+        fetchDropdownData(),   // โหลดรายการบริการ-สาขา
+        initializeLiff()       // โหลด LIFF
+      ]);
+      initDatePicker();
+      showLoading(false);
     });
   </script>
   <style>

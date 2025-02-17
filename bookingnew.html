@@ -1,26 +1,47 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>Booking with Custom Date & Time (iOS Fix)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Booking</title>
   <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-
   <!-- Flatpickr CSS/JS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+<script>
+    // ฟังก์ชันสำหรับตรวจสอบและแสดงข้อความสั้นๆ ตาม user agent
+    function getDeviceType() {
+      const ua = navigator.userAgent;
+      if (/android/i.test(ua)) {
+        return "(ANDROID)";
+      } else if (/iPhone|iPad|iPod/i.test(ua)) {
+        return "(IOS)";
+      } else if (/Windows/i.test(ua)) {
+        return "(WINDOW)";
+      } else if (/Macintosh/i.test(ua)) {
+        return "(MAC)";
+      } else {
+        return "(UNKNOWN)";
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+      // ตรวจสอบว่าเปิดผ่าน LINE (มือถือ) หรือไม่
+      if (!navigator.userAgent.includes('Line')) {
+        const deviceType = getDeviceType();
+        document.body.innerHTML = `
+          <div class="min-h-screen flex flex-col justify-center items-center bg-gray-100 p-4">
+            <h1 class="text-2xl font-bold mb-4">ขออภัย กรุณาเปิดใน LINE ของมือถือน้าา~</h1>
+            <p class="text-lg">คุณกำลังใช้งานผ่าน: ${deviceType}</p>
+          </div>
+        `;
+      }
+    });
+  </script>
   <style>
     /* Loading Overlay */
     .loading-overlay {

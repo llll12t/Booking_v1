@@ -311,28 +311,28 @@
           - altInput: true กับ altFormat: "d-m-Y" แสดงวันที่เป็น dd-mm-yyyy
           - ค่าส่งกลับยังคงเป็น "Y-m-d"
     ------------------------ */
-    function initDatePicker() {
-      flatpickr("#datePicker", {
-        dateFormat: "Y-m-d",   // ค่าส่งกลับเป็น yyyy-m-d
-        altInput: true,
-        altFormat: "d-m-Y",    // แสดงวันที่เป็น dd-mm-yyyy
-        minDate: "today",
-        onDayCreate: function(dObj, dStr, fp, dayElem) {
-          const dateStr = dayElem.dateObj.toISOString().split('T')[0];
-          if (myHolidays.includes(dateStr)) {
-            dayElem.style.backgroundColor = '#ffdddd'; // สีแดงอ่อนสำหรับวันหยุด
-          }
-        },
-        onChange: function(selectedDates, dateStr, instance) {
-          selectedDate = dateStr;
-          if (dateStr) {
-            checkAvailability(dateStr);
-          } else {
-            resetTimeDropdown();
-          }
-        }
-      });
+  flatpickr("#datePicker", {
+  disableMobile: true, // บังคับให้ Flatpickr ใช้ UI แบบ custom
+  dateFormat: "Y-m-d",
+  altInput: true,
+  altFormat: "d-m-Y",
+  minDate: "today",
+  onDayCreate: function(dObj, dStr, fp, dayElem) {
+    const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+    if (myHolidays.includes(dateStr)) {
+      dayElem.style.backgroundColor = '#ffdddd'; // สีแดงอ่อนสำหรับวันหยุด
     }
+  },
+  onChange: function(selectedDates, dateStr, instance) {
+    selectedDate = dateStr;
+    if (dateStr) {
+      checkAvailability(dateStr);
+    } else {
+      resetTimeDropdown();
+    }
+  }
+});
+
 
     /* ------------------------
        6) ตรวจสอบ Availability & สร้าง Custom Time Dropdown

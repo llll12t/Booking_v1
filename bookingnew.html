@@ -39,6 +39,14 @@
             <p class="text-lg">คุณกำลังใช้งานผ่าน: ${deviceType}</p>
           </div>
         `;
+            } else {
+        showLoading(true);
+        await Promise.all([
+          fetchDropdownData(),   // โหลดรายการบริการ-สาขา
+          initializeLiff()       // โหลด LIFF
+        ]);
+        initDatePicker();
+        showLoading(false);
       }
     });
   </script>
@@ -244,15 +252,15 @@
     /* ------------------------
        2) โหลดข้อมูลเริ่มต้น
     ------------------------ */
-    document.addEventListener('DOMContentLoaded', async () => {
-      showLoading(true);
-      await Promise.all([
-        fetchDropdownData(),   // โหลดรายการบริการ-สาขา
-        initializeLiff()       // โหลด LIFF
-      ]);
-      initDatePicker();
-      showLoading(false);
-    });
+    // document.addEventListener('DOMContentLoaded', async () => {
+    //   showLoading(true);
+    //   await Promise.all([
+    //     fetchDropdownData(),   // โหลดรายการบริการ-สาขา
+    //     initializeLiff()       // โหลด LIFF
+    //   ]);
+    //   initDatePicker();
+    //   showLoading(false);
+    // });
 
     /* ------------------------
        3) LIFF & Member Data

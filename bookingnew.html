@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>Booking with Custom Date & Time Dropdown</title>
+  <title>Booking with Custom Date & Time (iOS Fix)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <!-- Font Awesome -->
@@ -22,22 +22,6 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
-    /* Placeholder CSS สำหรับ input (รองรับ iOS) */
-    input::placeholder {
-      color: #a0aec0;
-      opacity: 1;
-    }
-    input::-webkit-input-placeholder {
-      color: #a0aec0;
-    }
-    input:-moz-placeholder {
-      color: #a0aec0;
-      opacity: 1;
-    }
-    input:-ms-input-placeholder {
-      color: #a0aec0;
-    }
-
     /* Loading Overlay */
     .loading-overlay {
       position: fixed;
@@ -82,12 +66,6 @@
       border-radius: 8px;
       width: 90%;
       max-width: 400px;
-    }
-
-    /* ปรับสีของวันหยุดใน Flatpickr */
-    .flatpickr-day.holiday {
-      background-color: #ffdddd !important;
-      border-color: #ffdddd !important;
     }
 
     /* Custom Time Dropdown */
@@ -203,7 +181,9 @@
       <!-- Date Picker -->
       <div>
         <label for="datePicker" class="block mb-1 font-semibold">เลือกวันที่ต้องการ:</label>
-        <input type="text" id="datePicker" class="w-full px-3 py-3 border border-slate-800 rounded-xl" placeholder="เลือกวัน..." />
+        <!-- ใส่ readonly, inputmode="none" และ autocomplete="off" -->
+        <input type="text" id="datePicker" readonly inputmode="none" autocomplete="off"
+               class="w-full px-3 py-3 border border-slate-800 rounded-xl" placeholder="เลือกวัน..." />
       </div>
 
       <!-- Custom Time Dropdown -->
@@ -222,10 +202,10 @@
   </div>
 
   <script>
-    /* ---------------------------------------------------------------------
-       1) กำหนดค่า Web App และ LIFF (เปลี่ยนเป็น URL/ID ของคุณ)
-    --------------------------------------------------------------------- */
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIzvRzAUYK-LSa_3kOHCJ7SLahcdh2f0TU2Xd0GtHreWFR_7y0uVrql203fuhAWH0G/exec'; // appscripts booking
+    /* ------------------------
+       1) กำหนดค่า Web App และ LIFF
+    ------------------------ */
+      const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIzvRzAUYK-LSa_3kOHCJ7SLahcdh2f0TU2Xd0GtHreWFR_7y0uVrql203fuhAWH0G/exec'; // appscripts booking
     const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbyR8goGsMD6q3oHSHUynmZ6tp2phuZN7xhYM0X0CU3FrLC95Rho_H2UgHOXbrAtfEHj8w/exec'; //appscripts members
     const LIFF_ID = '2006029649-bj0ez4Og';
 
@@ -233,28 +213,29 @@
     let selectedDate = '';
     let isSubmitting = false;
 
-    // ตัวอย่างวันหยุดที่ต้องการแสดง (ในรูปแบบ yyyy-mm-dd)
+    // ตัวอย่างวันหยุด (holiday) ที่จะแสดงเป็นสีแดงอ่อน
     const myHolidays = [
       "2025-02-25",
       "2025-03-01"
+      // เพิ่มวันอื่นๆ ตามต้องการ
     ];
 
-    /* ---------------------------------------------------------------------
-       2) โหลดข้อมูลเริ่มต้น (บริการ, สาขา, LIFF) 
-    --------------------------------------------------------------------- */
+    /* ------------------------
+       2) โหลดข้อมูลเริ่มต้น
+    ------------------------ */
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading(true);
       await Promise.all([
         fetchDropdownData(),   // โหลดรายการบริการ-สาขา
-        initializeLiff()       // โหลด LIFF และข้อมูลสมาชิก
+        initializeLiff()       // โหลด LIFF
       ]);
       initDatePicker();
       showLoading(false);
     });
 
-    /* ---------------------------------------------------------------------
+    /* ------------------------
        3) LIFF & Member Data
-    --------------------------------------------------------------------- */
+    ------------------------ */
     async function initializeLiff() {
       try {
         await liff.init({ liffId: LIFF_ID });
@@ -267,6 +248,7 @@
         console.error('Error initializing LIFF:', error);
       }
     }
+
     async function getUserProfile() {
       try {
         const profile = await liff.getProfile();
@@ -277,6 +259,7 @@
         console.error('Error getting profile data:', error);
       }
     }
+
     async function fetchData(userId) {
       showLoading(true);
       try {
@@ -297,9 +280,9 @@
       }
     }
 
-    /* ---------------------------------------------------------------------
+    /* ------------------------
        4) Dropdown บริการ & สาขา
-    --------------------------------------------------------------------- */
+    ------------------------ */
     async function fetchDropdownData() {
       try {
         const response = await fetch(`${WEB_APP_URL}?action=fetchServicesAndlocationservice`);
@@ -311,6 +294,7 @@
         console.error('Error fetching dropdown data:', error);
       }
     }
+
     function populateDropdown(dropdownId, items, defaultText) {
       const dropdown = document.getElementById(dropdownId);
       dropdown.innerHTML = `<option value="" disabled selected>${defaultText}</option>`;
@@ -322,21 +306,21 @@
       });
     }
 
-    /* ---------------------------------------------------------------------
+    /* ------------------------
        5) Datepicker ด้วย Flatpickr
-         - ใช้ altInput และ altFormat เพื่อแสดงวันที่เป็น dd-mm-yyyy
-         - ใช้ onDayCreate เพื่อเพิ่ม class "holiday" ให้กับวันหยุด
-    --------------------------------------------------------------------- */
+          - altInput: true กับ altFormat: "d-m-Y" แสดงวันที่เป็น dd-mm-yyyy
+          - ค่าส่งกลับยังคงเป็น "Y-m-d"
+    ------------------------ */
     function initDatePicker() {
       flatpickr("#datePicker", {
-        dateFormat: "Y-m-d",   // ค่าส่งกลับเป็นรูปแบบ yyyy-m-d
+        dateFormat: "Y-m-d",   // ค่าส่งกลับเป็น yyyy-m-d
         altInput: true,
         altFormat: "d-m-Y",    // แสดงวันที่เป็น dd-mm-yyyy
         minDate: "today",
         onDayCreate: function(dObj, dStr, fp, dayElem) {
           const dateStr = dayElem.dateObj.toISOString().split('T')[0];
           if (myHolidays.includes(dateStr)) {
-            dayElem.classList.add('holiday');
+            dayElem.style.backgroundColor = '#ffdddd'; // สีแดงอ่อนสำหรับวันหยุด
           }
         },
         onChange: function(selectedDates, dateStr, instance) {
@@ -350,11 +334,9 @@
       });
     }
 
-    /* ---------------------------------------------------------------------
+    /* ------------------------
        6) ตรวจสอบ Availability & สร้าง Custom Time Dropdown
-         - เรียก checkAvailability จาก Apps Script
-         - สร้างตัวเลือกเวลาที่มี badge แสดง remaining/total
-    --------------------------------------------------------------------- */
+    ------------------------ */
     async function checkAvailability(dateStr) {
       showLoading(true);
       try {
@@ -369,6 +351,7 @@
         showLoading(false);
       }
     }
+
     function updateTimeDropdown(availability) {
       const timeDropdown = document.getElementById('timeDropdown');
       timeDropdown.innerHTML = ""; // เคลียร์ตัวเลือกเก่า
@@ -379,53 +362,50 @@
         optionDiv.className = "time-option";
         optionDiv.dataset.value = timeKey;
         
-        // ส่วนแสดงเวลา (ชิดซ้าย)
+        // สร้างส่วนแสดงเวลา (ชิดซ้าย)
         const timeSpan = document.createElement('span');
         timeSpan.textContent = timeKey;
-
-        // ส่วนแสดง badge (ชิดขวา)
+        
+        // สร้าง badge แสดงจำนวน slot (ชิดขวา)
         const badge = document.createElement('span');
         badge.className = "badge";
         badge.textContent = `${info.remaining}/${info.total}`;
         if(info.remaining === 0){
-          badge.classList.add("full"); // สีแดง เมื่อเต็ม
+          badge.classList.add("full"); // สีแดงเมื่อเต็ม
         } else {
-          badge.classList.add("available"); // สีเขียว เมื่อยังว่าง
+          badge.classList.add("available"); // สีเขียวเมื่อว่าง
         }
         
         optionDiv.appendChild(timeSpan);
         optionDiv.appendChild(badge);
-
-        // ถ้าเวลาไม่ว่าง (เต็ม) ให้ disable คลิก
+        
+        // หากสถานะไม่ใช่ Available ให้ disable คลิก (แสดงความโปร่งแสง)
         if(info.status !== 'Available'){
           optionDiv.classList.add("opacity-50");
           optionDiv.style.pointerEvents = "none";
         } else {
           optionDiv.addEventListener('click', function() {
-            // ลบ class selected จากตัวเลือกทั้งหมด
             document.querySelectorAll(".time-option").forEach(el => el.classList.remove("selected"));
-            // ไฮไลต์ตัวเลือกที่คลิก
             optionDiv.classList.add("selected");
-            // เก็บค่าเวลาที่เลือกใน input ซ่อน
             document.getElementById('time').value = timeKey;
           });
         }
         timeDropdown.appendChild(optionDiv);
       }
-      // ถ้าไม่มีตัวเลือกเวลา
       if(!hasOption){
         timeDropdown.innerHTML = `<div class="p-3 text-gray-500">ไม่มีช่วงเวลาว่างในวันนี้</div>`;
       }
     }
+
     function resetTimeDropdown() {
       const timeDropdown = document.getElementById('timeDropdown');
       timeDropdown.innerHTML = `<div class="p-3 text-gray-500">ยังไม่ได้เลือกวัน</div>`;
       document.getElementById('time').value = '';
     }
 
-    /* ---------------------------------------------------------------------
+    /* ------------------------
        7) ส่งข้อมูลฟอร์ม
-    --------------------------------------------------------------------- */
+    ------------------------ */
     const bookingForm = document.getElementById('bookingForm');
     bookingForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -452,6 +432,7 @@
         'confirm'
       );
     });
+
     async function submitBooking() {
       if (isSubmitting) return;
       isSubmitting = true;
@@ -464,7 +445,7 @@
         console.log('Booking result:', result);
         hidePopup();
         showPopup('สำเร็จ!', 'การนัดหมายเสร็จสมบูรณ์', 'success');
-        // liff.closeWindow(); // หากต้องการปิด LIFF หลังจองเสร็จ
+        // liff.closeWindow(); // ปิด LIFF หากต้องการ
       } catch (error) {
         console.error('Error submitting booking:', error);
         showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อมูลได้ โปรดลองใหม่อีกครั้ง', 'error');
@@ -474,9 +455,9 @@
       }
     }
 
-    /* ---------------------------------------------------------------------
-       8) Popup & Loading Functions
-    --------------------------------------------------------------------- */
+    /* ------------------------
+       8) Popup & Loading
+    ------------------------ */
     function showPopup(title, content, type) {
       const popup = document.getElementById('popup');
       const popupContent = document.getElementById('popupContent');
@@ -505,9 +486,11 @@
       }
       popup.style.display = 'flex';
     }
+
     function hidePopup() {
       document.getElementById('popup').style.display = 'none';
     }
+
     function showLoading(isLoading) {
       document.getElementById('loadingOverlay').style.display = isLoading ? 'flex' : 'none';
     }

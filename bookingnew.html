@@ -246,8 +246,8 @@
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading(true);
       await Promise.all([
-        fetchDropdownData();
-        initializeLiff(); // หากต้องการผูกกับ LIFF
+        fetchDropdownData(),
+        initializeLiff() // หากต้องการผูกกับ LIFF
       ]);
       initInlineCalendar();
       showLoading(false);

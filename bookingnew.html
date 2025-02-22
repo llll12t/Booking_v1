@@ -38,6 +38,7 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
     /* Popup */
     .popup {
       position: fixed;
@@ -56,7 +57,8 @@
       width: 90%;
       max-width: 400px;
     }
-    /* Flatpickr inline adjustments */
+
+    /* ปรับ Flatpickr แบบ inline */
     #inlineCalendar {
       width: 100%;
     }
@@ -66,11 +68,12 @@
       margin: 0 auto;
       box-shadow: none;
     }
-    /* ซ่อน navigation bar ของ Flatpickr (ถ้าไม่ต้องการ) */
+    /* ซ่อน navigation bar ของ Flatpickr */
     #inlineCalendar .flatpickr-monthDropdown-months,
     #inlineCalendar .flatpickr-current-month {
       display: none;
     }
+    /* ปรับสไตล์สำหรับ weekdays */
     #inlineCalendar .flatpickr-weekdays {
       background-color: #f3f4f6; 
       border: none;
@@ -87,7 +90,15 @@
       background-color: #10b981 !important;
       color: #fff !important;
     }
-    /* ช่องเวลา 2 คอลัมน์ */
+    .flatpickr-rContainer {
+      margin-left: auto !important;
+      margin-right: auto !important;
+      padding: 20px !important;
+    }
+    .flatpickr-calendar.inline{
+      width: 100% !important;
+    }
+    /* ปรับ UI ช่องเวลา (2 คอลัมน์) */
     #timeDropdown {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -123,7 +134,9 @@
       background-color: #fee2e2;
       color: #b91c1c;
     }
-    .hidden { display: none; }
+    .opacity-50 {
+      opacity: 0.5;
+    }
   </style>
 </head>
 <body class="bg-white min-h-screen flex flex-col">
@@ -252,7 +265,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading(true);
-      await Promise.all([fetchDropdownData(), initializeLiff()]);
+      await Promise.all([fetchDropdownData(),initializeLiff(),fetchHolidayDates()]);
       initInlineCalendar();
       showLoading(false);
     });
@@ -375,22 +388,43 @@
        Inline Calendar & Holiday Highlight
        (ปรับปรุง: เริ่มต้นเลือกวันที่เป็นวันถัดไปจากปัจจุบันและตรวจสอบวันหยุดทันที)
     ------------------------ */
-    function initInlineCalendar() {
-      // กำหนดวันถัดไปจากปัจจุบัน
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
+     // ดึงวันหยุดจาก server (checkAvailability endpoint ที่ส่ง parameter getHolidays)
+     async function fetchHolidayDates() {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        holidayDates = data.holidays; // เช่น ["2025-02-27", "2025-02-28"]
+        console.log("Holiday dates:", holidayDates);
+      } catch (error) {
+        console.error('Error fetching holiday dates:', error);
+      }
+    }
 
-      // สร้าง Flatpickr instance และตั้งค่า defaultDate, minDate, และ dateFormat
-      const fpInstance = flatpickr("#inlineCalendar", {
+    // Initial inline calendar with flatpickr
+    function initInlineCalendar() {
+      flatpickr("#inlineCalendar", {
         inline: true,
-        defaultDate: tomorrow,
-        minDate: tomorrow,
         dateFormat: "Y-m-d",
-        onDayCreate: function(selectedDates, dateStr, fp, dayElem) {
-          const dayDate = fp.formatDate(dayElem.dateObj, "Y-m-d");
-          // ถ้าวันนั้นอยู่ใน myHolidays ให้เปลี่ยนสีเป็นแดง (Tailwind: bg-red-500, text-white)
-          if (myHolidays.includes(dayDate)) {
-            dayElem.classList.add("bg-red-500", "text-white");
+        // Disable วันที่เป็นวันหยุดโดยใช้ function ตรวจสอบกับ holidayDates
+        disable: [
+          function(date) {
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            const formattedDate = `${year}-${month}-${day}`;
+            return holidayDates.includes(formattedDate);
+          }
+        ],
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+          const date = dayElem.dateObj;
+          const year = date.getFullYear();
+          const month = ('0' + (date.getMonth() + 1)).slice(-2);
+          const day = ('0' + date.getDate()).slice(-2);
+          const formattedDate = `${year}-${month}-${day}`;
+          if (holidayDates.includes(formattedDate)) {
+            dayElem.style.backgroundColor = "#ffcccc"; // light red
+            dayElem.style.color = "#a00000"; // dark red
           }
         },
         onChange: function(selectedDates, dateStr, instance) {
@@ -402,37 +436,64 @@
           }
         }
       });
-
-      // เมื่อ Flatpickr ถูกสร้างขึ้นแล้ว ให้ดึงวันที่ default (วันถัดไป) และตรวจสอบวันหยุดทันที
-      selectedDate = fpInstance.formatDate(fpInstance.selectedDates[0], "Y-m-d");
-      checkAvailability(selectedDate);
     }
 
+    // เรียกเช็ค availability ผ่าน server
     async function checkAvailability(dateStr) {
-      showLoading(true);
       try {
         const response = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${dateStr}`);
         if (!response.ok) throw new Error('Network response was not ok');
-        const availability = await response.json();
-        // หากทุกช่วงเวลาไม่มีให้จอง (status !== "Available") ให้ถือว่าเป็นวันหยุด
-        const allSlotsUnavailable = Object.values(availability).every(slot => slot.status !== "Available");
+        const data = await response.json();
+        // ข้อมูลช่วงเวลาจะอยู่ใน data.availability
+        const allSlotsUnavailable = Object.values(data.availability).every(slot => slot.status !== "Available");
         if (allSlotsUnavailable) {
-          if (!myHolidays.includes(dateStr)) {
-            myHolidays.push(dateStr);
-          }
-          // รีเฟรชปฏิทินให้ onDayCreate ทำงานใหม่
-          const fpInstance = document.querySelector("#inlineCalendar")._flatpickr;
-          fpInstance.redraw();
           showPopup("ไม่สามารถจองได้", "วันที่เลือกเป็นวันหยุดหรือไม่พร้อมจอง", "error");
+          resetInlineCalendar();
           resetTimeDropdown();
         } else {
-          updateTimeDropdown(availability);
+          updateTimeDropdown(data.availability);
         }
       } catch (error) {
         console.error('Error fetching availability:', error);
         showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ โปรดลองใหม่อีกครั้ง', 'error');
-      } finally {
-        showLoading(false);
+      }
+    }
+
+    // อัปเดต dropdown เวลาจากข้อมูล availability
+    function updateTimeDropdown(availability) {
+      const timeDropdown = document.getElementById('timeDropdown');
+      timeDropdown.innerHTML = "";
+      for (const [timeKey, info] of Object.entries(availability)) {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = "time-option";
+        optionDiv.dataset.value = timeKey;
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.textContent = timeKey;
+        
+        const badge = document.createElement('span');
+        badge.className = "badge";
+        badge.textContent = `${info.remaining}/${info.total}`;
+        if (Number(info.remaining) === 0) {
+          badge.classList.add("full");
+        } else {
+          badge.classList.add("available");
+        }
+        
+        optionDiv.appendChild(timeSpan);
+        optionDiv.appendChild(badge);
+        
+        if (info.status !== 'Available') {
+          optionDiv.classList.add("opacity-50");
+          optionDiv.style.pointerEvents = "none";
+        } else {
+          optionDiv.addEventListener('click', () => {
+            document.querySelectorAll(".time-option").forEach(el => el.classList.remove("selected"));
+            optionDiv.classList.add("selected");
+            document.getElementById('time').value = timeKey;
+          });
+        }
+        timeDropdown.appendChild(optionDiv);
       }
     }
 

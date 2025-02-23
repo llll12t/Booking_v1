@@ -478,15 +478,24 @@
       showStep(2);
     });
 
-    function updateConfirmation() {
-      document.getElementById('confirmService').textContent = document.getElementById('service').value;
-      document.getElementById('confirmLocation').textContent = document.getElementById('locationservice').value;
-      document.getElementById('confirmName').textContent = document.getElementById('name').value;
-      document.getElementById('confirmPhone').textContent = document.getElementById('phonenumber').value;
-      document.getElementById('confirmNote').textContent = document.getElementById('note').value;
-      document.getElementById('confirmDate').textContent = selectedDate;
-      document.getElementById('confirmTime').textContent = document.getElementById('time').value;
+  function updateConfirmation() {
+    document.getElementById('confirmService').textContent = document.getElementById('service').value;
+    document.getElementById('confirmLocation').textContent = document.getElementById('locationservice').value;
+    document.getElementById('confirmName').textContent = document.getElementById('name').value;
+    document.getElementById('confirmPhone').textContent = document.getElementById('phonenumber').value;
+    document.getElementById('confirmNote').textContent = document.getElementById('note').value;
+    
+    // แปลง selectedDate จาก "YYYY-MM-DD" เป็น "dd/mm/yyyy"
+    if (selectedDate) {
+      const parts = selectedDate.split('-'); // [YYYY, MM, DD]
+      const formattedDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+      document.getElementById('confirmDate').textContent = formattedDate;
+    } else {
+      document.getElementById('confirmDate').textContent = '';
     }
+    
+    document.getElementById('confirmTime').textContent = document.getElementById('time').value;
+  }
 
     /* ------------------------ 
        LIFF & Data Fetching

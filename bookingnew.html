@@ -15,6 +15,16 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
+    /* ซ่อนรูปแบบของ select บนอุปกรณ์ iOS และ Firefox */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* กำหนด background ของตัว select (สามารถปรับแต่งได้ตามต้องการ) */
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="none" stroke="%23666" stroke-width="2" d="M1 1l4 4 4-4"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    padding-right: 2rem;
+  }
     /* Loading Overlay */
     .loading-overlay {
       position: fixed;

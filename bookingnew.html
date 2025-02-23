@@ -228,24 +228,68 @@
         </div>
       </div>
 
-      <!-- Step 3: ยืนยันการนัดหมาย -->
-      <div class="step hidden" id="step3">
-        <div class="p-3 bg-gray-100 rounded-lg">
-          <h2 class="text-lg font-bold mb-2">ยืนยันการนัดหมาย</h2>
-          <p><strong>บริการ:</strong> <span id="confirmService"></span></p>
-          <p><strong>สาขา:</strong> <span id="confirmLocation"></span></p>
-          <p><strong>ชื่อ-สกุล:</strong> <span id="confirmName"></span></p>
-          <p><strong>เบอร์ติดต่อ:</strong> <span id="confirmPhone"></span></p>
-          <p><strong>หมายเหตุ:</strong> <span id="confirmNote"></span></p>
-          <p><strong>วันที่:</strong> <span id="confirmDate"></span></p>
-          <p><strong>เวลา:</strong> <span id="confirmTime"></span></p>
-        </div>
-        <!-- ปุ่ม navigation -->
-        <div class="flex justify-between mt-4">
-          <button type="button" id="backToStep2" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg">ย้อนกลับ</button>
-          <button type="submit" id="confirmBooking" class="px-4 py-2 bg-emerald-500 text-white rounded-lg">ยืนยันการนัดหมาย</button>
-        </div>
-      </div>
+<!-- (โค้ดส่วนอื่นๆ ทั้งหมดเหมือนเดิม จนถึงจุดของ Step 3) -->
+
+<!-- Step 3: ยืนยันการนัดหมาย -->
+<div class="step hidden" id="step3">
+  <!-- ส่วนแสดงไอคอนเครื่องหมายถูก และข้อความแนะนำ -->
+  <div class="flex flex-col items-center p-4">
+    <!-- ไอคอนวงกลม + เครื่องหมายถูก -->
+    <div class="w-16 h-16 flex items-center justify-center rounded-full bg-emerald-100">
+      <!-- ไอคอนแบบ SVG -->
+      <svg class="text-emerald-500 w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <!-- ข้อความหัวเรื่อง -->
+    <h2 class="text-xl font-bold mt-2">ตรวจสอบข้อมูลก่อนยืนยัน</h2>
+    <p class="text-sm text-gray-500">ระบบจะแจ้งเตือนล่วงหน้าก่อนถึงนัดหมาย 1 วัน</p>
+  </div>
+
+  <!-- กล่องแสดงข้อมูลการนัดหมาย -->
+  <div class="bg-white shadow rounded-lg mx-4 mb-4 p-4">
+    <!-- บริการ -->
+    <div class="flex justify-between mb-2">
+      <span class="text-gray-600">บริการ</span>
+      <span id="confirmService" class="font-semibold"></span>
+    </div>
+    <!-- สถานที่ -->
+    <div class="flex justify-between mb-2">
+      <span class="text-gray-600">สถานที่</span>
+      <span id="confirmLocation" class="font-semibold"></span>
+    </div>
+    <!-- ชื่อ สกุล -->
+    <div class="flex justify-between mb-2">
+      <span class="text-gray-600">ชื่อ สกุล</span>
+      <span id="confirmName" class="font-semibold"></span>
+    </div>
+    <!-- เบอร์ติดต่อ -->
+    <div class="flex justify-between mb-2">
+      <span class="text-gray-600">เบอร์ติดต่อ</span>
+      <span id="confirmPhone" class="font-semibold"></span>
+    </div>
+    <!-- รายละเอียดเพิ่มเติม -->
+    <div class="flex justify-between mb-2">
+      <span class="text-gray-600">รายละเอียดเพิ่มเติม</span>
+      <span id="confirmNote" class="font-semibold"></span>
+    </div>
+    <!-- สถานะ -->
+    <div class="flex justify-between mb-2">
+      <span class="text-gray-600">สถานะ</span>
+      <!-- ตัวอย่าง: แสดง "รอการยืนยัน" ไว้ตายตัว หรือจะผูกกับข้อมูลจริงก็ได้ -->
+      <span class="text-emerald-500 font-semibold">รอการยืนยัน</span>
+    </div>
+  </div>
+
+  <!-- ปุ่มยืนยันการนัดหมาย -->
+  <div class="px-4">
+    <button type="submit" id="confirmBooking" class="w-full py-3 bg-emerald-500 text-white font-bold rounded-lg">
+      ยืนยันได้นัดหมาย
+    </button>
+  </div>
+</div>
+
     </form>
   </div>
 

@@ -15,17 +15,18 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
-     select {
-    /* ซ่อนรูปแบบของ select บนอุปกรณ์ iOS และ Firefox */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    /* กำหนด background ของตัว select (สามารถปรับแต่งได้ตามต้องการ) */
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="none" stroke="%23666" stroke-width="2" d="M1 1l4 4 4-4"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    padding-right: 2rem;
-  }
+    select {
+      /* ซ่อนรูปแบบของ select บนอุปกรณ์ iOS และ Firefox */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      /* กำหนด background ของตัว select (สามารถปรับแต่งได้ตามต้องการ) */
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="none" stroke="%23666" stroke-width="2" d="M1 1l4 4 4-4"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      padding-right: 2rem;
+    }
+
     /* Loading Overlay */
     .loading-overlay {
       position: fixed;
@@ -208,7 +209,7 @@
             </svg>
           </div>
           <!-- ข้อความหัวเรื่องและคำอธิบาย -->
-          <h2 class="text-xl font-bold mt-2">ขั้นตอนที่ 1: กรอกข้อมูลการนัดหมาย</h2>
+          <h2 class="text-lg font-bold mt-2">กรอกข้อมูลการนัดหมาย</h2>
           <p class="text-sm text-gray-500">โปรดกรอกข้อมูลเบื้องต้น</p>
         </div>
 
@@ -281,7 +282,7 @@
             </svg>
           </div>
           <!-- ข้อความหัวเรื่องและคำอธิบาย -->
-          <h2 class="text-xl font-bold mt-2">ขั้นตอนที่ 2: เลือกวันที่และเวลา</h2>
+          <h2 class="text-lg font-bold mt-2">เลือกวันที่และเวลา</h2>
           <p class="text-sm text-gray-500">โปรดเลือกวันที่และช่วงเวลาที่ต้องการ</p>
         </div>
 
@@ -333,7 +334,7 @@
             </svg>
           </div>
           <!-- ข้อความหัวเรื่อง -->
-          <h2 class="text-xl font-bold mt-2">ตรวจสอบข้อมูลก่อนยืนยัน</h2>
+          <h2 class="text-lg font-bold mt-2">ตรวจสอบข้อมูลก่อนยืนยัน</h2>
           <p class="text-sm text-gray-500">ระบบจะแจ้งเตือนล่วงหน้าก่อนถึงนัดหมาย 1 วัน</p>
         </div>
 
@@ -418,7 +419,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading(true);
-      await Promise.all([fetchDropdownData(),initializeLiff(),fetchHolidayDates()]);
+      await Promise.all([fetchDropdownData(), initializeLiff(), fetchHolidayDates()]);
       initInlineCalendar();
       showLoading(false);
     });
@@ -601,7 +602,7 @@
           selectedDate = dateStr;
           if (dateStr) {
             const timeDropdown = document.getElementById('timeDropdown');
-            timeDropdown.innerHTML = `<div class="p-3 text-gray-400 text-center">กำลังตรวจสอบเวลาว่าง โปรดรอสักครู่</div>`;
+            timeDropdown.innerHTML = `<div class="p-3 text-red-400 text-sm text-center">โปรดรอสักครู่..</div>`;
             checkAvailability(dateStr);
           } else {
             resetTimeDropdown();

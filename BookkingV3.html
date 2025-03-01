@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>Booking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+  <!-- Flatpickr CSS/JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <style>
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="none" stroke="%23666" stroke-width="2" d="M1 1l4 4 4-4"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      padding-right: 2rem;
+    }
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(30, 41, 59, 0.8);
+      z-index: 1000; display: none;
+      justify-content: center; align-items: center;
+    }
+    .loading-spinner {
+      border: 10px solid #ffffff;
+      background-color: #ebebeb;
+      border-radius: 50%;
+      border-top: 10px solid #1e293b;
+      width: 80px; height: 80px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .popup {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(30, 41, 59, 0.5);
+      display: none; justify-content: center; align-items: center;
+      z-index: 1001;
+    }
+    .popup-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%; max-width: 400px;
+    }
+    #inlineCalendar { width: 100%; }
+    #inlineCalendar .flatpickr-calendar { width: 100% !important; max-width: 100%; margin: 0 auto; box-shadow: none; }
+    #inlineCalendar .flatpickr-monthDropdown-months, #inlineCalendar .flatpickr-current-month { display: none; }
+    #inlineCalendar .flatpickr-weekdays { background-color: #f3f4f6; border: none; margin-top: 0.5rem; }
+    #inlineCalendar .flatpickr-day { padding: 1rem; font-size: 1rem; }
+    #inlineCalendar .flatpickr-day.today { border: 1px solid #4ade80; }
+    #inlineCalendar .flatpickr-day.selected { background-color: #10b981 !important; color: #fff !important; }
+    .flatpickr-rContainer { margin: auto; padding: 20px !important; }
+    .flatpickr-calendar.inline { width: 100% !important; }
+    #timeDropdown { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .time-option { display: flex; justify-content: space-between; align-items: center; border-radius: 8px; background-color: #fff; padding: 0.75rem 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; }
+    .time-option.selected { background-color: #10b981; color: #fff; }
+    .badge { border-radius: 9999px; padding: 0.25rem 0.5rem; font-weight: 600; font-size: 0.75rem; min-width: 40px; text-align: center; }
+    .badge.available { background-color: #dcfce7; color: #166534; }
+    .badge.full { background-color: #fee2e2; color: #b91c1c; }
+    .opacity-50 { opacity: 0.5; }
+  </style>
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+  <div class="popup" id="popup">
+    <div class="popup-content" id="popupContent"></div>
+  </div>
+  <div class="w-full max-w-md mx-auto p-4 pb-4 flex-1">
+    <form id="bookingForm" novalidate>
+      <!-- Step 1: เลือกบริการ -->
+      <div class="step" id="step1">
+        <div class="flex flex-col items-center p-4">
+          <div class="w-16 h-16 flex items-center justify-center rounded-full bg-blue-100">
+            <svg class="text-blue-500 w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5l4 4L7 21l-4 1 1-4z"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold mt-2">เลือกบริการ</h2>
+          <p class="text-sm text-gray-500">เลือกบริการที่ต้องการ (เลือกได้หลายรายการ)</p>
+        </div>
+        <div class="bg-white mb-4 p-4">
+          <div id="serviceCards" class="grid grid-cols-1 gap-4"></div>
+          <input type="hidden" id="selectedServices" name="selectedServices">
+          <input type="hidden" id="selectedServiceNames" name="selectedServiceNames">
+        </div>
+        <div class="flex justify-end mx-4 mb-4">
+          <button type="button" id="nextToStep2" class="w-full px-4 py-4 bg-blue-500 text-white rounded-lg font-bold">ถัดไป</button>
+        </div>
+      </div>
+      
+      <!-- Step 2: กรอกข้อมูลส่วนตัว -->
+      <div class="step hidden" id="step2">
+        <div class="flex flex-col items-center p-4">
+          <div class="w-16 h-16 flex items-center justify-center rounded-full bg-blue-100">
+            <svg class="text-blue-500 w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5l4 4L7 21l-4 1 1-4z"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold mt-2">กรอกข้อมูลการนัดหมาย</h2>
+          <p class="text-sm text-gray-500">โปรดกรอกข้อมูลส่วนตัวของคุณ</p>
+        </div>
+        <div class="bg-white mb-4 p-4">
+          <div class="p-4 bg-gray-50 rounded-lg">
+            <label class="block text-sm font-semibold mb-2">ข้อมูลการนัด</label>
+            <div class="mb-3">
+              <input type="text" id="name" name="name" class="w-full rounded-lg text-sm border border-gray-300 p-3" placeholder="ชื่อ-สกุล" />
+            </div>
+            <div class="mb-3">
+              <input type="tel" id="phonenumber" name="phonenumber" class="w-full rounded-lg text-sm border border-gray-300 p-3" placeholder="เบอร์ติดต่อ" />
+            </div>
+            <div class="mb-3">
+              <textarea id="note" name="note" class="w-full rounded-lg text-sm border border-gray-300 p-3" placeholder="หมายเหตุ"></textarea>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="saveInfo" name="saveInfo" class="mr-2 h-4 w-4" />
+              <label for="saveInfo" class="text-sm text-gray-600">บันทึกชื่อและเบอร์ติดต่อไว้</label>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-between mx-4 mb-4">
+          <button type="button" id="backToStep1" class="w-24 px-4 py-4 bg-gray-100 text-gray-700 rounded-lg font-bold">ย้อนกลับ</button>
+          <button type="button" id="nextToStep3" class="w-full px-4 py-4 bg-blue-500 text-white rounded-lg font-bold">ถัดไป</button>
+        </div>
+      </div>
+      
+      <!-- Step 3: เลือกวันที่และเวลา -->
+      <div class="step hidden" id="step3">
+        <div class="flex flex-col items-center p-4">
+          <div class="w-16 h-16 flex items-center justify-center rounded-full bg-purple-100">
+            <svg class="text-purple-500 w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold mt-2">เลือกวันที่และเวลา</h2>
+          <p class="text-sm text-gray-500">โปรดเลือกวันที่และช่วงเวลาที่ต้องการ</p>
+        </div>
+        <div class="bg-white mb-4 p-4">
+          <div>
+            <label class="block mb-1 text-sm font-semibold">เลือกวันที่:</label>
+            <div id="inlineCalendar"></div>
+          </div>
+          <div class="mt-4">
+            <label class="block mb-1 text-sm font-semibold">เลือกเวลา:</label>
+            <div id="timeDropdown">
+              <div class="p-3 text-gray-400 text-center">ยังไม่ได้เลือกวัน</div>
+            </div>
+            <input type="hidden" id="time" name="time" required />
+          </div>
+        </div>
+        <div class="flex justify-between space-x-2 mx-4 mb-4">
+          <button type="button" id="backToStep2" class="w-24 px-4 py-4 bg-gray-100 text-gray-700 rounded-lg font-bold">ย้อนกลับ</button>
+          <button type="button" id="nextToStep4" class="w-full px-4 py-4 bg-purple-500 text-white rounded-lg font-bold">ถัดไป</button>
+        </div>
+      </div>
+      
+      <!-- Step 4: ยืนยันการนัดหมาย -->
+      <div class="step hidden" id="step4">
+        <div class="flex flex-col items-center p-4">
+          <div class="w-16 h-16 flex items-center justify-center rounded-full bg-emerald-100">
+            <svg class="text-emerald-500 w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold mt-2">ตรวจสอบข้อมูลก่อนยืนยัน</h2>
+          <p class="text-sm text-gray-500">ระบบจะแจ้งเตือนล่วงหน้าก่อนถึงนัดหมาย 1 วัน</p>
+        </div>
+        <div class="bg-white shadow rounded-lg mx-4 mb-4 p-4">
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">บริการ</span>
+            <span id="confirmService" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">ชื่อ-สกุล</span>
+            <span id="confirmName" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">เบอร์ติดต่อ</span>
+            <span id="confirmPhone" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">รายละเอียดเพิ่มเติม</span>
+            <span id="confirmNote" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">วันที่</span>
+            <span id="confirmDate" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">เวลา</span>
+            <span id="confirmTime" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-600">สถานะ</span>
+            <span class="text-emerald-500 font-semibold">รอการยืนยัน</span>
+          </div>
+        </div>
+        <div class="flex justify-between space-x-2 mx-4 mb-4">
+          <button type="button" id="backToStep3" class="w-24 px-4 py-4 bg-gray-100 text-gray-700 rounded-lg font-bold">ย้อนกลับ</button>
+          <button type="submit" id="confirmBooking" class="w-full py-3 bg-emerald-500 text-white font-bold rounded-lg">ยืนยันได้นัดหมาย</button>
+        </div>
+      </div>
+      
+      <!-- Hidden fields สำหรับ LIFF -->
+      <input type="hidden" id="displayName" name="displayName" />
+      <input type="hidden" id="userlineid" name="userlineid" />
+      <input type="hidden" name="action" value="makeBooking" />
+    </form>
+  </div>
+  
+  <script>
+    /* ------------------------
+       Global Variables & Initial Setup
+    ------------------------ */
+    let holidayDates = [];
+    let selectedDate = '';
+    let isSubmitting = false;
+    let currentStep = 1;
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIzvRzAUYK-LSa_3kOHCJ7SLahcdh2f0TU2Xd0GtHreWFR_7y0uVrql203fuhAWH0G/exec';
+    const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbyR8goGsMD6q3oHSHUynmZ6tp2phuZN7xhYM0X0CU3FrLC95Rho_H2UgHOXbrAtfEHj8w/exec';
+    const LIFF_ID = '2006029649-bj0ez4Og';
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      showLoading(true);
+      await Promise.all([fetchServiceData(), initializeLiff(), fetchHolidayDates()]);
+      initInlineCalendar();
+      showLoading(false);
+    });
+    
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
+      document.getElementById('step' + step).classList.remove('hidden');
+      currentStep = step;
+      if (step === 4) { updateConfirmation(); }
+    }
+    
+    // Step Navigation
+    document.getElementById('nextToStep2').addEventListener('click', () => {
+      const selected = document.getElementById('selectedServices').value;
+      if (!selected || selected === '[]') {
+        showPopup('เกิดข้อผิดพลาด', 'กรุณาเลือกบริการอย่างน้อย 1 รายการ', 'error');
+        return;
+      }
+      showStep(2);
+    });
+    document.getElementById('backToStep1').addEventListener('click', () => showStep(1));
+    document.getElementById('nextToStep3').addEventListener('click', () => {
+      const name = document.getElementById('name').value;
+      const phonenumber = document.getElementById('phonenumber').value;
+      if (!name) { showPopup('เกิดข้อผิดพลาด', 'กรุณากรอกชื่อ-สกุล', 'error'); return; }
+      if (!phonenumber) { showPopup('เกิดข้อผิดพลาด', 'กรุณากรอกเบอร์ติดต่อ', 'error'); return; }
+      showStep(3);
+    });
+    document.getElementById('backToStep2').addEventListener('click', () => showStep(2));
+    document.getElementById('nextToStep4').addEventListener('click', () => {
+      if (!selectedDate) { showPopup('เกิดข้อผิดพลาด', 'กรุณาเลือกวันที่', 'error'); return; }
+      if (!document.getElementById('time').value) { showPopup('เกิดข้อผิดพลาด', 'กรุณาเลือกเวลา', 'error'); return; }
+      showStep(4);
+    });
+    document.getElementById('backToStep3').addEventListener('click', () => showStep(3));
+    
+    function updateConfirmation() {
+      document.getElementById('confirmService').textContent = document.getElementById('selectedServiceNames').value;
+      document.getElementById('confirmName').textContent = document.getElementById('name').value;
+      document.getElementById('confirmPhone').textContent = document.getElementById('phonenumber').value;
+      document.getElementById('confirmNote').textContent = document.getElementById('note').value;
+      if (selectedDate) {
+        const parts = selectedDate.split('-');
+        document.getElementById('confirmDate').textContent = parts[2] + '/' + parts[1] + '/' + parts[0];
+      } else { document.getElementById('confirmDate').textContent = ''; }
+      document.getElementById('confirmTime').textContent = document.getElementById('time').value;
+    }
+    
+    /* ------------------------
+       LIFF & Data Fetching
+    ------------------------ */
+    async function initializeLiff() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) { liff.login(); }
+        else { getUserProfile(); }
+      } catch (error) { console.error('Error initializing LIFF:', error); }
+    }
+    
+    async function getUserProfile() {
+      try {
+        const profile = await liff.getProfile();
+        document.getElementById('userlineid').value = profile.userId;
+        document.getElementById('displayName').value = profile.displayName;
+        fetchMemberData(profile.userId);
+      } catch (error) { console.error('Error getting profile data:', error); }
+    }
+    
+    async function fetchMemberData(userId) {
+      showLoading(true);
+      try {
+        const response = await fetch(WEB_APP_MEMBER_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'fetchData', userId: userId })
+        });
+        const data = await response.json();
+        const row = data.find(r => r[1] === userId);
+        if (row) {
+          document.getElementById('name').value = row[2] || '';
+          document.getElementById('phonenumber').value = row[3] || '';
+        }
+      } catch (error) { console.error('Error fetching member data:', error); }
+      finally { showLoading(false); }
+    }
+    
+    async function fetchHolidayDates() {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        holidayDates = data.holidays;
+        console.log("Holiday dates:", holidayDates);
+      } catch (error) { console.error('Error fetching holiday dates:', error); }
+    }
+    
+    function initInlineCalendar() {
+      flatpickr("#inlineCalendar", {
+        inline: true,
+        dateFormat: "Y-m-d",
+        disable: [
+          function (date) {
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            return holidayDates.includes(`${year}-${month}-${day}`);
+          }
+        ],
+        onDayCreate: function (dObj, dStr, fp, dayElem) {
+          const date = dayElem.dateObj;
+          const formattedDate = `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`;
+          if (holidayDates.includes(formattedDate)) {
+            dayElem.style.backgroundColor = "#ffcccc";
+            dayElem.style.color = "#a00000";
+            dayElem.textContent = "หยุด";
+          }
+        },
+        onChange: function (selectedDates, dateStr) {
+          selectedDate = dateStr;
+          if (dateStr) {
+            const timeDropdown = document.getElementById('timeDropdown');
+            timeDropdown.innerHTML = `<div class="p-3 text-red-400 text-sm text-center">โปรดรอสักครู่..</div>`;
+            checkAvailability(dateStr);
+          } else { resetTimeDropdown(); }
+        }
+      });
+    }
+    
+    async function checkAvailability(dateStr) {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${dateStr}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        const allSlotsUnavailable = Object.values(data.availability).every(slot => slot.status !== "Available");
+        if (allSlotsUnavailable) {
+          showPopup("ไม่สามารถจองได้", "วันที่เลือกเป็นวันหยุดหรือไม่พร้อมจอง", "error");
+          resetInlineCalendar();
+          resetTimeDropdown();
+        } else { updateTimeDropdown(data.availability); }
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+        showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลได้ โปรดลองใหม่อีกครั้ง', 'error');
+      }
+    }
+    
+    function updateTimeDropdown(availability) {
+      const timeDropdown = document.getElementById('timeDropdown');
+      timeDropdown.innerHTML = "";
+      let hasOption = false;
+      for (const [timeKey, info] of Object.entries(availability)) {
+        hasOption = true;
+        const optionDiv = document.createElement('div');
+        optionDiv.className = "time-option";
+        optionDiv.dataset.value = timeKey;
+        const timeSpan = document.createElement('span');
+        timeSpan.textContent = timeKey;
+        const badge = document.createElement('span');
+        badge.className = "badge";
+        badge.textContent = `${info.remaining}/${info.total}`;
+        if (Number(info.remaining) === 0) { badge.classList.add("full"); }
+        else { badge.classList.add("available"); }
+        optionDiv.appendChild(timeSpan);
+        optionDiv.appendChild(badge);
+        if (info.status !== 'Available') {
+          optionDiv.classList.add("opacity-50");
+          optionDiv.style.pointerEvents = "none";
+        } else {
+          optionDiv.addEventListener('click', () => {
+            document.querySelectorAll(".time-option").forEach(el => el.classList.remove("selected"));
+            optionDiv.classList.add("selected");
+            document.getElementById('time').value = timeKey;
+          });
+        }
+        timeDropdown.appendChild(optionDiv);
+      }
+      if (!hasOption) { timeDropdown.innerHTML = `<div class="p-3 text-gray-400 text-center">ไม่มีช่วงเวลาว่างในวันนี้</div>`; }
+    }
+    
+    function resetTimeDropdown() {
+      const timeDropdown = document.getElementById('timeDropdown');
+      timeDropdown.innerHTML = `<div class="p-3 text-gray-400 text-center">ยังไม่ได้เลือกวัน</div>`;
+      document.getElementById('time').value = '';
+    }
+    
+    function resetInlineCalendar() {
+      const fpInstance = document.querySelector("#inlineCalendar")._flatpickr;
+      fpInstance.clear();
+      selectedDate = "";
+    }
+    
+    // ดึงข้อมูลบริการจาก GAS และสร้างการ์ดเลือกบริการ
+    async function fetchServiceData() {
+      try {
+        const response = await fetch(`${WEB_APP_URL}?action=fetchServices`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const services = await response.json();
+        populateServiceCards(services);
+      } catch (error) { console.error('Error fetching service data:', error); }
+    }
+    
+    function populateServiceCards(services) {
+      const container = document.getElementById('serviceCards');
+      container.innerHTML = "";
+      services.forEach(service => {
+        const card = document.createElement('div');
+        card.className = "p-4 border border-gray-300 rounded-lg cursor-pointer";
+        card.dataset.serviceId = service.id;
+        card.dataset.serviceName = service.name;
+        card.dataset.servicePrice = service.price;
+        card.innerHTML = `<div class="font-bold">${service.name}</div>
+                          <div class="text-sm text-gray-600">ราคา: ${service.price}</div>`;
+        card.addEventListener('click', () => {
+          card.classList.toggle('bg-green-100');
+          updateSelectedServices();
+        });
+        container.appendChild(card);
+      });
+    }
+    
+    function updateSelectedServices() {
+      const selectedCards = document.querySelectorAll('#serviceCards .bg-green-100');
+      const selectedIds = Array.from(selectedCards).map(card => card.dataset.serviceId);
+      const selectedNames = Array.from(selectedCards).map(card => card.dataset.serviceName + " (ราคา " + card.dataset.servicePrice + ")");
+      document.getElementById('selectedServices').value = JSON.stringify(selectedIds);
+      document.getElementById('selectedServiceNames').value = selectedNames.join(", ");
+    }
+    
+    // การส่งข้อมูลฟอร์มการจอง
+    const bookingForm = document.getElementById('bookingForm');
+    bookingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (isSubmitting) return;
+      submitBooking();
+    });
+    
+    async function submitBooking() {
+      if (isSubmitting) return;
+      isSubmitting = true;
+      showLoading(true);
+      try {
+        const formData = new FormData(bookingForm);
+        formData.append('date', selectedDate);
+        const response = await fetch(WEB_APP_URL, { method: 'POST', body: formData });
+        const result = await response.text();
+        showPopup('สำเร็จ!', 'การนัดหมายเสร็จสมบูรณ์', 'success');
+      } catch (error) {
+        console.error('Error submitting booking:', error);
+        showPopup('เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อมูลได้ โปรดลองใหม่อีกครั้ง', 'error');
+      } finally {
+        showLoading(false);
+        isSubmitting = false;
+      }
+    }
+    
+    function showPopup(title, content, type) {
+      const popup = document.getElementById('popup');
+      const popupContent = document.getElementById('popupContent');
+      popupContent.innerHTML = `<h2 class="text-lg font-bold mb-2">${title}</h2>
+                                <div class="text-sm">${content}</div>`;
+      if (type === 'confirm') {
+        popupContent.innerHTML += `<div class="flex justify-between space-x-4 mt-4">
+                                      <button id="cancelButton" class="w-1/3 px-2 py-2 bg-gray-300 text-gray-700 rounded-lg">ยกเลิก</button>
+                                      <button id="confirmButton" class="w-2/3 px-2 py-2 bg-emerald-500 text-white rounded-lg">ยืนยัน</button>
+                                    </div>`;
+        document.getElementById('cancelButton').addEventListener('click', hidePopup);
+        document.getElementById('confirmButton').addEventListener('click', () => {
+          document.getElementById('confirmButton').innerText = 'กำลังบันทึก...';
+          submitBooking();
+        });
+      } else {
+        popupContent.innerHTML += `<div class="mt-4 text-center">
+                                      <button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg">ปิด</button>
+                                    </div>`;
+      }
+      popup.style.display = 'flex';
+    }
+    
+    function hidePopup() { document.getElementById('popup').style.display = 'none'; }
+    function showLoading(isLoading) { document.getElementById('loadingOverlay').style.display = isLoading ? 'flex' : 'none'; }
+  </script>
+</body>
+</html>

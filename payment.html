@@ -1,1 +1,209 @@
 
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>อัปโหลดใบเสร็จ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</head>
+
+<body style="font-family: 'Noto Sans Thai';">
+  <div class="bg-slate-100 flex justify-center items-center p-4">
+    <div class="w-full max-w-md mx-auto">
+      <form id="uploadForm">
+        <div class="p-6">
+          <div class="text-center">
+            <h1 class="text-slate-800 text-2xl font-semibold mb-6">อัปโหลดใบเสร็จชำระเงิน</h1>
+          </div>
+          <!-- แสดงข้อมูล Order ที่รับมาจาก URL -->
+          <div id="orderInfo" class="mb-4 p-2 border rounded bg-white text-sm text-slate-700"></div>
+          <!-- Preview and upload button -->
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+            <!-- Preview container -->
+            <div id="previewContainer" class="w-full md:w-1/2 h-48 bg-gray-200 flex items-center justify-center rounded-lg overflow-hidden">
+              <!-- SVG icon แสดงก่อนอัพโหลด -->
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" color="#000000" fill="none">
+                <path d="M8 16L16.7201 15.2733C19.4486 15.046 20.0611 14.45 20.3635 11.7289L21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M6 6L7.5 6M22 6H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M10.5 7C10.5 7 11.5 7 12.5 9C12.5 9 15.6765 4 18.5 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="6" cy="20" r="2" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="17" cy="20" r="2" stroke="currentColor" stroke-width="1.5" />
+                <path d="M8 20L15 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M2 2H2.966C3.91068 2 4.73414 2.62459 4.96326 3.51493L7.93852 15.0765C8.08887 15.6608 7.9602 16.2797 7.58824 16.7616L6.63213 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+            </div>
+            <!-- Upload button -->
+            <label for="file" class="cursor-pointer w-full md:w-1/2 h-24 flex flex-col justify-center items-center bg-slate-900 rounded-lg text-white font-medium p-4 hover:bg-slate-800 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" color="#FFFFFF" fill="none">
+                <path d="M13 3.00231C12.5299 3 12.0307 3 11.5 3C7.02166 3 4.78249 3 3.39124 4.39124C2 5.78249 2 8.02166 2 12.5C2 16.9783 2 19.2175 3.39124 20.6088C4.78249 22 7.02166 22 11.5 22C15.9783 22 18.2175 22 19.6088 20.6088C20.9472 19.2703 20.998 17.147 20.9999 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M2 14.1354C2.61902 14.0455 3.24484 14.0011 3.87171 14.0027C6.52365 13.9466 9.11064 14.7729 11.1711 16.3342C13.082 17.7821 14.4247 19.7749 15 22" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M21 16.8962C19.8246 16.3009 18.6088 15.9988 17.3862 16.0001C15.5345 15.9928 13.7015 16.6733 12 18" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M17 4.5C17.4915 3.9943 18.7998 2 19.5 2M22 4.5C21.5085 3.9943 20.2002 2 19.5 2M19.5 2V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span class="text-lg">อัพโหลดสลิปโอนเงิน</span>
+              <input type="file" id="file" name="file" accept="image/*" class="hidden">
+            </label>
+          </div>
+          <div class="text-center text-sm text-slate-500">
+            <p>กรณีล่าช้าหรือมีปัญหา แอดมินจะทำการตรวจสอบอีกครั้ง</p>
+            <p>กรุณารอการตรวจสอบสลิปหลังการโอนประมาณ 5-10 นาที</p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+  <script>
+    // เมื่อหน้าเว็บโหลด ให้แสดงข้อมูลจาก URL
+    window.onload = function () {
+      displayFormData();
+    };
+
+    // ฟังก์ชันสำหรับดึงข้อมูลจาก URL
+    function displayFormData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      // หากมี parameter liff.state ให้ใช้ข้อมูลจากนั้น (กรณีที่ LIFF ส่งมาในรูปแบบนี้)
+      const liffState = urlParams.get('liff.state');
+      let params;
+      if (liffState) {
+        const decoded = decodeURIComponent(liffState);
+        params = new URLSearchParams(decoded);
+      } else {
+        params = urlParams;
+      }
+      
+      // ดึงข้อมูลที่จำเป็นจาก query string
+      const idKey = params.get('idKey') || "";
+      const name = params.get('name') || "";
+      const serviceNames = params.get('serviceNames') || "";
+      const totalPrice = params.get('totalPrice') || "";
+
+      // แสดงข้อมูลใน div#orderInfo
+      const orderInfoDiv = document.getElementById('orderInfo');
+      orderInfoDiv.innerText = `Order ID: ${idKey}\nName: ${name}\nServices: ${serviceNames}\nTotal Price: ${totalPrice}`;
+
+      // เก็บข้อมูลลงใน form (หากต้องการใช้งานในฟอร์ม)
+      const form = document.getElementById('uploadForm');
+      form.idKey = idKey;
+      form.nameField = name;
+      form.serviceNames = serviceNames;
+      form.totalPrice = totalPrice;
+    }
+
+    // URL สำหรับส่งข้อมูลใบเสร็จไปยัง GAS
+    let endpointUrl = "https://script.google.com/macros/s/AKfycbwDA-uMnqI_YCiBY_MRXhbVAGKE9j7fT52c1yo2qes_nRt_kGc4puVuMlXNX6KkvmI7/exec";
+    let fileInput = document.getElementById("file");
+    let previewContainer = document.getElementById("previewContainer");
+
+    // ฟังก์ชันแปลงไฟล์เป็น base64
+    function getBase64(file) {
+      return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ฟังก์ชันแสดง preview เมื่อเลือกไฟล์
+    function previewImage() {
+      if (fileInput.files.length > 0) {
+        let file = fileInput.files[0];
+        let reader = new FileReader();
+        reader.onload = function (e) {
+          let img = document.createElement("img");
+          img.src = e.target.result;
+          img.alt = "Image Preview";
+          img.className = "object-cover w-full h-full rounded-lg";
+          previewContainer.innerHTML = "";
+          previewContainer.appendChild(img);
+          submitData(file);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // ฟังก์ชันส่งข้อมูลใบเสร็จไปยัง GAS
+    async function submitData(file) {
+      const isConfirmed = await showConfirmationDialog();
+      if (isConfirmed) {
+        try {
+          let base64 = await getBase64(file);
+          const formData = document.getElementById('uploadForm');
+          // สร้างออบเจ็กต์ข้อมูลที่จะส่ง (รวมข้อมูลที่ดึงมาจาก URL)
+          let obj = {
+            base64: base64,
+            type: file.type,
+            name: file.name,
+            idKey: formData.idKey,         // ข้อมูลจาก URL
+            userlineId: formData.userlineid, // สมมติว่า userlineid ถูกตั้งค่าจาก LIFF ก่อนหน้า
+            totalOrder: formData.totalPrice, // ใช้ totalPrice จาก URL
+            customerName: formData.nameField, // ชื่อจาก URL
+            serviceNames: formData.serviceNames, // รายการบริการจาก URL
+            contact: formData.contact // สามารถส่ง contact ได้หากมี
+          };
+
+          Swal.fire({
+            title: 'กำลังบันทึก, กรุณารอสักครู่...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            html: '<div class="swal2-loading text-md"></div>',
+            onBeforeOpen: () => { Swal.showLoading(); }
+          });
+
+          let response = await fetch(endpointUrl, {
+            method: "POST",
+            body: JSON.stringify(obj)
+          });
+
+          let data = await response.text();
+          Swal.fire({
+            title: 'สำเร็จ!',
+            text: 'อัปโหลดใบเสร็จเรียบร้อยแล้ว!',
+            icon: 'success',
+            confirmButtonText: 'ปิด',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              liff.closeWindow();
+            }
+          });
+          console.log(data);
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'ข้อผิดพลาด',
+            text: 'เกิดข้อผิดพลาดขณะส่งข้อมูล',
+          });
+          console.error(error);
+        }
+      } else {
+        Swal.fire('ยกเลิกการส่งข้อมูล', 'ข้อมูลของคุณยังไม่ถูกส่ง', 'info');
+      }
+    }
+
+    fileInput.addEventListener('change', () => {
+      previewImage();
+    });
+
+    async function showConfirmationDialog() {
+      const confirmation = await Swal.fire({
+        title: 'ยืนยันการส่งข้อมูล',
+        text: 'คุณแน่ใจหรือว่าต้องการส่งข้อมูลนี้?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ใช่, ส่งข้อมูล!',
+        cancelButtonText: 'ไม่, ยกเลิก'
+      });
+      return confirmation.isConfirmed;
+    }
+  </script>
+</body>
+
+</html>

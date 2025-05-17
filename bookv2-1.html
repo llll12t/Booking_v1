@@ -8,9 +8,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-  <!-- Flatpickr CSS/JS -->
+  <!-- Flatpickr CSS/JS + Thai locale -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
   <style>
     select {
       appearance: none;
@@ -89,7 +90,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <p id="greetingPrefix" class="text-sm text-gray-500">Good morning</p>
+        <p id="greetingPrefix" class="text-sm text-gray-500">สวัสดีตอนเช้า</p>
         <h1 id="greetingName" class="text-xl font-bold">LINE NAME</h1>
       </div>
       <img id="greetingAvatar" src="" alt="Avatar" class="w-12 h-12 rounded-full bg-gray-200" />
@@ -146,7 +147,9 @@
         </div>
         <div class="flex justify-between">
           <button type="button" id="backToStep3" class="px-4 py-2 border rounded-lg font-bold">ย้อนกลับ</button>
-          <button type="submit" id="confirmBooking" class="w-full py-3 bg-black text-white rounded-lg font-bold ml-4">ยืนยันการนัดหมาย</button>
+          <button type="submit" id="confirmBooking" class="w-full py-3 bg-black text-white rounded-lg font-bold ml-4">
+            ยืนยันการนัดหมาย
+          </button>
         </div>
       </div>
 
@@ -179,14 +182,13 @@
     };
 
     function getGreeting(hour) {
-      if (hour >= 5 && hour < 12) return 'Good morning';
-      if (hour >= 12 && hour < 13) return 'Good noon';
-      if (hour >= 13 && hour < 17) return 'Good afternoon';
-      if (hour >= 17 && hour < 19) return 'Good evening';
-      return 'Good night';
+      if (hour >= 5 && hour < 12) return 'สวัสดีตอนเช้า';
+      if (hour >= 12 && hour < 13) return 'สวัสดีตอนเที่ยง';
+      if (hour >= 13 && hour < 17) return 'สวัสดีตอนบ่าย';
+      if (hour >= 17 && hour < 19) return 'สวัสดีตอนเย็น';
+      return 'ราตรีสวัสดิ์';
     }
 
-    // Render pill nav
     function renderPillNav(step) {
       const nav = document.getElementById('pillNav');
       nav.innerHTML = '';
@@ -200,7 +202,6 @@
       }
     }
 
-    // Show step
     function showStep(step) {
       document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
       document.getElementById('step'+step).classList.remove('hidden');
@@ -209,7 +210,6 @@
       if (step === 4) updateConfirmation();
     }
 
-    // Update confirmation
     function updateConfirmation(){
       document.getElementById('confirmService').textContent = document.getElementById('selectedServiceNames').value;
       document.getElementById('confirmName').textContent    = document.getElementById('name').value;
@@ -219,7 +219,6 @@
       document.getElementById('confirmTime').textContent    = document.getElementById('time').value;
     }
 
-    // Popup
     function showPopup(message){
       popupContent.innerHTML = `<div class="text-center py-4">${message}</div>
                                 <div class="text-center mt-4">
@@ -228,11 +227,8 @@
       popup.style.display = 'flex';
     }
     function hidePopup(){ popup.style.display = 'none'; }
-
-    // Loading
     function showLoading(on){ loadingOverlay.style.display = on ? 'flex' : 'none'; }
 
-    // Fetch month availability
     async function fetchMonthAvailability(year, month) {
       try {
         const res = await fetch(`${WEB_APP_URL}?action=getMonthAvailability&year=${year}&month=${month}`);
@@ -243,7 +239,6 @@
       }
     }
 
-    // Init calendar with past/future/full
     function formatDate(d) {
       const y = d.getFullYear();
       const m = ('0'+(d.getMonth()+1)).slice(-2);
@@ -256,6 +251,7 @@
       fetchMonthAvailability(today.getFullYear(), ('0'+(today.getMonth()+1)).slice(-2));
       flatpickr("#inlineCalendar", {
         inline: true,
+        locale: 'th',
         dateFormat: "Y-m-d",
         disable: [
           date => {
@@ -292,7 +288,6 @@
       });
     }
 
-    // Check availability
     async function checkAvailability(dateStr){
       try {
         const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${dateStr}`);
@@ -324,7 +319,6 @@
       time.value = '';
     }
 
-    // Fetch services
     async function fetchServiceData(){
       try {
         const res = await fetch(`${WEB_APP_URL}?action=fetchServices`);
@@ -351,7 +345,6 @@
       selectedServiceNames.value = names;
     }
 
-    // Fetch holidays
     async function fetchHolidayDates(){
       try {
         const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
@@ -359,7 +352,6 @@
       } catch(e){ console.error(e); }
     }
 
-    // Step navigation validation
     document.getElementById('nextToStep2').onclick = () => {
       if (!JSON.parse(selectedServices.value||'[]').length) {
         showPopup('กรุณาเลือกบริการอย่างน้อย 1 รายการ');
@@ -388,7 +380,6 @@
     };
     document.getElementById('backToStep3').onclick = () => showStep(3);
 
-    // Submit booking
     bookingForm.onsubmit = async e => {
       e.preventDefault();
       if (isSubmitting) return;
@@ -406,13 +397,10 @@
       }
     };
 
-    // Initialize everything
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading(true);
-      // set dynamic greeting
-      const hour = new Date().getHours();
-      greetingPrefix.textContent = getGreeting(hour);
-
+      const hr = new Date().getHours();
+      greetingPrefix.textContent = getGreeting(hr);
       renderPillNav(1);
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) {
@@ -431,7 +419,6 @@
       showLoading(false);
     });
 
-    // Pre-fill member data
     async function fetchMemberData(uid) {
       try {
         const res = await fetch(WEB_APP_MEMBER_URL, {
@@ -444,9 +431,7 @@
           document.getElementById('name').value = row[2] || '';
           document.getElementById('phonenumber').value = row[3] || '';
         }
-      } catch(e) {
-        console.error(e);
-      }
+      } catch(e){ console.error(e); }
     }
   </script>
 </body>

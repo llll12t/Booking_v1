@@ -172,7 +172,6 @@
     let currentStep = 1, isSubmitting = false;
 
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-Yjv94ffGn98tweURPh1cxDfegwcffZg8dZ_YsZDqwxi2L4G6Q_hIETG1Wv5IMP3V/exec';
-    const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbyR8goGsMD6q3oHSHUynmZ6tp2phuZN7xhYM0X0CU3FrLC95Rho_H2UgHOXbrAtfEHj8w/exec';
     const LIFF_ID = '2006029649-bj0ez4Og';
 
     function getGreeting(hour) {
@@ -226,8 +225,7 @@
       return `${y}-${m}-${day}`;
     }
     function initCalendar() {
-      const today = new Date();
-      today.setHours(0,0,0,0);
+      const today = new Date(); today.setHours(0,0,0,0);
       fetchMonthAvailability(today.getFullYear(), ('0'+(today.getMonth()+1)).slice(-2));
       flatpickr("#inlineCalendar", {
         inline: true,
@@ -236,8 +234,8 @@
         disable: [
           date => {
             const key = formatDate(date);
-            return date < today 
-              || holidayDates.includes(key) 
+            return date < today
+              || holidayDates.includes(key)
               || monthAvailability[key] === 'full';
           }
         ],
@@ -393,25 +391,9 @@
         await fetchServiceData();
         await fetchHolidayDates();
         initCalendar();
-        await fetchMemberData(profile.userId);
       }
       showLoading(false);
     });
-
-    async function fetchMemberData(uid) {
-      try {
-        const res = await fetch(WEB_APP_MEMBER_URL, {
-          method:'POST',
-          body: JSON.stringify({ action:'fetchData', userId:uid })
-        });
-        const data = await res.json();
-        const row = data.find(r => r[1] === uid);
-        if (row) {
-          document.getElementById('name').value = row[2] || '';
-          document.getElementById('phonenumber').value = row[3] || '';
-        }
-      } catch(e){ console.error(e); }
-    }
   </script>
 </body>
 </html>

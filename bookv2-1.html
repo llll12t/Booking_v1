@@ -40,6 +40,7 @@
     .popup-content {
       background:#fff; padding:1.5rem; border-radius:0.5rem; width:90%; max-width:320px;
     }
+    /* Flatpickr container centering */
     #inlineCalendar-wrapper {
       max-width: 320px; margin: 0 auto 1rem;
     }
@@ -149,7 +150,7 @@
         </div>
         <div class="flex justify-between">
           <button type="button" id="backToStep3" class="px-4 py-2 border rounded-lg font-bold">ย้อนกลับ</button>
-          <button type="button" id="confirmBooking" class="w-full py-3 bg-black text-white rounded-lg font-bold ml-4">
+          <button type="submit" id="confirmBooking" class="w-full py-3 bg-black text-white rounded-lg font-bold ml-4">
             ยืนยันการนัดหมาย
           </button>
         </div>
@@ -159,15 +160,15 @@
       <input type="hidden" id="time" name="time" />
       <input type="hidden" id="selectedServices" name="selectedServices" />
       <input type="hidden" id="selectedServiceNames" name="selectedServiceNames" />
+      <input type="hidden" id="userlineid" name="userlineid" value="" />
       <input type="hidden" name="action" value="makeBooking" />
 
     </form>
   </div>
 
   <script>
-    // Globals
     let holidayDates = [], monthAvailability = {}, selectedDate = '';
-    let isSubmitting = false;
+    let currentStep = 1, isSubmitting = false;
 
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-Yjv94ffGn98tweURPh1cxDfegwcffZg8dZ_YsZDqwxi2L4G6Q_hIETG1Wv5IMP3V/exec';
     const LIFF_ID = '2006029649-bj0ez4Og';
@@ -180,22 +181,38 @@
       return 'ราตรีสวัสดิ์';
     }
 
-    function showPopup(message) {
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
+      document.getElementById('step'+step).classList.remove('hidden');
+      currentStep = step;
+      if (step === 4) updateConfirmation();
+    }
+
+    function updateConfirmation(){
+      document.getElementById('confirmService').textContent = document.getElementById('selectedServiceNames').value;
+      document.getElementById('confirmName').textContent    = document.getElementById('name').value;
+      document.getElementById('confirmPhone').textContent   = document.getElementById('phonenumber').value;
+      document.getElementById('confirmNote').textContent    = document.getElementById('note').value || '-';
+      document.getElementById('confirmDate').textContent    = selectedDate.split('-').reverse().join('/');
+      document.getElementById('confirmTime').textContent    = document.getElementById('time').value;
+    }
+
+    function showPopup(message){
       popupContent.innerHTML = `<div class="text-center py-4">${message}</div>
                                 <div class="text-center mt-4">
                                   <button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 rounded-lg">ปิด</button>
                                 </div>`;
       popup.style.display = 'flex';
     }
-    function hidePopup() { popup.style.display = 'none'; }
-    function showLoading(on) { loadingOverlay.style.display = on ? 'flex' : 'none'; }
+    function hidePopup(){ popup.style.display = 'none'; }
+    function showLoading(on){ loadingOverlay.style.display = on ? 'flex' : 'none'; }
 
     async function fetchMonthAvailability(year, month) {
       try {
         const res = await fetch(`${WEB_APP_URL}?action=getMonthAvailability&year=${year}&month=${month}`);
         monthAvailability = await res.json();
       } catch (e) {
-        console.error(e);
+        console.error('fetchMonthAvailability error', e);
       }
     }
 
@@ -205,7 +222,6 @@
       const day = ('0'+d.getDate()).slice(-2);
       return `${y}-${m}-${day}`;
     }
-
     function initCalendar() {
       const today = new Date(); today.setHours(0,0,0,0);
       fetchMonthAvailability(today.getFullYear(), ('0'+(today.getMonth()+1)).slice(-2));
@@ -221,7 +237,7 @@
               || monthAvailability[key] === 'full';
           }
         ],
-        onDayCreate: (dObj, dStr, fp, dayElem) => {
+        onDayCreate: (dObj,dStr,fp,dayElem) => {
           const key = formatDate(dayElem.dateObj);
           if (dayElem.dateObj < today) {
             dayElem.classList.add('past');
@@ -232,26 +248,28 @@
             dayElem.classList.add("flatpickr-disabled");
           }
         },
-        onMonthChange: async (sd, ds, fp) => {
+        onMonthChange: async (sd,ds,fp) => {
           await fetchMonthAvailability(fp.currentYear, ('0'+(fp.currentMonth+1)).slice(-2));
           fp.redraw();
         },
-        onChange: (sd, ds) => {
-          selectedDate = ds;
-          if (ds) {
+        onChange: (selectedDates, dateStr) => {
+          selectedDate = dateStr;
+          if (dateStr) {
             timeDropdown.innerHTML = `<div class="text-gray-800 text-sm text-center py-2">โปรดรอสักครู่..</div>`;
-            checkAvailability(ds);
+            checkAvailability(dateStr);
+          } else {
+            resetTimeDropdown();
           }
         }
       });
     }
 
-    async function checkAvailability(dateStr) {
+    async function checkAvailability(dateStr){
       try {
         const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${dateStr}`);
-        const avail = (await res.json()).availability;
+        const avail = await res.json().then(j=>j.availability);
         timeDropdown.innerHTML = '';
-        Object.entries(avail).forEach(([t, i]) => {
+        Object.entries(avail).forEach(([t,i])=>{
           const div = document.createElement('div');
           div.className = 'time-option'; div.dataset.value = t;
           const spanT = document.createElement('span'); spanT.textContent = t;
@@ -260,7 +278,7 @@
           badge.textContent = `${i.remaining}/${i.total}`;
           if (i.status!=='Available') div.classList.add('opacity-50');
           else div.onclick = () => {
-            [...timeDropdown.children].forEach(c => c.classList.remove('selected'));
+            [...timeDropdown.children].forEach(c=>c.classList.remove('selected'));
             div.classList.add('selected');
             time.value = t;
           };
@@ -272,20 +290,20 @@
         console.error(e);
       }
     }
-
     function resetTimeDropdown() {
       timeDropdown.innerHTML = `<div class="text-gray-400 text-sm text-center py-2">ยังไม่ได้เลือกวัน</div>`;
       time.value = '';
     }
 
-    async function fetchServiceData() {
+    async function fetchServiceData(){
       try {
         const res = await fetch(`${WEB_APP_URL}?action=fetchServices`);
         const services = await res.json();
-        services.forEach(s => {
+        services.forEach(s=>{
           const c = document.createElement('div');
           c.className = 'p-4 border rounded-lg cursor-pointer';
-          c.innerHTML = `<div class="font-bold">${s.name}</div><div class="text-sm text-gray-600">ราคา: ${s.price}</div>`;
+          c.innerHTML = `<div class="font-bold">${s.name}</div>
+                         <div class="text-sm text-gray-600">ราคา: ${s.price}</div>`;
           c.dataset.id = s.id; c.dataset.name = s.name; c.dataset.price = s.price;
           c.onclick = () => {
             c.classList.toggle('bg-green-100');
@@ -293,10 +311,9 @@
           };
           serviceCards.appendChild(c);
         });
-      } catch(e) { console.error(e); }
+      } catch(e){ console.error(e); }
     }
-
-    function updateSelectedServices() {
+    function updateSelectedServices(){
       const sel = [...serviceCards.querySelectorAll('.bg-green-100')];
       const ids = sel.map(c=>c.dataset.id);
       const names = sel.map(c=>`${c.dataset.name} (${c.dataset.price})`).join(', ');
@@ -304,136 +321,148 @@
       selectedServiceNames.value = names;
     }
 
-    async function fetchHolidayDates() {
+    async function fetchHolidayDates(){
       try {
         const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
-        holidayDates = (await res.json()).holidays;
-      } catch(e) { console.error(e); }
+        holidayDates = await res.json().then(j=>j.holidays);
+      } catch(e){ console.error(e); }
     }
 
-    // Build Flex Message payload
-    function buildBookingFlex(booking) {
-      return {
-        type: 'flex',
-        altText: 'รายละเอียดการจองของคุณ',
-        contents: {
-          type: 'bubble',
-          header: {
-            type: 'box', layout: 'vertical', contents: [{
-              type: 'text',
-              text: '✅ การจองสำเร็จ',
-              weight: 'bold', size: 'lg', align: 'center'
-            }]
-          },
-          body: {
-            type: 'box', layout: 'vertical', spacing: 'sm',
-            contents: [
-              { type: 'box', layout: 'baseline', contents: [
-                  { type: 'text', text: '🛠 บริการ', weight: 'bold', flex: 2 },
-                  { type: 'text', text: booking.serviceNames, flex: 5, wrap: true }
-                ]
-              },
-              { type: 'box', layout: 'baseline', contents: [
-                  { type: 'text', text: '📅 วันที่', weight: 'bold', flex: 2 },
-                  { type: 'text', text: booking.date, flex: 5 }
-                ]
-              },
-              { type: 'box', layout: 'baseline', contents: [
-                  { type: 'text', text: '⏰ เวลา', weight: 'bold', flex: 2 },
-                  { type: 'text', text: booking.time, flex: 5 }
-                ]
-              },
-              { type: 'separator' },
-              { type: 'box', layout: 'baseline', contents: [
-                  { type: 'text', text: '👤 ชื่อ', weight: 'bold', flex: 2 },
-                  { type: 'text', text: booking.name, flex: 5 }
-                ]
-              },
-              { type: 'box', layout: 'baseline', contents: [
-                  { type: 'text', text: '📞 เบอร์', weight: 'bold', flex: 2 },
-                  { type: 'text', text: booking.phone, flex: 5 }
-                ]
-              },
-              { type: 'box', layout: 'baseline', contents: [
-                  { type: 'text', text: '📝 หมายเหตุ', weight: 'bold', flex: 2 },
-                  { type: 'text', text: booking.note || '-', flex: 5, wrap: true }
-                ]
-              }
-            ]
-          },
-          footer: {
-            type: 'box', layout: 'vertical', contents: [{
-              type: 'text',
-              text: 'ขอบคุณที่ใช้บริการ',
-              size: 'xs', color: '#aaaaaa', align: 'center'
-            }]
-          }
+    // ส่ง Flex Message ยืนยันการจอง
+    async function sendFlexMessage() {
+      const services = document.getElementById('selectedServiceNames').value;
+      const name     = document.getElementById('name').value;
+      const phone    = document.getElementById('phonenumber').value;
+      const date     = selectedDate.split('-').reverse().join('/');
+      const timeVal  = document.getElementById('time').value;
+      const note     = document.getElementById('note').value || '-';
+
+      const bubble = {
+        type: 'bubble',
+        header: {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            { type: 'text', text: 'ยืนยันการจองของคุณ', weight: 'bold', size: 'lg', align: 'center' }
+          ]
+        },
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'sm',
+          contents: [
+            { type: 'text', text: `🛎 บริการ: ${services}`, size: 'sm', wrap: true },
+            { type: 'text', text: `📅 วันที่: ${date}`, size: 'sm' },
+            { type: 'text', text: `⏰ เวลา: ${timeVal}`, size: 'sm' },
+            { type: 'text', text: `👤 ชื่อ: ${name}`, size: 'sm', wrap: true },
+            { type: 'text', text: `📱 เบอร์ติดต่อ: ${phone}`, size: 'sm' },
+            { type: 'text', text: `📝 หมายเหตุ: ${note}`, size: 'sm', wrap: true }
+          ]
         }
       };
-    }
 
-    // Send via LIFF
-    async function sendFlexMessage(booking) {
       try {
-        await liff.sendMessages([ buildBookingFlex(booking) ]);
+        await liff.sendMessages([{
+          type: 'flex',
+          altText: 'รายละเอียดการจองของคุณ',
+          contents: bubble
+        }]);
+        console.log('Flex message sent');
       } catch (err) {
         console.error('Error sending flex message:', err);
       }
     }
 
-    // Step nav handlers
-    nextToStep2.onclick = () => {
-      if (!JSON.parse(selectedServices.value||'[]').length) { showPopup('กรุณาเลือกบริการอย่างน้อย 1 รายการ'); return; }
+    // การนำทางและการส่งฟอร์ม
+    document.getElementById('nextToStep2').onclick = () => {
+      if (!JSON.parse(selectedServices.value||'[]').length) {
+        showPopup('กรุณาเลือกบริการอย่างน้อย 1 รายการ');
+        return; }
       showStep(2);
     };
-    backToStep1.onclick = () => showStep(1);
-    nextToStep3.onclick = () => {
+    document.getElementById('backToStep1').onclick = () => showStep(1);
+    document.getElementById('nextToStep3').onclick = () => {
       if (!selectedDate) { showPopup('กรุณาเลือกวันที่'); return; }
-      if (!time.value) { showPopup('กรุณาเลือกเวลา'); return; }
+      if (!time.value)    { showPopup('กรุณาเลือกเวลา'); return; }
       showStep(3);
     };
-    backToStep2.onclick = () => showStep(2);
-    nextToStep4.onclick = () => {
-      if (!name.value.trim()) { showPopup('กรุณากรอกชื่อ-สกุล'); return; }
-      if (!phonenumber.value.trim()) { showPopup('กรุณากรอกเบอร์ติดต่อ'); return; }
+    document.getElementById('backToStep2').onclick = () => showStep(2);
+    document.getElementById('nextToStep4').onclick = () => {
+      const nameVal  = document.getElementById('name').value.trim();
+      const phoneVal = document.getElementById('phonenumber').value.trim();
+      if (!nameVal)  { showPopup('กรุณากรอกชื่อ-สกุล'); return; }
+      if (!phoneVal) { showPopup('กรุณากรอกเบอร์ติดต่อ'); return; }
       showStep(4);
     };
-    backToStep3.onclick = () => showStep(3);
+    document.getElementById('backToStep3').onclick = () => showStep(3);
 
-    // Confirm button: send flex then submit
-    confirmBooking.onclick = async () => {
+    // ส่งข้อมูลและ Flex Message
+    bookingForm.onsubmit = async e => {
+      e.preventDefault();
       if (isSubmitting) return;
-      const booking = {
-        serviceNames: selectedServiceNames.value,
-        date:         confirmDate.textContent,
-        time:         confirmTime.textContent,
-        name:         confirmName.textContent,
-        phone:        confirmPhone.textContent,
-        note:         confirmNote.textContent
-      };
-      await sendFlexMessage(booking);
-      bookingForm.submit();
+      isSubmitting = true; showLoading(true);
+      try {
+        const fd = new FormData(bookingForm);
+        fd.append('date', selectedDate);
+        await fetch(WEB_APP_URL, { method:'POST', body:fd });
+        await sendFlexMessage();
+        showPopup('สำเร็จ! การนัดหมายเสร็จสมบูรณ์');
+      } catch(e) {
+        console.error(e);
+        showPopup('ส่งข้อมูลไม่สำเร็จ');
+      } finally {
+        isSubmitting = false; showLoading(false);
+      }
     };
 
-    bookingForm.addEventListener('submit', e => {
-      // prevent duplicate
-      if (isSubmitting) e.preventDefault();
-      else isSubmitting = true;
-    });
-
-    // Initialize
     document.addEventListener('DOMContentLoaded', async () => {
       showLoading(true);
       const hr = new Date().getHours();
       greetingPrefix.textContent = getGreeting(hr);
       await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) liff.login();
-      await fetchServiceData();
-      await fetchHolidayDates();
-      initCalendar();
-      showStep(1);
+      if (!liff.isLoggedIn()) { liff.login(); }
+      else {
+        const profile = await liff.getProfile();
+        greetingName.textContent = profile.displayName;
+        greetingAvatar.src = profile.pictureUrl;
+        userlineid.value = profile.userId;
+        await fetchServiceData();
+        await fetchHolidayDates();
+        initCalendar();
+      }
       showLoading(false);
     });
+
+    // ดึงลิสต์บริการและวันหยุด
+    async function fetchServiceData(){
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=fetchServices`);
+        const services = await res.json();
+        services.forEach(s=>{
+          const c = document.createElement('div');
+          c.className = 'p-4 border rounded-lg cursor-pointer';
+          c.innerHTML = `<div class="font-bold">${s.name}</div>
+                         <div class="text-sm text-gray-600">ราคา: ${s.price}</div>`;
+          c.dataset.id = s.id; c.dataset.name = s.name; c.dataset.price = s.price;
+          c.onclick = () => {
+            c.classList.toggle('bg-green-100');
+            updateSelectedServices();
+          };
+          serviceCards.appendChild(c);
+        });
+      } catch(e){ console.error(e); }
+    }
+    function updateSelectedServices(){
+      const sel = [...serviceCards.querySelectorAll('.bg-green-100')];
+      selectedServices.value = JSON.stringify(sel.map(c=>c.dataset.id));
+      selectedServiceNames.value = sel.map(c=>`${c.dataset.name} (${c.dataset.price})`).join(', ');
+    }
+    async function fetchHolidayDates(){
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
+        holidayDates = await res.json().then(j=>j.holidays);
+      } catch(e){ console.error(e); }
+    }
   </script>
 </body>
 </html>

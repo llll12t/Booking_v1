@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
   <style>
+    body { font-family: 'Noto Sans Thai', sans-serif; }
     select {
       appearance: none;
       background-image:
@@ -39,6 +40,10 @@
     .popup-content {
       background:#fff; padding:1.5rem; border-radius:0.5rem; width:90%; max-width:320px;
     }
+    /* Flatpickr tweaks */
+    #inlineCalendar-wrapper {
+      max-width: 320px; margin: 0 auto 1rem;
+    }
     #inlineCalendar .flatpickr-calendar.inline {
       width:100% !important; border-radius:0.75rem; box-shadow:none;
     }
@@ -51,7 +56,6 @@
     #inlineCalendar .flatpickr-day.selected {
       background:#10b981 !important; color:#fff !important;
     }
-    /* fade past dates */
     #inlineCalendar .flatpickr-day.past {
       opacity:0.4; pointer-events:none;
     }
@@ -96,9 +100,6 @@
       <img id="greetingAvatar" src="" alt="Avatar" class="w-12 h-12 rounded-full bg-gray-200" />
     </div>
 
-    <!-- Pill Navigation -->
-    <div id="pillNav" class="flex space-x-2 mb-6"></div>
-
     <!-- Booking Form -->
     <form id="bookingForm" novalidate>
 
@@ -113,7 +114,9 @@
       <!-- Step 2: เลือกวันที่ / เวลา -->
       <div class="step hidden" id="step2">
         <label class="block mb-2 font-semibold">เลือกวันที่:</label>
-        <div id="inlineCalendar" class="mb-4"></div>
+        <div id="inlineCalendar-wrapper">
+          <div id="inlineCalendar"></div>
+        </div>
         <label class="block mb-2 font-semibold">เลือกเวลา:</label>
         <div id="timeDropdown" class="mb-6">
           <div class="text-gray-400 text-sm text-center py-2">ยังไม่ได้เลือกวัน</div>
@@ -165,21 +168,12 @@
   </div>
 
   <script>
-    // Globals
     let holidayDates = [], monthAvailability = {}, selectedDate = '';
     let currentStep = 1, isSubmitting = false;
 
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-Yjv94ffGn98tweURPh1cxDfegwcffZg8dZ_YsZDqwxi2L4G6Q_hIETG1Wv5IMP3V/exec';
     const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbyR8goGsMD6q3oHSHUynmZ6tp2phuZN7xhYM0X0CU3FrLC95Rho_H2UgHOXbrAtfEHj8w/exec';
     const LIFF_ID = '2006029649-bj0ez4Og';
-
-    const pillLabels = {1:'บริการ',2:'วันที่/เวลา',3:'ข้อมูลส่วนตัว',4:'ตรวจสอบ'};
-    const pillColorActive = {
-      1:'bg-green-100 text-green-800',
-      2:'bg-purple-100 text-purple-800',
-      3:'bg-green-100 text-green-800',
-      4:'bg-gray-100 text-gray-800'
-    };
 
     function getGreeting(hour) {
       if (hour >= 5 && hour < 12) return 'สวัสดีตอนเช้า';
@@ -189,23 +183,9 @@
       return 'ราตรีสวัสดิ์';
     }
 
-    function renderPillNav(step) {
-      const nav = document.getElementById('pillNav');
-      nav.innerHTML = '';
-      for (let i=1; i<=4; i++){
-        const pill = document.createElement('div');
-        pill.className = (i===step)
-          ? `${pillColorActive[i]} rounded-full px-4 py-2 font-bold`
-          : 'bg-gray-200 text-gray-500 rounded-full px-4 py-2';
-        pill.textContent = pillLabels[i];
-        nav.appendChild(pill);
-      }
-    }
-
     function showStep(step) {
       document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
       document.getElementById('step'+step).classList.remove('hidden');
-      renderPillNav(step);
       currentStep = step;
       if (step === 4) updateConfirmation();
     }
@@ -401,7 +381,6 @@
       showLoading(true);
       const hr = new Date().getHours();
       greetingPrefix.textContent = getGreeting(hr);
-      renderPillNav(1);
       await liff.init({ liffId: LIFF_ID });
       if (!liff.isLoggedIn()) {
         liff.login();

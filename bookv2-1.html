@@ -12,28 +12,59 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
-    /* select arrow */
-    select { appearance: none; background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="none" stroke="%23666" stroke-width="2" d="M1 1l4 4 4-4"/></svg>'); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; }
-    /* loading overlay */
-    .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(30,41,59,0.8); display:none; align-items:center; justify-content:center; z-index:50; }
-    .loading-spinner { border:8px solid #fff; border-top:8px solid #1e293b; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite; }
-    @keyframes spin { to{transform:rotate(360deg);} }
-    /* popup */
-    .popup { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(30,41,59,0.5); display:none; align-items:center; justify-content:center; z-index:60; }
-    .popup-content { background:#fff; padding:1.5rem; border-radius:0.5rem; width:90%; max-width:320px; }
-    /* inline calendar tweaks */
-    #inlineCalendar .flatpickr-calendar.inline { width:100% !important; border-radius:0.75rem; box-shadow:none; }
-    #inlineCalendar .flatpickr-day { padding:0.75rem; border-radius:0.5rem; margin:2px; }
-    #inlineCalendar .flatpickr-day.today { border:1px solid #4ade80 !important; }
-    #inlineCalendar .flatpickr-day.selected { background:#10b981 !important; color:#fff !important; }
-    /* time options */
-    #timeDropdown { display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; }
-    .time-option { display:flex; justify-content:space-between; align-items:center; padding:0.75rem; border-radius:0.5rem; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.1); cursor:pointer; }
-    .time-option.selected    { background:#10b981; color:#fff; }
-    .badge { border-radius:9999px; padding:0.25rem 0.5rem; font-size:0.75rem; font-weight:600; min-width:2.5rem; text-align:center; }
+    select {
+      appearance: none;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="7" viewBox="0 0 10 7"><path fill="none" stroke="%23666" stroke-width="2" d="M1 1l4 4 4-4"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+    }
+    .loading-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(30,41,59,0.8);
+      display: none; align-items:center; justify-content:center; z-index:50;
+    }
+    .loading-spinner {
+      border:8px solid #fff; border-top:8px solid #1e293b;
+      border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .popup {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(30,41,59,0.5);
+      display: none; align-items:center; justify-content:center; z-index:60;
+    }
+    .popup-content {
+      background:#fff; padding:1.5rem; border-radius:0.5rem; width:90%; max-width:320px;
+    }
+    #inlineCalendar .flatpickr-calendar.inline {
+      width:100% !important; border-radius:0.75rem; box-shadow:none;
+    }
+    #inlineCalendar .flatpickr-day {
+      padding:0.75rem; border-radius:0.5rem; margin:2px;
+    }
+    #inlineCalendar .flatpickr-day.today {
+      border:1px solid #4ade80 !important;
+    }
+    #inlineCalendar .flatpickr-day.selected {
+      background:#10b981 !important; color:#fff !important;
+    }
+    #timeDropdown {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem;
+    }
+    .time-option {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:0.75rem; border-radius:0.5rem; background:#fff;
+      box-shadow:0 1px 2px rgba(0,0,0,0.1); cursor:pointer;
+    }
+    .time-option.selected { background:#10b981; color:#fff; }
+    .badge {
+      border-radius:9999px; padding:0.25rem 0.5rem;
+      font-size:0.75rem; font-weight:600; min-width:2.5rem; text-align:center;
+    }
     .badge.available { background:#dcfce7; color:#166534; }
     .badge.full      { background:#fee2e2; color:#b91c1c; }
-    .opacity-50      { opacity:0.5; pointer-events:none; }
+    .opacity-50 { opacity:0.5; pointer-events:none; }
   </style>
 </head>
 <body class="bg-white min-h-screen flex flex-col">
@@ -82,12 +113,8 @@
           <div class="text-gray-400 text-sm text-center py-2">ยังไม่ได้เลือกวัน</div>
         </div>
         <div class="flex justify-between">
-          <button type="button" id="backToStep1" class="px-4 py-2 border rounded-lg font-bold">
-            ย้อนกลับ
-          </button>
-          <button type="button" id="nextToStep3" class="px-4 py-2 bg-black text-white rounded-lg font-bold">
-            ถัดไป
-          </button>
+          <button type="button" id="backToStep1" class="px-4 py-2 border rounded-lg font-bold">ย้อนกลับ</button>
+          <button type="button" id="nextToStep3" class="px-4 py-2 bg-black text-white rounded-lg font-bold">ถัดไป</button>
         </div>
       </div>
 
@@ -97,12 +124,8 @@
         <input type="tel" id="phonenumber" name="phonenumber" placeholder="เบอร์ติดต่อ" class="w-full mb-3 rounded-lg border p-3" required />
         <textarea id="note" name="note" rows="4" placeholder="หมายเหตุ" class="w-full mb-6 rounded-lg border p-3"></textarea>
         <div class="flex justify-between">
-          <button type="button" id="backToStep2" class="px-4 py-2 border rounded-lg font-bold">
-            ย้อนกลับ
-          </button>
-          <button type="button" id="nextToStep4" class="px-4 py-2 bg-black text-white rounded-lg font-bold">
-            ถัดไป
-          </button>
+          <button type="button" id="backToStep2" class="px-4 py-2 border rounded-lg font-bold">ย้อนกลับ</button>
+          <button type="button" id="nextToStep4" class="px-4 py-2 bg-black text-white rounded-lg font-bold">ถัดไป</button>
         </div>
       </div>
 
@@ -117,12 +140,8 @@
           <div class="flex justify-between"><span>หมายเหตุ</span><span id="confirmNote" class="font-semibold"></span></div>
         </div>
         <div class="flex justify-between">
-          <button type="button" id="backToStep3" class="px-4 py-2 border rounded-lg font-bold">
-            ย้อนกลับ
-          </button>
-          <button type="submit" id="confirmBooking" class="w-full py-3 bg-black text-white rounded-lg font-bold ml-4">
-            ยืนยันการนัดหมาย
-          </button>
+          <button type="button" id="backToStep3" class="px-4 py-2 border rounded-lg font-bold">ย้อนกลับ</button>
+          <button type="submit" id="confirmBooking" class="w-full py-3 bg-black text-white rounded-lg font-bold ml-4">ยืนยันการนัดหมาย</button>
         </div>
       </div>
 
@@ -139,23 +158,30 @@
 
   <script>
     // Globals
-    let holidayDates = [], selectedDate = '';
+    let holidayDates = [], monthAvailability = {}, selectedDate = '';
     let currentStep = 1, isSubmitting = false;
+
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw-Yjv94ffGn98tweURPh1cxDfegwcffZg8dZ_YsZDqwxi2L4G6Q_hIETG1Wv5IMP3V/exec';
     const WEB_APP_MEMBER_URL = 'https://script.google.com/macros/s/AKfycbyR8goGsMD6q3oHSHUynmZ6tp2phuZN7xhYM0X0CU3FrLC95Rho_H2UgHOXbrAtfEHj8w/exec';
     const LIFF_ID = '2006029649-bj0ez4Og';
 
-    // Pill labels & colors
     const pillLabels = {1:'บริการ',2:'วันที่/เวลา',3:'ข้อมูลส่วนตัว',4:'ตรวจสอบ'};
-    const pillColorActive = {1:'bg-green-100 text-green-800',2:'bg-purple-100 text-purple-800',3:'bg-green-100 text-green-800',4:'bg-gray-100 text-gray-800'};
+    const pillColorActive = {
+      1:'bg-green-100 text-green-800',
+      2:'bg-purple-100 text-purple-800',
+      3:'bg-green-100 text-green-800',
+      4:'bg-gray-100 text-gray-800'
+    };
 
-    // Render pill navigation
+    // Render pill nav
     function renderPillNav(step) {
       const nav = document.getElementById('pillNav');
       nav.innerHTML = '';
       for (let i=1; i<=4; i++){
         const pill = document.createElement('div');
-        pill.className = (i===step) ? `${pillColorActive[i]} rounded-full px-4 py-2 font-bold` : 'bg-gray-200 text-gray-500 rounded-full px-4 py-2';
+        pill.className = (i===step)
+          ? `${pillColorActive[i]} rounded-full px-4 py-2 font-bold`
+          : 'bg-gray-200 text-gray-500 rounded-full px-4 py-2';
         pill.textContent = pillLabels[i];
         nav.appendChild(pill);
       }
@@ -163,14 +189,14 @@
 
     // Show step
     function showStep(step) {
-      document.querySelectorAll('.step').forEach(el=>el.classList.add('hidden'));
+      document.querySelectorAll('.step').forEach(el => el.classList.add('hidden'));
       document.getElementById('step'+step).classList.remove('hidden');
       renderPillNav(step);
       currentStep = step;
-      if(step===4) updateConfirmation();
+      if (step === 4) updateConfirmation();
     }
 
-    // Update confirmation summary
+    // Update confirmation
     function updateConfirmation(){
       document.getElementById('confirmService').textContent = document.getElementById('selectedServiceNames').value;
       document.getElementById('confirmName').textContent    = document.getElementById('name').value;
@@ -180,97 +206,70 @@
       document.getElementById('confirmTime').textContent    = document.getElementById('time').value;
     }
 
-    // Step buttons
-    document.getElementById('nextToStep2').onclick  = ()=>{ if(!JSON.parse(selectedServices.value||'[]').length){ showPopup('กรุณาเลือกบริการ'); return;} showStep(2); };
-    document.getElementById('backToStep1').onclick  = ()=>showStep(1);
-    document.getElementById('nextToStep3').onclick  = ()=>{ if(!selectedDate){ showPopup('กรุณาเลือกวันที่'); return;} if(!time.value){ showPopup('กรุณาเลือกเวลา'); return;} showStep(3); };
-    document.getElementById('backToStep2').onclick  = ()=>showStep(2);
-    document.getElementById('nextToStep4').onclick  = ()=>{ if(!name.value){ showPopup('กรุณากรอกชื่อ'); return;} if(!phonenumber.value){ showPopup('กรุณากรอกเบอร์ติดต่อ'); return;} showStep(4); };
-    document.getElementById('backToStep3').onclick  = ()=>showStep(3);
-
     // Popup
     function showPopup(message){
-      popupContent.innerHTML = `<div class="text-center py-4">${message}</div><div class="text-center mt-4"><button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 rounded-lg">ปิด</button></div>`;
+      popupContent.innerHTML = `<div class="text-center py-4">${message}</div>
+                                <div class="text-center mt-4">
+                                  <button onclick="hidePopup()" class="px-4 py-2 bg-gray-300 rounded-lg">ปิด</button>
+                                </div>`;
       popup.style.display = 'flex';
     }
     function hidePopup(){ popup.style.display = 'none'; }
 
     // Loading
-    function showLoading(on){ loadingOverlay.style.display = on?'flex':'none'; }
+    function showLoading(on){ loadingOverlay.style.display = on ? 'flex' : 'none'; }
 
-    // Initialize LIFF & fetch data
-    document.addEventListener('DOMContentLoaded', async ()=>{
-      showLoading(true);
-      renderPillNav(1);
-      await liff.init({liffId:LIFF_ID});
-      if(!liff.isLoggedIn()) liff.login(); else {
-        const profile = await liff.getProfile();
-        greetingName.textContent = profile.displayName;
-        greetingAvatar.src = profile.pictureUrl;
-        userlineid.value = profile.userId;
-        displayName.value = profile.displayName;
-        await fetchMemberData(profile.userId);
+    // Fetch month availability
+    async function fetchMonthAvailability(year, month) {
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=getMonthAvailability&year=${year}&month=${month}`);
+        if (!res.ok) throw new Error('Network error');
+        monthAvailability = await res.json(); 
+      } catch (e) {
+        console.error('fetchMonthAvailability error', e);
       }
-      await fetchServiceData();
-      await fetchHolidayDates();
-      initCalendar();
-      showLoading(false);
-    });
-
-    // Fetch member data
-    async function fetchMemberData(uid){
-      try {
-        const res = await fetch(WEB_APP_MEMBER_URL, {method:'POST',body:JSON.stringify({action:'fetchData',userId:uid})});
-        const data = await res.json();
-        const row = data.find(r=>r[1]===uid);
-        if(row){ name.value = row[2]||''; phonenumber.value = row[3]||''; }
-      } catch(e){console.error(e);}
     }
 
-    // Fetch services
-    async function fetchServiceData(){
-      try {
-        const res = await fetch(`${WEB_APP_URL}?action=fetchServices`);
-        const services = await res.json();
-        services.forEach(s=>{
-          const c=document.createElement('div');
-          c.className='p-4 border rounded-lg cursor-pointer';
-          c.innerHTML=`<div class="font-bold">${s.name}</div><div class="text-sm text-gray-600">ราคา: ${s.price}</div>`;
-          c.dataset.id=s.id; c.dataset.name=s.name; c.dataset.price=s.price;
-          c.onclick=()=>{
-            c.classList.toggle('bg-green-100');
-            updateSelectedServices();
-          };
-          serviceCards.appendChild(c);
-        });
-      } catch(e){console.error(e);}
+    // Initialize calendar
+    function formatDate(d) {
+      const y = d.getFullYear();
+      const m = ('0'+(d.getMonth()+1)).slice(-2);
+      const day = ('0'+d.getDate()).slice(-2);
+      return `${y}-${m}-${day}`;
     }
-
-    function updateSelectedServices(){
-      const sel = [...serviceCards.querySelectorAll('.bg-green-100')];
-      const ids = sel.map(c=>c.dataset.id);
-      const names = sel.map(c=>`${c.dataset.name} (${c.dataset.price})`).join(', ');
-      selectedServices.value = JSON.stringify(ids);
-      selectedServiceNames.value = names;
-    }
-
-    // Holidays
-    async function fetchHolidayDates(){
-      try {
-        const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
-        holidayDates = await res.json().then(j=>j.holidays);
-      } catch(e){console.error(e);}
-    }
-
-    // Calendar
-    function initCalendar(){
+    function initCalendar() {
+      const today = new Date();
+      fetchMonthAvailability(today.getFullYear(), ('0'+(today.getMonth()+1)).slice(-2));
       flatpickr("#inlineCalendar", {
-        inline:true, dateFormat:"Y-m-d",
-        disable:[d=>holidayDates.includes(d.toISOString().slice(0,10))],
-        onChange:(sd,ds)=> {
-          selectedDate=ds;
-          timeDropdown.innerHTML='<div class="text-center py-2 text-gray-500">Loading…</div>';
-          checkAvailability(ds);
+        inline: true,
+        dateFormat: "Y-m-d",
+        disable: [
+          date => {
+            const key = formatDate(date);
+            return holidayDates.includes(key) || monthAvailability[key] === 'full';
+          }
+        ],
+        onDayCreate: (dObj,dStr,fp,dayElem) => {
+          const key = formatDate(dayElem.dateObj);
+          if (holidayDates.includes(key)) {
+            dayElem.textContent = "❌";
+          } else if (monthAvailability[key] === 'full') {
+            dayElem.textContent = "เต็ม";
+            dayElem.classList.add("flatpickr-disabled");
+          }
+        },
+        onMonthChange: async (sd,ds,fp) => {
+          await fetchMonthAvailability(fp.currentYear, ('0'+(fp.currentMonth+1)).slice(-2));
+          fp.redraw();
+        },
+        onChange: (selectedDates, dateStr) => {
+          selectedDate = dateStr;
+          if (dateStr) {
+            timeDropdown.innerHTML = `<div class="text-gray-800 text-sm text-center py-2">โปรดรอสักครู่..</div>`;
+            checkAvailability(dateStr);
+          } else {
+            resetTimeDropdown();
+          }
         }
       });
     }
@@ -280,38 +279,162 @@
       try {
         const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&date=${dateStr}`);
         const avail = await res.json().then(j=>j.availability);
-        timeDropdown.innerHTML='';
+        timeDropdown.innerHTML = '';
         Object.entries(avail).forEach(([t,i])=>{
-          const div=document.createElement('div');
-          div.className='time-option'; div.dataset.value=t;
-          const spanT=document.createElement('span'); spanT.textContent=t;
-          const badge=document.createElement('span'); badge.className='badge '+(i.remaining>0?'available':'full');
-          badge.textContent=`${i.remaining}/${i.total}`;
-          if(i.status!=='Available') div.classList.add('opacity-50');
-          else div.onclick=()=>{
+          const div = document.createElement('div');
+          div.className = 'time-option'; div.dataset.value = t;
+          const spanT = document.createElement('span'); spanT.textContent = t;
+          const badge = document.createElement('span');
+          badge.className = 'badge ' + (i.remaining>0?'available':'full');
+          badge.textContent = `${i.remaining}/${i.total}`;
+          if (i.status!=='Available') div.classList.add('opacity-50');
+          else div.onclick = () => {
             [...timeDropdown.children].forEach(c=>c.classList.remove('selected'));
             div.classList.add('selected');
-            time.value=t;
+            time.value = t;
           };
-          div.append(spanT,badge);
+          div.append(spanT, badge);
           timeDropdown.appendChild(div);
         });
-      } catch(e){ showPopup('โหลดช่วงเวลาไม่สำเร็จ'); console.error(e); }
+      } catch (e) {
+        showPopup('โหลดช่วงเวลาไม่สำเร็จ');
+        console.error(e);
+      }
+    }
+    function resetTimeDropdown() {
+      timeDropdown.innerHTML = `<div class="text-gray-400 text-sm text-center py-2">ยังไม่ได้เลือกวัน</div>`;
+      time.value = '';
     }
 
+    // Fetch services
+    async function fetchServiceData(){
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=fetchServices`);
+        const services = await res.json();
+        services.forEach(s=>{
+          const c = document.createElement('div');
+          c.className = 'p-4 border rounded-lg cursor-pointer';
+          c.innerHTML = `<div class="font-bold">${s.name}</div>
+                         <div class="text-sm text-gray-600">ราคา: ${s.price}</div>`;
+          c.dataset.id = s.id; c.dataset.name = s.name; c.dataset.price = s.price;
+          c.onclick = () => {
+            c.classList.toggle('bg-green-100');
+            updateSelectedServices();
+          };
+          serviceCards.appendChild(c);
+        });
+      } catch(e){ console.error(e); }
+    }
+    function updateSelectedServices(){
+      const sel = [...serviceCards.querySelectorAll('.bg-green-100')];
+      const ids = sel.map(c=>c.dataset.id);
+      const names = sel.map(c=>`${c.dataset.name} (${c.dataset.price})`).join(', ');
+      selectedServices.value = JSON.stringify(ids);
+      selectedServiceNames.value = names;
+    }
+
+    // Fetch holidays
+    async function fetchHolidayDates(){
+      try {
+        const res = await fetch(`${WEB_APP_URL}?action=checkAvailability&getHolidays=true`);
+        holidayDates = await res.json().then(j=>j.holidays);
+      } catch(e){ console.error(e); }
+    }
+
+    // Step navigation validation
+    document.getElementById('nextToStep2').onclick = () => {
+      if (!JSON.parse(selectedServices.value||'[]').length) {
+        showPopup('กรุณาเลือกบริการอย่างน้อย 1 รายการ');
+        return;
+      }
+      showStep(2);
+    };
+    document.getElementById('backToStep1').onclick = () => showStep(1);
+
+    document.getElementById('nextToStep3').onclick = () => {
+      if (!selectedDate) {
+        showPopup('กรุณาเลือกวันที่');
+        return;
+      }
+      if (!time.value) {
+        showPopup('กรุณาเลือกเวลา');
+        return;
+      }
+      showStep(3);
+    };
+    document.getElementById('backToStep2').onclick = () => showStep(2);
+
+    document.getElementById('nextToStep4').onclick = () => {
+      const nameVal  = document.getElementById('name').value.trim();
+      const phoneVal = document.getElementById('phonenumber').value.trim();
+      if (!nameVal) {
+        showPopup('กรุณากรอกชื่อ-สกุล');
+        return;
+      }
+      if (!phoneVal) {
+        showPopup('กรุณากรอกเบอร์ติดต่อ');
+        return;
+      }
+      showStep(4);
+    };
+    document.getElementById('backToStep3').onclick = () => showStep(3);
+
     // Submit booking
-    bookingForm.onsubmit = async e=>{
+    bookingForm.onsubmit = async e => {
       e.preventDefault();
-      if(isSubmitting) return;
-      isSubmitting=true; showLoading(true);
+      if (isSubmitting) return;
+      isSubmitting = true; showLoading(true);
       try {
         const fd = new FormData(bookingForm);
-        fd.append('date',selectedDate);
-        await fetch(WEB_APP_URL,{method:'POST',body:fd});
+        fd.append('date', selectedDate);
+        await fetch(WEB_APP_URL, { method:'POST', body:fd });
         showPopup('สำเร็จ! การนัดหมายเสร็จสมบูรณ์');
-      } catch(e){ showPopup('ส่งข้อมูลไม่สำเร็จ'); console.error(e); }
-      finally { isSubmitting=false; showLoading(false); }
+      } catch(e) {
+        showPopup('ส่งข้อมูลไม่สำเร็จ');
+        console.error(e);
+      } finally {
+        isSubmitting = false; showLoading(false);
+      }
     };
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', async () => {
+      showLoading(true);
+      renderPillNav(1);
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        const profile = await liff.getProfile();
+        greetingName.textContent = profile.displayName;
+        greetingAvatar.src = profile.pictureUrl;
+        userlineid.value = profile.userId;
+        displayName.value = profile.displayName;
+        await fetchServiceData();
+        await fetchHolidayDates();
+        initCalendar();
+        await fetchMemberData(profile.userId);
+      }
+      showLoading(false);
+    });
+
+    // Fetch member data for pre-fill
+    async function fetchMemberData(uid) {
+      try {
+        const res = await fetch(WEB_APP_MEMBER_URL, {
+          method:'POST',
+          body: JSON.stringify({ action:'fetchData', userId:uid })
+        });
+        const data = await res.json();
+        const row = data.find(r => r[1] === uid);
+        if (row) {
+          document.getElementById('name').value = row[2] || '';
+          document.getElementById('phonenumber').value = row[3] || '';
+        }
+      } catch(e) {
+        console.error(e);
+      }
+    }
   </script>
 </body>
 </html>
